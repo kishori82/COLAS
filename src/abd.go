@@ -49,7 +49,7 @@ func printHeader(title string) {
 
 
 func usage() {
-	fmt.Println("Usage : abdprocess --process-type [0 (reader) , 1(writer)  2(server)] --ip-address ip1 [ --ip-address ip2]")
+	fmt.Println("Usage : abdprocess --process-type [0(reader), 1(writer), 2(server), 3(controller)] --ip-address ip1 [ --ip-address ip2]")
 }
 
 /*
@@ -83,7 +83,7 @@ func main() {
 				if err == nil {
 					proc_type = _type
 				} else {
-					fmt.Println("Incorrect Process type [0-reader, 1-writer and 2-server, 3-controller] ", proc_type)
+					fmt.Println("Incorrect Process type [0-reader, 1-writer, 2-server, 3-controller] ", proc_type)
 				}
 
 				i++
