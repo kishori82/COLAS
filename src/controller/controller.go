@@ -27,7 +27,7 @@ func GetLogs(w http.ResponseWriter, r *http.Request)  {
 	vars := mux.Vars(r)
 	ip := vars["ip"]
 
-	url := "http://" + ip + ":8081" + "/GetLogs"
+	url := "http://" + ip + ":8080" + "/GetLogs"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +48,7 @@ func StopProcess(w http.ResponseWriter, r *http.Request)  {
 	vars := mux.Vars(r)
 	ip := vars["ip"]
 
-	url := "http://" + ip + ":8081" + "/StopProcess"
+	url := "http://" + ip + ":8080" + "/StopProcess"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -69,7 +69,7 @@ func StartProcess(w http.ResponseWriter, r *http.Request)  {
 	vars := mux.Vars(r)
 	ip := vars["ip"]
 
-	url := "http://" + ip + ":8081" + "/StartProcess"
+	url := "http://" + ip + ":8080" + "/StartProcess"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -90,7 +90,7 @@ func KillProcess(w http.ResponseWriter, r *http.Request)  {
 	vars := mux.Vars(r)
 	ip := vars["ip"]
 
-	url := "http://" + ip + ":8081" + "/KillProcess"
+	url := "http://" + ip + ":8080" + "/KillProcess"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -163,7 +163,7 @@ func ConfigReaders(w http.ResponseWriter, r *http.Request)  {
 
   for e:= range data.readers {
 	   fmt.Println(e)
-	   url := "http://" + e + ":8081" + "/ConfigServers/" + serverList
+	   url := "http://" + e + ":8080" + "/ConfigServers/" + serverList
 
 		 fmt.Println(url)
 	   _, err := http.Get(url)
@@ -198,7 +198,7 @@ func ConfigWriters(w http.ResponseWriter, r *http.Request)  {
 /*
 
 
-	url := "http://" + ip + ":8081" + "/ConfigServers"
+	url := "http://" + ip + ":8080" + "/ConfigServers"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
