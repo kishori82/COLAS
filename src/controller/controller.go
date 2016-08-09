@@ -119,12 +119,13 @@ func ConfigServers(w http.ResponseWriter, r *http.Request)  {
   ips := strings.Split(ip,"s")
   
   for i := range ips {
+	    fmt.Println("add ed")
 			data.servers[ips[i]]=true
 	}
 
-	fmt.Println("servers added controller")
+	fmt.Println("added")
   for k := range data.servers {
-     fmt.Println("    ", k)
+     fmt.Println("map ", k)
 	}
 
 }
