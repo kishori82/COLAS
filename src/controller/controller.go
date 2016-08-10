@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"strings"
+	"strconv"
 )
 
 
@@ -15,6 +16,10 @@ type Nodes struct{
     readers map[string]bool
     servers map[string]bool
     writers map[string]bool
+
+    params map[string]float32
+		writer_delta float32
+		reader_delta float32
 }
 
 var data Nodes
@@ -106,12 +111,9 @@ func KillProcess(w http.ResponseWriter, r *http.Request)  {
 
 
 // this process registers the servers in the controller
-func ConfigServers(w http.ResponseWriter, r *http.Request)  {
-  if data.servers == nil {
-     data.servers = make(map[string]bool)
-	}
+func SetServers(w http.ResponseWriter, r *http.Request)  {
 
-	log.Println("ConfigServers")
+	log.Println("SetServers")
 
 	vars := mux.Vars(r)
 	ip := vars["ip"]
@@ -130,87 +132,144 @@ func ConfigServers(w http.ResponseWriter, r *http.Request)  {
 
 }
 
+// returns the set of servers 
+func GetServers(w http.ResponseWriter, r *http.Request)  {
+	log.Println("Get Servers")
+  ipstr := ""
+	for ip := range data.servers {
+	   ipstr += " " + ip
+	}
+  fmt.Fprintf(w, "%s", ipstr)
+}
 // this process registers the readers in the controller and then 
 // registers the servers in each readers
-func ConfigReaders(w http.ResponseWriter, r *http.Request)  {
-  if data.readers == nil {
-     data.readers = make(map[string]bool)
-	}
+func SetReaders(w http.ResponseWriter, r *http.Request)  {
+	log.Println("SetReaders")
+  var clients map[string]bool  = data.readers
 
-	log.Println("ConfigReaders")
+  fmt.Println("num readers", len(clients))
+  configClients(r, clients) 
+}
+
+// returns the list of readers
+func GetReaders(w http.ResponseWriter, r *http.Request)  {
+	log.Println("Get Readers")
+  ipstr := ""
+	for ip := range data.readers {
+	   ipstr += " " + ip
+	}
+  fmt.Fprintf(w, "%s", ipstr)
+}
+
+
+// this process registers the writers in the controller and then 
+// registers the servers in each readers
+
+func SetWriters(w http.ResponseWriter, r *http.Request)  {
+	log.Println("SetReaders")
+  var clients map[string]bool  = data.writers
+
+  fmt.Println(len(clients))
+  configClients(r, clients) 
+}
+
+// returns the list of writers
+func GetWriters(w http.ResponseWriter, r *http.Request)  {
+	log.Println("Get Writers")
+  ipstr := ""
+	for ip := range data.writers {
+	   ipstr += " " + ip
+	}
+  fmt.Fprintf(w, "%s", ipstr)
+}
+
+// It can configure any client (reader/writer) with the set of servers
+func configClients(r *http.Request, clients map[string]bool)  {
+
 
 	vars := mux.Vars(r)
 	ip := vars["ip"]
 
   ips := strings.Split(ip,"s")
   
-  for i := range ips {
-			data.readers[ips[i]]=true
-	}
 
+  for i := range ips {
+			clients[ips[i]]=true
+	}
 
   var serverList string 
 	i:=0
 
-  for e:= range data.readers {
+  for e:= range data.servers {
 	    if i==0 {
         serverList = serverList +  e
 		  } else {
-        serverList = serverList + e
+        serverList = serverList + "s" +  e
 			}
 			i = i + 1
 	}
 
-  for e:= range data.readers {
+  for e:= range clients {
 	   fmt.Println(e)
-	   url := "http://" + e + ":8080" + "/ConfigServers/" + serverList
+	   url := "http://" + e + ":8080" + "/SetServers/" + serverList
 
 		 fmt.Println(url)
 	   _, err := http.Get(url)
 	   if err != nil {
 		    log.Fatal(err)
 	   }
-	   //fmt.Printf("%s", contents)
 	}
 }
 
-// this process registers the writers in the controller and then 
-// registers the servers in each writer
-func ConfigWriters(w http.ResponseWriter, r *http.Request)  {
-  if data.writers == nil {
-     data.writers = make(map[string]bool)
-	}
 
-	log.Println("ConfigWriter")
+func SetParams(w http.ResponseWriter, r *http.Request)  {
 
+	log.Println("Config Params")
 	vars := mux.Vars(r)
-	ip := vars["ip"]
-
+	ip := vars["params"]
+	
   ips := strings.Split(ip,"s")
-  
-  for i := range ips {
-			data.writers[ips[i]] =true
+	
+	if len(ips)!=2 {
+		 fmt.Printf("%s\n", ip)
+	   fmt.Printf("Expected 2 parameters, found %d\n", len(ips))
 	}
+
+  f, _ := strconv.ParseFloat(ips[0], 32)
+  data.params["read_freq"] = float32(f) 
+
+  s, _ := strconv.ParseFloat(ips[1], 32)
+  data.params["write_freq"] = float32(s) 
+
+	fmt.Println("command", len(data.readers))
+
+  commandAll(data.readers, ip)
+  commandAll(data.writers, ip)
 
 }
 
 
-/*
+//send the command to all processes
+func commandAll(processes map[string]bool, mesg string) {
 
-
-	url := "http://" + ip + ":8080" + "/ConfigServers"
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
+   
+  for e:= range processes {
+	   fmt.Println(e)
+	   url := "http://" + e + ":8080" + "/SetParams/" + mesg
+		 fmt.Println(url)
+	   _, err := http.Get(url)
+	   if err != nil {
+		    log.Fatal(err)
+	   }
 	}
+}
 
-	contents, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%s", contents)
-	*/
+func GetParams(w http.ResponseWriter, r *http.Request)  {
+	log.Println("Get Params")
+  fmt.Fprintf(w, "%g %g\n", data.params["read_freq"], data.params["write_freq"])
+  fmt.Printf("%g %g\n", data.params["read_freq"], data.params["write_freq"])
+}
+
 
 
 // KillSelf will end this server
@@ -219,7 +278,6 @@ func KillSelf(w http.ResponseWriter, r *http.Request)  {
 	defer log.Fatal("Controller Exiting")
 }
 
-//func main() {
 func Controller_process() {
 	log.Println("Starting Controller")
 
@@ -230,9 +288,31 @@ func Controller_process() {
 	router.HandleFunc("/StartProcess/{ip}", StartProcess)
 	router.HandleFunc("/KillProcess/{ip}", KillProcess)
 	router.HandleFunc("/KillSelf", KillSelf)
-	router.HandleFunc("/ConfigReaders/{ip:[0-9.s]+}", ConfigReaders)
-	router.HandleFunc("/ConfigWriters/{ip:[0-9.s]+}", ConfigWriters)
-	router.HandleFunc("/ConfigServers/{ip:[0-9.s]+}", ConfigServers)
+	router.HandleFunc("/SetReaders/{ip:[0-9.s]+}", SetReaders)
+	router.HandleFunc("/SetWriters/{ip:[0-9.s]+}", SetWriters)
+	router.HandleFunc("/SetServers/{ip:[0-9.s]+}", SetServers)
+
+	router.HandleFunc("/GetReaders", GetReaders)
+	router.HandleFunc("/GetWriters", GetWriters)
+	router.HandleFunc("/GetServers", GetServers)
+
+
+  router.HandleFunc("/SetParams/{params:[0-9.s]+}", SetParams)
+  router.HandleFunc("/GetParams", GetParams)
+
+
+  data.readers = make(map[string]bool)
+  data.servers = make(map[string]bool)
+  data.writers = make(map[string]bool)
+
+  data.params = make(map[string]float32)
+	data.params["read_freq"] = 0.0
+	data.params["write_freq"] = 0.0
+   
+
+  data.writer_delta = 10
+  data.reader_delta = 2
 
 	http.ListenAndServe(":8080", router)
+
 }
