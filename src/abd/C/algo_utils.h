@@ -53,5 +53,8 @@ void free_items_in_list( zlist_t *list) ;
 
 int  get_object_tag(zhash_t *hash, char * object_name, TAG *tag) ;
 
+char **create_server_names(char *servers_str) ;
+unsigned int count_num_servers(char *servers_str) ;
+
 #endif
 

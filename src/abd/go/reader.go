@@ -1,16 +1,15 @@
 package abd_processes
 
 import (
+	"container/list"
 	"fmt"
 	"log"
 	"math"
 	"math/rand"
-  "container/list"
 	"sync"
 	"time"
 	//utilities "../utilities/"
 )
-
 
 var (
 	readers        []Reader
@@ -27,21 +26,18 @@ var (
 )
 
 type Reader struct {
-	Id int
+	Id           int
 	ip_addresses []string
 }
 
-var active_chan  chan bool
-var reset_chan  chan bool
-
-
-
+var active_chan chan bool
+var reset_chan chan bool
 
 /**
 * Read a value from a set of nodes
 * @param objectId the id of the object to be read
 * @return value the value of the object
-*/
+ */
 func (r Reader) Read(objectId int) (value int) {
 	PrintHeader("Reading")
 
@@ -62,7 +58,7 @@ func (r Reader) Read(objectId int) (value int) {
 * Queries all nodes for their state variables associated with an objectId
 * @param objectId the id of the object for which we are querying
 * @stateVariables the slice to which the state variable is added
-*/
+ */
 func queryAll(objectId int, stateVariables *[]StateVariable) {
 	fmt.Println("Querying for Tag...")
 	majority := int(math.Ceil(float64((len(nodes) + 1)) / float64(2)))
@@ -84,7 +80,7 @@ func queryAll(objectId int, stateVariables *[]StateVariable) {
 * @param objectId the id of the object for which we are querying
 * @param stateVariables the slice to which the state variable is added
 * @param c the channel used to wait for all nodes to complete
-*/
+ */
 func getStateVariable(node Server, objectId int, stateVariables *[]StateVariable, c chan int) {
 	if node.isAlive {
 		r := rand.Intn(1000)
@@ -104,7 +100,7 @@ func getStateVariable(node Server, objectId int, stateVariables *[]StateVariable
 * to be written to storage and cache
 * @param objectId the state variable's object id
 * @param stateVariable the state variable to be sent
-*/
+ */
 func sendAll(objectId int, stateVariable StateVariable) {
 	fmt.Println("Sending to nodes...")
 	majority := int(math.Ceil(float64((len(nodes) + 1)) / float64(2)))
@@ -127,7 +123,7 @@ func sendAll(objectId int, stateVariable StateVariable) {
 * @param objectId the state variable's objectId
 * @param stateVariable the state variable to be sent
 * @param c the channel used to wait for all nodes to complete
-*/
+ */
 func sendStateVariable(node Server, objectId int, stateVariable StateVariable, c chan int) {
 	r := rand.Intn(maxDelay - 1)
 	time.Sleep(time.Duration(r) * time.Millisecond)
@@ -146,7 +142,7 @@ func sendStateVariable(node Server, objectId int, stateVariable StateVariable, c
 * @param stateVariables the slice of state variables
 * @return maxStateVariable the state variable containing the
 * maximum tag
-*/
+ */
 func getMaxTag(stateVariables []StateVariable) (maxStateVariable StateVariable) {
 	fmt.Println("Calculating Maximum Tag")
 	maxStateVariable = stateVariables[0]
@@ -161,36 +157,36 @@ func getMaxTag(stateVariables []StateVariable) (maxStateVariable StateVariable) 
 		}
 	}
 
-	return maxStateVariable 
+	return maxStateVariable
 }
 
-
-func Reader_process(ip_addrs *list.List ) {
+func Reader_process(ip_addrs *list.List) {
 
 	// This should become part of the standard init function later when we refactor...
-  active_chan =make(chan bool, 10)
-  fmt.Println("Starting reader\n");
-	SetupLogging() 
+	active_chan = make(chan bool, 10)
+	fmt.Println("Starting reader\n")
+	SetupLogging()
 
+	InitializeParameters()
 	go HTTP_Server()
 
-  for {
-    select {
-		    case active := <- active_chan:
-           data.active = active
-		    case active := <- reset_chan:
-           data.active = active
-					 data.read_counter=0
-				default:
-				  if data.active==true {
-		        rand_wait :=exponential_wait(data.write_rate)
-						time.Sleep( time.Duration(rand_wait)*1000 * time.Microsecond)
-            log.Println("READ", data.name,  data.read_counter, rand_wait)
-						data.read_counter +=1
+	for {
+		select {
+		case active := <-active_chan:
+			data.active = active
+		case active := <-reset_chan:
+			data.active = active
+			data.read_counter = 0
+		default:
+			if data.active == true {
+				rand_wait := exponential_wait(data.write_rate)
+				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
+				log.Println("READ", data.name, data.read_counter, rand_wait)
+				data.read_counter += 1
 
-					}else {
-		        time.Sleep(5*1000000 * time.Microsecond)
-				  }
+			} else {
+				time.Sleep(5 * 1000000 * time.Microsecond)
+			}
 		}
 	}
 }

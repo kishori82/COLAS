@@ -25,10 +25,10 @@ static: abd_client.c abd_server.c
 	#ar rcs libabd.a  abd_server.o abd_client.o
 	ar -cvq libabd.a  abd_server.o abd_client.o
 
-libabd_shared.so: abd_client.c abd_server.c  algo_utils.o
+lib_shared: abd_client.c abd_server.c  algo_utils.o  base64.o
 	$(CC) -c -fPIC -o abd_client.o  abd_client.c  -DASLIBRARY 
 	$(CC) -c -fPIC -o abd_server.o  abd_server.c  -DASLIBRARY 
-	$(CC) -shared -fPIC -o libabd_shared.so  abd_client.o  abd_server.o   algo_utils.o
+	$(CC) -shared -fPIC -o libabd_shared.so  abd_client.o  abd_server.o   algo_utils.o base64.o
 
 abd_client_shared: abd_client.c  $(DEPS)  libabd_shared.so
 	$(CC) -DASMAIN -o abd_client abd_client.c -L. -labd_shared $(CFLAGS) 

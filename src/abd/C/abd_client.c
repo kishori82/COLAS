@@ -331,8 +331,62 @@ int ABD_hello( int a, int b) {
   return a+ b;
 }
 
-#endif
+const char *byte_to_binary(int x)
+{
+    static char b[9];
+    b[0] = '\0';
 
+    int z;
+    for (z = 128; z > 0; z >>= 1)
+    {
+        strcat(b, ((x & z) == z) ? "1" : "0");
+    }
+
+    return b;
+}
+
+
+bool ABD_write1(
+                char *obj_name,
+                char *writer_id, 
+                unsigned int op_num ,
+                char *payload, 
+                unsigned int size, 
+                char *servers_str, 
+                char *port
+
+             )
+{
+
+    int j;
+    printf("Obj name       : %s\n",obj_name);
+    printf("Writer name    : %s\n",writer_id);
+    printf("Operation num  : %d\n",op_num);
+    printf("Size           : %d\n", size);
+    printf("Size of        : %u\n", (unsigned int)strlen(payload));
+
+    char *myb64 = (char *)malloc(strlen(payload));
+    b64_decode(payload, myb64);
+
+    printf("Encoded string  : %s\n", payload);
+    printf("Server string   : %s\n", servers_str);
+    printf("Port to Use     : %s\n", port);
+
+    int num_servers = count_num_servers(servers_str);
+
+    printf("Num of Servers  : %d\n",num_servers);
+
+//    printf("Decoded string  : %s\n", myb64);
+    char **server_names = create_server_names(servers_str);
+    for(j=0; j < num_servers; j++) {
+        printf("\tServer : %s\n", server_names[j]);
+    }
+    printf("\n");
+    free(myb64);
+    
+
+}
+#endif
 
 
 //  The main thread simply starts several clients and a server, and then
@@ -358,6 +412,7 @@ void s_catch_signals ()
     sigaction (SIGINT, &action, NULL);
     sigaction (SIGTERM, &action, NULL);
 }
+
 
 int main (void)
 {
@@ -404,5 +459,8 @@ int main (void)
 //   zclock_sleep(50*1000); 
    return 0;
 }
+
+
+
 
 #endif

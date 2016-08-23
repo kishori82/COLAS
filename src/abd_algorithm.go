@@ -3,13 +3,13 @@ package main
 import (
 	abd "./abd/go/"
 	controller "./controller/"
-//	utilities  "./utilities"
+	//	utilities "./utilities"
 	"container/list"
 	"fmt"
 	"math"
 	"os"
 	"strconv"
-//	"sync"
+	//	"sync"
 )
 
 /*
@@ -18,7 +18,6 @@ import (
 #include <abd_client.h>
 */
 import "C"
-
 
 func printHeader(title string) {
 	length := len(title)
@@ -34,7 +33,6 @@ func printHeader(title string) {
 	fmt.Println("*                                             *")
 	fmt.Println("***********************************************")
 }
-
 
 func usage() {
 	fmt.Println("Usage : abdprocess --process-type [0(reader), 1(writer), 2(server), 3(controller)] --ip-address ip1 [ --ip-address ip2]")
@@ -56,7 +54,7 @@ func main() {
 
 	args := os.Args
 
-    fmt.Println(C.ABD_hello(5, 6));
+	fmt.Println(C.ABD_hello(5, 6))
 
 	// reader, writer and servers are 0, 1 and 2
 	//  var proc_type string="--process-type"
@@ -95,13 +93,13 @@ func main() {
 
 	_ = proc_type
 
-	if proc_type==0 {
+	if proc_type == 0 {
 		abd.Reader_process(ip_addrs)
-	} else if  proc_type==1 {
-		abd.Writer_process(ip_addrs )
-	} else if proc_type==2 {
+	} else if proc_type == 1 {
+		abd.Writer_process(ip_addrs)
+	} else if proc_type == 2 {
 		abd.Server_process()
-	} else if proc_type==3 {
+	} else if proc_type == 3 {
 		controller.Controller_process()
 	} else {
 		fmt.Println("unknown type\n")

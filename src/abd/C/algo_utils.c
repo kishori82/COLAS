@@ -16,6 +16,40 @@ void _zframe_str(zframe_t *f, char *buf) {
      buf[s]='\0';
 }
 
+unsigned int count_num_servers(char *servers_str) {
+    int count = 0;
+    if( servers_str==NULL) return 0;
+    count++;
+    char *p = servers_str;
+    while(*p !='\0') {
+       if( *p==' ') count++;
+       p++;
+    }
+    return count;
+}
+
+char **create_server_names(char *servers_str) {
+
+    unsigned int num_servers =  count_num_servers(servers_str);
+
+    char **servers = (char **)malloc(num_servers*sizeof(char *));
+    char *p, *q;
+    p = servers_str;
+    int i = 0;
+    while( *p!='\0') {
+       servers[i] = (char *)malloc(16*sizeof(char));
+       q = servers[i]; 
+       while(*p !=' ' && *p !='\0') {
+          *q++ = *p++; 
+       }
+       *q = '\0';
+       if( *p == '\0') break;
+       p++;
+       i++;
+    }
+    return servers;
+}
+
 char *create_destinations(char **servers, unsigned int num_servers, char *port, char type) {
       int i,size = 0;
        

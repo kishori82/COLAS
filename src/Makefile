@@ -4,9 +4,11 @@ all: $(ALL)
 
 ABD = abd_algorithm.go
 
-SRCS = controller/controller.go abd/go/utils.go abd/go/writer.go abd/go/reader.go abd/go/server.go
+SRCS = controller/controller.go abd/go/utils.go abd/go/writer.go abd/go/reader.go abd/go/server.go utilities/utilities.go
 
-abdprocess: $(ABD) $(SRCS)
+CSRCS = abd/C/abd_client.c abd/C/abd_server.c abd/C/abd_client.h abd/C/algo_utils.h abd/C/algo_utils.c
+
+abdprocess: $(ABD) $(SRCS)  $(CSRCS)
 	go build -o abdprocess $(ABD)
 
 clean:

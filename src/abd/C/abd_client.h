@@ -10,6 +10,7 @@
 #include <fcntl.h>
 
 #include "algo_utils.h"
+#include "base64.h"
 
 //  This is our client task
 //  It connects to the server, and then sends a request once per second
@@ -40,6 +41,11 @@ TAG write_value_phase(
                    ) ;
 
 bool ABD_write(char *obj_name, char *writer_id, unsigned int op_num,  byte *payload, unsigned int size, char **servers, unsigned int num_servers, char *port);
+
+bool ABD_write1(char *obj_name, char *writer_id, 
+             unsigned int op_num,  char *payload, 
+              unsigned int size, char *servers_str,
+               char *port);
 
 bool ABD_read(byte *payload, unsigned int size, char **servers, unsigned int num_servers, char *port);
 
