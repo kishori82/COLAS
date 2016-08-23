@@ -1,3 +1,4 @@
 *.o
 logs/*
 abdprocess
+src/abd/C/abd_server

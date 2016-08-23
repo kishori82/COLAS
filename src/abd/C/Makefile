@@ -4,7 +4,7 @@ CFLAGS= -lm -lzmq  -lczmq -Wimplicit-function-declaration -fpic #-Wall
 #SOURCES: hwserver.c asyncsrv.c
 DEPS=algo_utils.h
 
-all: abd_client abd_server  static
+all: abd_client abd_server  
 
 %.o: %.c 
 	$(CC) -c -o $@  $< $(CFLAGS)
@@ -12,12 +12,12 @@ all: abd_client abd_server  static
 
 #asyncsrv: asyncsrv.o
 
-abd_client: abd_client.c  $(DEPS)
-	$(CC) -DASLIBRARY -DASMAIN -o $@ $<  $(CFLAGS)
+abd_client: abd_client.c   algo_utils.o  $(DEPS)
+	$(CC) -DASLIBRARY -DASMAIN -o $@ $<  algo_utils.o  $(CFLAGS)
 
 
-abd_server: abd_server.c  $(DEPS)
-	$(CC) -DASLIBRARY -DASMAIN -o $@ $<  $(CFLAGS)
+abd_server: abd_server.c algo_utils.o  $(DEPS)
+	$(CC) -DASLIBRARY -DASMAIN -o $@ $< algo_utils.o  $(CFLAGS)
 
 static: abd_client.c abd_server.c
 	$(CC) -static -c  -o abd_client.o  abd_client.c  -DASLIBRARY #$(CFLAGS)
