@@ -1,0 +1,18 @@
+reader:
+    image: kishori82/dev:COLAS
+    command: /home/docker/COLAS/abdprocess --process-type 0
+
+writer:
+    image: kishori82/dev:COLAS
+    command: /home/docker/COLAS/abdprocess --process-type 1
+
+server:
+    image: kishori82/dev:COLAS
+#    command: /home/docker/COLAS/abdprocess --process-type 2
+    command: /home/docker/COLAS/src/abd/abd_server
+    environment:
+    - LD_LIBRARY_PATH=/usr/local/lib
+
+controller:
+    image: kishori82/dev:COLAS
+    command: /home/docker/COLAS/abdprocess --process-type 3
