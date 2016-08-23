@@ -132,6 +132,8 @@ static void algorithm_ABD_WRITE_VALUE( zmsg_t *msg, void *worker, char *object_n
         
         void *key = zlist_first(keys);
         if( key!=NULL) {
+            void *item = zhash_lookup(temp_hash_hash,key);
+            free(item);
             zhash_delete(temp_hash_hash, key);
             printf("\t\tDELETED\n");
         }
