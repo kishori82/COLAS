@@ -277,12 +277,19 @@ TAG write_value_phase(
                 }
             }
      }
-     return ;
+     return max_tag;
 }
 
 
-bool ABD_write(char *obj_name, char *writer_id, unsigned int op_num,  byte *payload, unsigned int size, char **servers, 
-                          unsigned int num_servers, char *port)
+bool ABD_write(char *obj_name, 
+               char *writer_id, 
+               unsigned int op_num,  
+               char *payload, 
+               unsigned int size, 
+               char **servers, 
+               unsigned int num_servers, 
+               char *port
+               )
 {
 
     int j;
@@ -308,11 +315,9 @@ bool ABD_write(char *obj_name, char *writer_id, unsigned int op_num,  byte *payl
 
    printf("     WRITE_VALUE\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
-  //}
 
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
-  //}
 
 
     return true;
@@ -384,6 +389,44 @@ bool ABD_write1(
     printf("\n");
     free(myb64);
     
+    zctx_t *ctx  = zctx_new();
+    void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
+    zctx_set_linger(ctx, 0);
+    assert (sock_to_servers);
+
+    zsocket_set_identity(sock_to_servers,  writer_id);
+    for(j=0; j < num_servers; j++) {    
+       char *destination = create_destination(servers[j], port);
+       int rc = zsocket_connect(sock_to_servers, destination);
+       assert(rc==0);
+       free(destination);
+    }
+
+  //for( i=0; i < 50; i++) {
+   // printf("WRITE %d\n", i);
+   printf("     MAX_TAG\n");
+   TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
+
+   printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
+
+   printf("     WRITE_VALUE\n");
+   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
+  //}
+
+    zsocket_destroy(ctx, sock_to_servers);
+    zctx_destroy(&ctx);
+  //}
+
+
+    return true;
+}
+
+
+
+
+
+
+
 
 }
 #endif

@@ -75,7 +75,7 @@ void *server_task (void *args)
     //  Frontend socket talks to clients over TCP
     zctx_t *ctx = zctx_new ();
     void *frontend = zsocket_new(ctx, ZMQ_ROUTER);
-    zsocket_bind(frontend, "tcp://*:5570");
+    zsocket_bind(frontend, "tcp://*:8081");
     
     //  Backend socket talks to workers over inproc
     void *backend = zsocket_new (ctx, ZMQ_DEALER);
