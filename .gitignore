@@ -4,3 +4,4 @@ abdprocess
 src/abd/C/abd_server
 src/logs/logs.txt
 src/abd/C/libabd_shared.so
+src/abd/C/abd_client

@@ -3,12 +3,16 @@
 //  While this example runs in a single process, that is to make
 //  it easier to start and stop the example. Each task has its own
 //  context and conceptually acts as a separate process.
-#include <czmq.h> #include <zmq.h> #include <stdio.h>
+
+#include <czmq.h> 
+#include <zmq.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
+#define GET_TAG_VALUE "GET_TAG_VALUE"
 
 static int se_interrupted=0;
 void se_signal_handler(int signal_value)
@@ -69,6 +73,7 @@ int create_object( char *obj_name) {
 
        char *value =(void *)malloc(3);
        strcpy(value, "v0");
+       value[3]= '\0';
        zhash_insert(hash_hash, tag_str, (void *)value); 
 
        //add it to the main list 
@@ -103,6 +108,7 @@ void *server_task (void *args)
 
     //  Connect backend to frontend via a proxy
     zmq_proxy (frontend, backend, NULL);
+
     zctx_destroy (&ctx);
 
     return NULL;
@@ -133,9 +139,11 @@ static void algorithm_ABD_WRITE_VALUE( zmsg_t *msg, void *worker, char *object_n
         zframe_t *payload_frame= zmsg_pop (msg);
         int size = zframe_size(payload_frame); 
         void *frame_data = zframe_data(payload_frame); 
-        char *data =  (char *)malloc(size);
+        char *data =  (char *)malloc(size + 1);
+
         printf("\t\tDATA SIZE %d\n",size); 
         memcpy(data, frame_data, size);
+        data[size]='\0';
 
         zhash_t *temp_hash_hash = zhash_lookup(hash, object_name);
 
@@ -170,6 +178,7 @@ static void algorithm_ABD_WRITE_VALUE( zmsg_t *msg, void *worker, char *object_n
         zframe_destroy(&ack_frame);
         printf("\t\tSENT SUCCESS\n");
     }
+
     else {
         zframe_t *ack_frame = zframe_new("BEHIND", 6);
         //zframe_send(&tag_frame, worker, ZFRAME_REUSE);
@@ -184,7 +193,6 @@ static void algorithm_ABD_WRITE_VALUE( zmsg_t *msg, void *worker, char *object_n
 
 
 static void algorithm_ABD_GET_TAG( zmsg_t *msg, void *worker, char *object_name) {
-
      char buf[100];
      TAG tag;
      get_object_tag(hash, object_name, &tag); 
@@ -195,11 +203,40 @@ static void algorithm_ABD_GET_TAG( zmsg_t *msg, void *worker, char *object_name)
      zframe_destroy(&tag_frame);
 }
 
+static void algorithm_ABD_GET_TAG_VALUE( zmsg_t *msg, void *worker, char *object_name) {
+     char buf[100];
+     TAG tag;
+     get_object_tag(hash, object_name, &tag); 
+
+     tag_to_string(tag, buf);
+     zframe_t *tag_frame= zframe_new(buf, strlen(buf));
+     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+     zframe_destroy(&tag_frame);
+
+     zhash_t *temp_hash_hash = zhash_lookup(hash, object_name);
+
+     zlist_t *keys = zhash_keys (temp_hash_hash);
+
+     assert((int)zlist_size(keys)==1);
+        
+     void *key = zlist_first(keys);
+     
+     assert(key!=NULL);
+     void *item = zhash_lookup(temp_hash_hash,key);
+
+     zframe_t *data_frame= zframe_new((char *)item, strlen(item));
+     zframe_send(&data_frame, worker, ZFRAME_REUSE);
+     
+     zframe_destroy(&data_frame);
+
+}
+
 static void algorithm_ABD( zmsg_t *msg, void *worker, char *object_name) {
      char buf[100];
      char tag[10]; 
      int  round;
 
+     printf("algorithm ABD\n");
      zframe_t *phase_frame= zmsg_pop (msg);
      _zframe_str(phase_frame, buf) ;
      zframe_send(&phase_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
@@ -207,6 +244,7 @@ static void algorithm_ABD( zmsg_t *msg, void *worker, char *object_name) {
      zframe_t *op_num_frame= zmsg_pop (msg);
      zframe_send(&op_num_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
+     printf("algorithm ABD tag %s\n", buf);
       if( strcmp(buf, GET_TAG)==0)  {
            printf("\t-----------------\n");
            printf("\tGET_TAG\n");
@@ -217,6 +255,12 @@ static void algorithm_ABD( zmsg_t *msg, void *worker, char *object_name) {
             printf("\tWRITE_VALUE\n");
             algorithm_ABD_WRITE_VALUE(msg, worker, object_name);
             printf("\tDONE WRITE_VALUE\n");
+      }
+
+      if( strcmp(buf, GET_TAG_VALUE)==0)  {
+           printf("\t-----------------\n");
+           printf("\tGET_TAG\n");
+           algorithm_ABD_GET_TAG_VALUE(msg, worker, object_name);
       }
 
       zframe_destroy(&phase_frame);
@@ -247,6 +291,7 @@ server_worker (void *args, zctx_t *ctx, void *pipe)
     char tag[10]; 
     int  round;
 
+    printf("Receiving something\n");
     
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
@@ -301,7 +346,7 @@ int ABD_server_process(char *server_id, char *port)
    int i ; 
    se_catch_signals();
    zthread_new(server_task, NULL);
-   printf("Starting the thread with id %d\n", server_id);
+   printf("Starting the thread with id %s\n", server_id);
    while(true) {
       zclock_sleep(60*60*1000); 
    }
