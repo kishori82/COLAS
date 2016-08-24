@@ -19,6 +19,7 @@ static int s_interrupted=0;
 #ifdef ASLIBRARY
 #include "algo_utils.h"
 #include "abd_client.h"
+#include "base64.h"
 
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
@@ -362,7 +363,6 @@ bool ABD_write1(
 
              )
 {
-
     int j;
     printf("Obj name       : %s\n",obj_name);
     printf("Writer name    : %s\n",writer_id);
@@ -382,9 +382,9 @@ bool ABD_write1(
     printf("Num of Servers  : %d\n",num_servers);
 
 //    printf("Decoded string  : %s\n", myb64);
-    char **server_names = create_server_names(servers_str);
+    char **servers = create_server_names(servers_str);
     for(j=0; j < num_servers; j++) {
-        printf("\tServer : %s\n", server_names[j]);
+        printf("\tServer : %s\n", servers[j]);
     }
     printf("\n");
     free(myb64);
@@ -427,8 +427,30 @@ bool ABD_write1(
 
 
 
+=======
+>>>>>>> refs/remotes/origin/master
 
+  //for( i=0; i < 50; i++) {
+   // printf("WRITE %d\n", i);
+   printf("     MAX_TAG\n");
+   TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
+
+   printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
+
+   printf("     WRITE_VALUE\n");
+   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, 
+                     num_servers, port, payload, size, max_tag);
+  //}
+
+    zsocket_destroy(ctx, sock_to_servers);
+    zctx_destroy(&ctx);
+  //}
+
+
+    return true;
 }
+
+
 #endif
 
 
@@ -466,27 +488,26 @@ int main (void)
 
 /*
    char *servers[]= {
-                     "tcp://172.17.0.7", "tcp://172.17.0.5", 
-                     "tcp://172.17.0.4", "tcp://172.17.0.6",
-                     "tcp://172.17.0.3"
+                     "172.17.0.7", "172.17.0.5", 
+                     "172.17.0.4", "172.17.0.6",
+                     "172.17.0.3"
                    };
 
 */
 
-
-   char *servers[] = {
-"tcp://172.17.0.22", "tcp://172.17.0.21", "tcp://172.17.0.18", "tcp://172.17.0.17", "tcp://172.17.0.20", "tcp://172.17.0.16", "tcp://172.17.0.19", "tcp://172.17.0.15", "tcp://172.17.0.14", "tcp://172.17.0.13", "tcp://172.17.0.12", "tcp://172.17.0.11", "tcp://172.17.0.10", "tcp://172.17.0.9", "tcp://172.17.0.7", "tcp://172.17.0.8", "tcp://172.17.0.6", "tcp://172.17.0.5", "tcp://172.17.0.4", "tcp://172.17.0.3"
-                     };
-
 /*
-   char *servers[]= {
-                     "tcp://172.17.0.2"
+   char *servers[] = {
+"172.17.0.22", "172.17.0.21", "172.17.0.18", "172.17.0.17", "172.17.0.20", "172.17.0.16", "172.17.0.19", "172.17.0.15", "172.17.0.14", "172.17.0.13", "172.17.0.12", "172.17.0.11", "172.17.0.10", "172.17.0.9", "172.17.0.7", "172.17.0.8", "172.17.0.6", "172.17.0.5", "172.17.0.4", "172.17.0.3"
                      };
 */
 
+   char *servers[]= {
+                     "172.17.0.2"
+                     };
 
-   unsigned int num_servers = 20;
-   char port[]= {"5570"};
+
+   unsigned int num_servers = 1;
+   char port[]= {"8081"};
 
    char writer_id[] = { "writer_1"};
    char obj_name[] = {"object"};
