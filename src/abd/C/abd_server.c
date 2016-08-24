@@ -254,7 +254,6 @@ static void algorithm_ABD( zmsg_t *msg, void *worker, char *object_name) {
       if( strcmp(buf, WRITE_VALUE)==0)  {
             printf("\tWRITE_VALUE\n");
             algorithm_ABD_WRITE_VALUE(msg, worker, object_name);
-            printf("\tDONE WRITE_VALUE\n");
       }
 
       if( strcmp(buf, GET_TAG_VALUE)==0)  {
@@ -265,8 +264,6 @@ static void algorithm_ABD( zmsg_t *msg, void *worker, char *object_name) {
 
       zframe_destroy(&phase_frame);
       zframe_destroy(&op_num_frame);
-      printf("\tDONE\n");
-
 
    /* zframe_t *payloadf= zmsg_pop (msg);
            printf("%d\n",  (int)zframe_size(payloadf));

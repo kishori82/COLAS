@@ -83,7 +83,6 @@ func Print_configuration(proc_type uint64, ip_addrs *list.List) {
 }
 
 func SetServers(w http.ResponseWriter, r *http.Request) {
-	log.Println("SetServers")
 	vars := mux.Vars(r)
 	ip := vars["ip"]
 	ips := strings.Split(ip, DELIM)
@@ -91,11 +90,12 @@ func SetServers(w http.ResponseWriter, r *http.Request) {
 	for i := range ips {
 		data.servers[ips[i]] = true
 	}
+	log.Println("INFO\tSetServers\t"+ip)
 }
 
 func SetParams(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("Config Params")
+	log.Println("INFO\tConfig Params")
 	vars := mux.Vars(r)
 	ip := vars["params"]
 	ips := strings.Split(ip, DELIM)
@@ -120,7 +120,7 @@ func SetParams(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetParams(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Params")
+	log.Println("INFO\tGet Params")
 	fmt.Fprintf(w, "%d %g %g %g\n", data.rand_seed, data.file_size, data.read_rate, data.write_rate)
 }
 
@@ -188,13 +188,13 @@ func StartProcess(w http.ResponseWriter, r *http.Request) {
 }
 
 func KillProcess(w http.ResponseWriter, r *http.Request) {
-	log.Fatal("KillProcess called... Shutting down.")
+	log.Fatal("INFO\tKillProcess called... Shutting down.")
 }
 
 //set seed
 func SetSeed(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("Set Seed")
+	log.Println("INFO\tSet Seed")
 	vars := mux.Vars(r)
 	ip := vars["seed"]
 	ips := strings.Split(ip, DELIM)
@@ -211,13 +211,13 @@ func SetSeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSeed(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Params")
+	log.Println("INFO\tGet Params")
 	fmt.Fprintf(w, "%d\n", data.rand_seed)
 }
 
 //set seed
 func SetReadRate(w http.ResponseWriter, r *http.Request) {
-	log.Println("Set ReadRate")
+	log.Println("INFO\tSet ReadRate")
 	vars := mux.Vars(r)
 	ip := vars["param"]
 	ips := strings.Split(ip, DELIM)
@@ -233,13 +233,13 @@ func SetReadRate(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetReadRate(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Params")
+	log.Println("INFO\tGet Params")
 	fmt.Fprintf(w, "%g\n", data.read_rate)
 }
 
 // set write rate
 func SetWriteRate(w http.ResponseWriter, r *http.Request) {
-	log.Println("Set WriteRate")
+	log.Println("INFO\tSet WriteRate")
 	vars := mux.Vars(r)
 	ip := vars["param"]
 	ips := strings.Split(ip, DELIM)
@@ -254,13 +254,13 @@ func SetWriteRate(w http.ResponseWriter, r *http.Request) {
 
 // get read rate
 func GetWriteRate(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Params")
+	log.Println("INFO\tGet Params")
 	fmt.Fprintf(w, "%g\n", data.write_rate)
 }
 
 // set file size
 func SetFileSize(w http.ResponseWriter, r *http.Request) {
-	log.Println("Set File Size")
+	log.Println("INFO\tSet File Size")
 	vars := mux.Vars(r)
 	ip := vars["param"]
 	ips := strings.Split(ip, DELIM)
@@ -275,7 +275,7 @@ func SetFileSize(w http.ResponseWriter, r *http.Request) {
 
 // get file size
 func GetFileSize(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Params")
+	log.Println("INFO\tGet Params")
 	fmt.Fprintf(w, "%g\n", data.file_size)
 }
 
@@ -302,8 +302,8 @@ func InitializeParameters() {
 	data.servers = make(map[string]bool)
 	data.writers = make(map[string]bool)
 
-	data.write_rate = 0.1
-	data.read_rate = 0.1
+	data.write_rate = 0.6
+	data.read_rate = 0.6
 	data.file_size = 10
 	data.rand_seed = 1
 	data.read_counter = 0
@@ -364,4 +364,17 @@ func exponential_wait(lambda float64) (interval int64) {
 	dur := int64(_dur)
 	fmt.Println(unif, lambda, ln, dur)
 	return dur
+}
+
+func create_server_string_to_C() string {
+	var servers_str string = ""
+	i := 0
+	for key, _ := range data.servers {
+		if i > 0 {
+			servers_str += " "
+		}
+		servers_str += key
+		i++
+	}
+	return servers_str
 }

@@ -21,6 +21,7 @@ import "C"
 func writer_deamon() {
 	active_chan = make(chan bool)
 
+/*
 	data.active = true
 	data.write_rate = 0.6
 	data.name = "writer_1"
@@ -36,6 +37,7 @@ func writer_deamon() {
 		servers_str += key
 		i++
 	}
+	*/
 
 	var object_name string = "atomic_object"
 
@@ -47,7 +49,7 @@ func writer_deamon() {
 			data.active = active
 			data.write_counter = 0
 		default:
-			if data.active == true {
+			if data.active == true && len(data.servers) > 0 {
 				rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
 
 				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
@@ -62,10 +64,19 @@ func writer_deamon() {
 
 				//decoded, _ := base64.StdEncoding.DecodeString(encoded)
 				//fmt.Println("Decoded data", decoded)
-
 				//		rawdata := (*C.byte)(unsafe.Pointer(&rand_data))
+
 				rawdata := C.CString(encoded)
-				defer C.free(unsafe.Pointer(&rawdata))
+		   	fmt.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
+				rand_wait, "DATA SIZE", len(encoded))
+
+				log.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
+				rand_wait, "DATA SIZE", encoded)
+
+        servers_str:=create_server_string_to_C() 
+	      log.Println("INFO\tUsing Servers\t"+servers_str)
+
+		defer C.free(unsafe.Pointer(&rawdata))
 
 				C.ABD_write(
 					C.CString(object_name),
@@ -75,7 +86,7 @@ func writer_deamon() {
 
 				//	fmt.Println(rand_wait, len(rand_data), data.active)
 
-				log.Println("WRITE", data.name, data.write_counter, rand_wait, len(rand_data))
+				log.Println("OPERATION\tWRITE", data.name, data.write_counter, rand_wait, len(rand_data))
 				data.write_counter += 1
 			} else {
 				time.Sleep(5 * 1000000 * time.Microsecond)

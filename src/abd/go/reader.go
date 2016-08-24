@@ -22,24 +22,17 @@ import "C"
 var active_chan chan bool
 var reset_chan chan bool
 
+
+
 func reader_daemon() {
 	active_chan = make(chan bool)
 
+/*
 	data.active = true
 	data.write_rate = 0.6
 	data.name = "reader_1"
-
 	data.servers["172.17.0.2"] = true
-
-	var servers_str string = ""
-	i := 0
-	for key, _ := range data.servers {
-		if i > 0 {
-			servers_str += " "
-		}
-		servers_str += key
-		i++
-	}
+	*/
 
 	var object_name string = "atomic_object"
 
@@ -51,7 +44,7 @@ func reader_daemon() {
 			data.active = active
 			data.write_counter = 0
 		default:
-			if data.active == true {
+			if data.active == true && len(data.servers) > 0{
 				rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
 
 				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
@@ -60,7 +53,11 @@ func reader_daemon() {
 				//fmt.Println("Decoded data", decoded)
 				//		rawdata := (*C.byte)(unsafe.Pointer(&rand_data))
 
-				fmt.Println("READ", data.name, data.write_counter, "RAND TIME INT", rand_wait)
+				fmt.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
+				log.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
+        servers_str:=create_server_string_to_C() 
+	      log.Println("INFO\tUsing Servers\t"+servers_str)
+
 				data_read := C.GoString(C.ABD_read(
 					C.CString(object_name),
 					C.CString(data.name),
@@ -71,7 +68,7 @@ func reader_daemon() {
 				//	fmt.Println(rand_wait, len(rand_data), data.active)
 
 				fmt.Println("\t\t\tREAD DATA : ", data_read)
-				log.Println("READ", data.name, data.write_counter, rand_wait, data_read)
+				log.Println("OPERATION\tREAD", data.name, data.write_counter, rand_wait, data_read)
 				data.write_counter += 1
 			} else {
 				time.Sleep(5 * 1000000 * time.Microsecond)
@@ -91,6 +88,7 @@ func Reader_process(ip_addrs *list.List) {
 
 	go HTTP_Server()
 
+	log.Println("INFO\tStarting reader process\n")
 	reader_daemon()
 
 	for {
