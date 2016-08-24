@@ -2,7 +2,7 @@ ALL = abdprocess
 
 all: $(ALL)
 
-ABD = abd_algorithm.go
+ABD = abdprocess.go
 
 SRCS = controller/controller.go abd/go/utils.go abd/go/writer.go abd/go/reader.go abd/go/server.go utilities/utilities.go
 

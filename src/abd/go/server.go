@@ -1,9 +1,7 @@
 package abd_processes
 
 import (
-	//	"encoding/gob"
 	"fmt"
-	//	"os"
 )
 /*
 #cgo CFLAGS: -I../C
@@ -18,10 +16,7 @@ func server_daemon() {
 	data.active = true
 	data.name = "server_1"
 
-
 	C.ABD_server_process( C.CString(data.name), C.CString(data.port) )
-
-
 }
 
 func Server_process() {
@@ -30,6 +25,5 @@ func Server_process() {
 	defer f.Close()
 	// Run the server for now
 	go HTTP_Server()
- server_daemon()
-
+    server_daemon()
 }

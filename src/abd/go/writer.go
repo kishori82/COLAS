@@ -21,24 +21,6 @@ import "C"
 func writer_deamon() {
 	active_chan = make(chan bool)
 
-/*
-	data.active = true
-	data.write_rate = 0.6
-	data.name = "writer_1"
-
-	data.servers["172.17.0.2"] = true
-
-	var servers_str string = ""
-	i := 0
-	for key, _ := range data.servers {
-		if i > 0 {
-			servers_str += " "
-		}
-		servers_str += key
-		i++
-	}
-	*/
-
 	var object_name string = "atomic_object"
 
 	for {
@@ -62,10 +44,6 @@ func writer_deamon() {
 				encoded := base64.StdEncoding.EncodeToString(rand_data)
 				fmt.Println("Encoded data   : ", encoded)
 
-				//decoded, _ := base64.StdEncoding.DecodeString(encoded)
-				//fmt.Println("Decoded data", decoded)
-				//		rawdata := (*C.byte)(unsafe.Pointer(&rand_data))
-
 				rawdata := C.CString(encoded)
 		   	fmt.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
 				rand_wait, "DATA SIZE", len(encoded))
@@ -84,8 +62,6 @@ func writer_deamon() {
 					(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
 					C.CString(servers_str), C.CString(data.port))
 
-				//	fmt.Println(rand_wait, len(rand_data), data.active)
-
 				log.Println("OPERATION\tWRITE", data.name, data.write_counter, rand_wait, len(rand_data))
 				data.write_counter += 1
 			} else {
@@ -93,7 +69,6 @@ func writer_deamon() {
 			}
 		}
 	}
-
 }
 
 func Writer_process(ip_addrs *list.List) {

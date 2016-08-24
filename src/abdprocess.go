@@ -3,13 +3,11 @@ package main
 import (
 	abd "./abd/go/"
 	controller "./controller/"
-	//	utilities "./utilities"
 	"container/list"
 	"fmt"
 	"math"
 	"os"
 	"strconv"
-	//	"sync"
 )
 
 /*
@@ -37,18 +35,6 @@ func printHeader(title string) {
 func usage() {
 	fmt.Println("Usage : abdprocess --process-type [0(reader), 1(writer), 2(server), 3(controller)] --ip-address ip1 [ --ip-address ip2]")
 }
-
-/*
-func print_configuration(proc_type uint64, ip_addrs *list.List) {
-
-	fmt.Printf("Process Type: %d\n", proc_type)
-	fmt.Println("IP Addresses: ")
-	for e := ip_addrs.Front(); e != nil; e = e.Next() {
-		fmt.Printf("    %s\n", e.Value)
-	}
-
-}
-*/
 
 func main() {
 

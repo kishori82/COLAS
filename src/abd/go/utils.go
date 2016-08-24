@@ -20,7 +20,7 @@ type Tag struct {
 	id string
 }
 
-type Nodes struct {
+type Params struct {
 	readers map[string]bool
 	servers map[string]bool
 	writers map[string]bool
@@ -37,7 +37,7 @@ type Nodes struct {
 	name                        string
 }
 
-var data Nodes
+var data Params
 var DELIM string = "_"
 
 func PrintHeader(title string) {

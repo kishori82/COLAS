@@ -1,15 +1,11 @@
 package abd_processes
 
 import (
-	//	utilities "../../utilities"
 	"container/list"
-	//	"encoding/base64"
 	"fmt"
 	"log"
 	"math/rand"
 	"time"
-	//"unsafe"
-	//utilities "../utilities/"
 )
 
 /*
@@ -22,17 +18,8 @@ import "C"
 var active_chan chan bool
 var reset_chan chan bool
 
-
-
 func reader_daemon() {
 	active_chan = make(chan bool)
-
-/*
-	data.active = true
-	data.write_rate = 0.6
-	data.name = "reader_1"
-	data.servers["172.17.0.2"] = true
-	*/
 
 	var object_name string = "atomic_object"
 
@@ -49,10 +36,6 @@ func reader_daemon() {
 
 				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
 
-				//decoded, _ := base64.StdEncoding.DecodeString(encoded)
-				//fmt.Println("Decoded data", decoded)
-				//		rawdata := (*C.byte)(unsafe.Pointer(&rand_data))
-
 				fmt.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
 				log.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
         servers_str:=create_server_string_to_C() 
@@ -65,8 +48,6 @@ func reader_daemon() {
 					C.CString(servers_str),
 					C.CString(data.port)))
 
-				//	fmt.Println(rand_wait, len(rand_data), data.active)
-
 				fmt.Println("\t\t\tREAD DATA : ", data_read)
 				log.Println("OPERATION\tREAD", data.name, data.write_counter, rand_wait, data_read)
 				data.write_counter += 1
@@ -75,7 +56,6 @@ func reader_daemon() {
 			}
 		}
 	}
-
 }
 
 func Reader_process(ip_addrs *list.List) {
@@ -90,24 +70,4 @@ func Reader_process(ip_addrs *list.List) {
 
 	log.Println("INFO\tStarting reader process\n")
 	reader_daemon()
-
-	for {
-		select {
-		case active := <-active_chan:
-			data.active = active
-		case active := <-reset_chan:
-			data.active = active
-			data.read_counter = 0
-		default:
-			if data.active == true {
-				rand_wait := exponential_wait(data.write_rate)
-				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
-				log.Println("READ", data.name, data.read_counter, rand_wait)
-				data.read_counter += 1
-
-			} else {
-				time.Sleep(5 * 1000000 * time.Microsecond)
-			}
-		}
-	}
 }
