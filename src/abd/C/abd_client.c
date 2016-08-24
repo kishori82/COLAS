@@ -37,6 +37,7 @@ void s_catch_signals ()
 
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
+#define GET_TAG_VALUE "GET_TAG_VALUE"
 
 // this fethers the max tag
 TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
@@ -103,29 +104,35 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
 */
 
                 //object
-                zframe_t *identity = zmsg_pop(msg);
-                _zframe_str(identity,buf);
+                zframe_t *object_frame = zmsg_pop(msg);
+                _zframe_str(object_frame, buf);
                 printf("\t\tobject    : %s\n",buf);
 
                 // algorithm
-                identity = zmsg_pop(msg);
-                _zframe_str(identity,buf);
+                zframe_t *algorithm_frame = zmsg_pop(msg);
+                _zframe_str(algorithm_frame, buf);
                 printf("\t\talgorithm : %s\n",buf);
 
                 // phase
-                identity = zmsg_pop(msg);
-                _zframe_str(identity,phase);
+                zframe_t *phase_frame = zmsg_pop(msg);
+                _zframe_str(phase_frame, phase);
                 printf("\t\tphase     : %s\n",phase);
 
                 // operation number
-                identity = zmsg_pop(msg);
-                _zframe_int(identity, &round);
+                zframe_t *op_num_frame = zmsg_pop(msg);
+                _zframe_int(op_num_frame, &round);
                 printf("\t\tOP_NUM    : %d\n", round);
 
-                identity = zmsg_pop(msg);
-                _zframe_str(identity, tag_str);
+                zframe_t *tag_str_frame = zmsg_pop(msg);
+                _zframe_str(tag_str_frame, tag_str);
                 printf("\t\tTAG    : %s\n", tag_str);
-                
+                  
+                zframe_destroy(&object_frame);
+                zframe_destroy(&algorithm_frame);
+                zframe_destroy(&phase_frame);
+                zframe_destroy(&op_num_frame);
+                zframe_destroy(&tag_str_frame);
+
                 zmsg_destroy (&msg);
                 if(round==op_num && strcmp(phase, GET_TAG)==0) {
                    responses++;
@@ -154,9 +161,16 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
 
 // this fetches the max tag and value
 
-TAG get_max_tag_value_phase(char *obj_name, unsigned int op_num, 
-                      zsock_t *sock_to_servers,  char **servers, 
-                          unsigned int num_servers, char *port)
+TAG get_max_tag_value_phase(
+            char *obj_name, 
+            unsigned int op_num, 
+            zsock_t *sock_to_servers,  
+            char **servers, 
+            unsigned int num_servers, 
+            char *port, 
+            TAG *max_tag, 
+            char **max_value
+        )
 {
 
     // send out the messages to all servers
@@ -166,14 +180,18 @@ TAG get_max_tag_value_phase(char *obj_name, unsigned int op_num,
     char phase[64];
     char tag_str[64];
     char buf1[400];
+    char *value=NULL;
     int round;
+    int size;
+
+    TAG *tag;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
     int i; 
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algo = zframe_new("ABD", 3);
-    zframe_t *phase_frame = zframe_new(GET_TAG, 7);
+    zframe_t *phase_frame = zframe_new(GET_TAG_VALUE, 13);
     zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
 
     for(i=0; i < num_servers; i++) {
@@ -195,7 +213,6 @@ TAG get_max_tag_value_phase(char *obj_name, unsigned int op_num,
      unsigned int responses =0;
      zlist_t *tag_list = zlist_new();
      
-     TAG *tag;
      while (true) {
         //  Tick once per second, pulling in arriving messages
             
@@ -218,37 +235,55 @@ TAG get_max_tag_value_phase(char *obj_name, unsigned int op_num,
 */
 
                 //object
-                zframe_t *identity = zmsg_pop(msg);
-                _zframe_str(identity,buf);
+                zframe_t *object_frame = zmsg_pop(msg);
+                _zframe_str(object_frame, buf);
                 printf("\t\tobject    : %s\n",buf);
 
                 // algorithm
-                identity = zmsg_pop(msg);
-                _zframe_str(identity,buf);
+                zframe_t *algorithm_frame = zmsg_pop(msg);
+                _zframe_str(algorithm_frame ,buf);
                 printf("\t\talgorithm : %s\n",buf);
 
                 // phase
-                identity = zmsg_pop(msg);
-                _zframe_str(identity,phase);
+                zframe_t *phase_frame = zmsg_pop(msg);
+                _zframe_str(phase_frame, phase);
                 printf("\t\tphase     : %s\n",phase);
 
                 // operation number
-                identity = zmsg_pop(msg);
-                _zframe_int(identity, &round);
+                zframe_t *op_num_frame = zmsg_pop(msg);
+                _zframe_int(op_num_frame, &round);
                 printf("\t\tOP_NUM    : %d\n", round);
 
-                identity = zmsg_pop(msg);
-                _zframe_str(identity, tag_str);
+                zframe_t *tag_str_frame = zmsg_pop(msg);
+                _zframe_str(tag_str_frame, tag_str);
                 printf("\t\tTAG    : %s\n", tag_str);
                 
+
+                zframe_t *value_frame = zmsg_pop(msg);
+                size = zframe_size(value_frame);    
+                if( value !=NULL) free(value);
+                value = (char *)malloc(  (zframe_size(value_frame) + 1)*sizeof(char) );
+                _zframe_str(value_frame, value);
+                printf("\t\tVALUE    : %s\n", value);
+
+                zframe_destroy(&object_frame);
+                zframe_destroy(&algorithm_frame);
+                zframe_destroy(&phase_frame);
+                zframe_destroy(&op_num_frame);
+                zframe_destroy(&tag_str_frame);
+                zframe_destroy(&value_frame);
+
                 zmsg_destroy (&msg);
-                if(round==op_num && strcmp(phase, GET_TAG)==0) {
+
+                if(round==op_num && strcmp(phase, GET_TAG_VALUE)==0) {
                    responses++;
 
                    // add tag to list                
                    tag = (TAG *)malloc(sizeof(TAG));
                    string_to_tag(tag_str, tag);
                    zlist_append(tag_list, (void *)tag);
+
+                   *max_value = value;
 
                    if(responses >= majority) break;
                    //if(responses >= num_servers) break;
@@ -260,11 +295,10 @@ TAG get_max_tag_value_phase(char *obj_name, unsigned int op_num,
             }
      }
    //comute the max tag now and return 
-     TAG max_tag = get_max_tag(tag_list);
+     *max_tag = get_max_tag(tag_list);
 
      free_items_in_list(tag_list);
      zlist_destroy(&tag_list);
-     return  max_tag;
 }
 
 
@@ -277,7 +311,8 @@ TAG write_value_phase(
                       zsock_t *sock_to_servers,  
                       char **servers, 
                       unsigned int num_servers, 
-                      char *port, byte *payload, 
+                      char *port, 
+                      char *payload, 
                       int size, 
                       TAG max_tag
                    )
@@ -290,6 +325,9 @@ TAG write_value_phase(
     char phase[64];
     char tag_str[64];
     char buf1[400];
+    char *value;
+    
+
     int round;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
@@ -323,7 +361,7 @@ TAG write_value_phase(
     zframe_destroy(&phase_frame);
     zframe_destroy(&op_num_frame);
     zframe_destroy(&tag_frame);
-    zframe_destroy (&payload_frame);
+    zframe_destroy(&payload_frame);
 
     unsigned int majority =  ceil((num_servers+1)/2);
      unsigned int responses =0;
@@ -348,37 +386,36 @@ TAG write_value_phase(
 
                  //identity variable is abused
                 //object
-                zframe_t *identity = zmsg_pop(msg);
-                _zframe_str(identity,buf);
+                zframe_t *object_frame = zmsg_pop(msg);
+                _zframe_str(object_frame, buf);
                 printf("\t\tobject    : %s\n",buf);
 
                 // algorithm
-                identity = zmsg_pop(msg);
-                _zframe_str(identity,buf);
+                zframe_t *algorithm_frame = zmsg_pop(msg);
+                _zframe_str(algorithm_frame, buf);
                 printf("\t\talgorithm : %s\n",buf);
 
                 // phase
-                identity = zmsg_pop(msg);
-                _zframe_str(identity,phase);
+                zframe_t *phase_frame = zmsg_pop(msg);
+                _zframe_str(phase_frame, phase);
                 printf("\t\tphase     : %s\n",phase);
 
                 // operation number
-                identity = zmsg_pop(msg);
-                _zframe_int(identity, &round);
+                zframe_t *op_num_frame = zmsg_pop(msg);
+                _zframe_int(op_num_frame, &round);
                 printf("\t\tOP_NUM    : %d\n", round);
 
                 // tag string
-                identity = zmsg_pop(msg);
-                _zframe_str(identity, tag_str);
+                zframe_t *tag_str_frame = zmsg_pop(msg);
+                _zframe_str(tag_str_frame, tag_str);
                 printf("\t\tTAG STRING    : %s\n", tag_str);
 
-/*
-                // status
-                identity = zmsg_pop(msg);
-                _zframe_str(identity, tag_str);
-                printf("\t\tSTATUS    : %s\n", tag_str);
-*/
 
+                zframe_destroy(&object_frame);
+                zframe_destroy(&algorithm_frame);
+                zframe_destroy(&phase_frame);
+                zframe_destroy(&op_num_frame);
+                zframe_destroy(&tag_str_frame);
 
                 zmsg_destroy (&msg);
                 if(round==op_num && strcmp(phase, WRITE_VALUE)==0) {
@@ -449,18 +486,18 @@ bool ABD_write(
     zsocket_set_identity(sock_to_servers,  writer_id);
     for(j=0; j < num_servers; j++) {    
        char *destination = create_destination(servers[j], port);
-       int rc = zsocket_connect(sock_to_servers, destination);
+       int rc = zsocket_connect(sock_to_servers, (const char *)destination);
        assert(rc==0);
        free(destination);
     }
 
    printf("WRITE %d\n", op_num);
-   printf("     MAX_TAG\n");
+   printf("     MAX_TAG (WRITER)\n");
    TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
 
-   printf("     WRITE_VALUE\n");
+   printf("     WRITE_VALUE (WRITER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
                      num_servers, port, payload, size, max_tag);
 
@@ -490,10 +527,11 @@ bool ABD_read(
     printf("Size           : %d\n", size);
     printf("Size of        : %u\n", (unsigned int)strlen(payload));
 
-    char *myb64 = (char *)malloc(strlen(payload));
+   /* char *myb64 = (char *)malloc(strlen(payload));
     b64_decode(payload, myb64);
-
     printf("Encoded string  : %s\n", payload);
+    free(myb64);
+*/
     printf("Server string   : %s\n", servers_str);
     printf("Port to Use     : %s\n", port);
 
@@ -507,7 +545,6 @@ bool ABD_read(
         printf("\tServer : %s\n", servers[j]);
     }
     printf("\n");
-    free(myb64);
     
     zctx_t *ctx  = zctx_new();
     void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
@@ -523,12 +560,14 @@ bool ABD_read(
     }
 
    printf("WRITE %d\n", op_num);
-   printf("     MAX_TAG\n");
-   TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
+   printf("     MAX_TAG (READER)\n");
+
+   TAG max_tag;
+   get_max_tag_value_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port, &max_tag, &payload);
 
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
 
-   printf("     WRITE_VALUE\n");
+   printf("     WRITE_VALUE (READER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
                      num_servers, port, payload, size, max_tag);
 
@@ -556,8 +595,8 @@ int main (void)
 {
    int i ; 
    
-   byte *payload = (byte *)malloc(100000000*sizeof(byte));
-   unsigned int size = 100000000*sizeof(byte);
+   char *payload = (char *)malloc(100000000*sizeof(char));
+   unsigned int size = 100000000*sizeof(char);
 
 /*
    char *servers[]= {

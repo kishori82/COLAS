@@ -16,6 +16,17 @@ void _zframe_str(zframe_t *f, char *buf) {
      buf[s]='\0';
 }
 
+void _zframe_value(zframe_t *f, char *buf) {
+    byte *data = zframe_data(f);
+    int s = zframe_size(f);
+    int j;
+    for( j = 0; j < s ; j++) {
+           buf[j] = data[j]; 
+     }
+  //   buf[s]='\0';
+}
+
+
 unsigned int count_num_servers(char *servers_str) {
     int count = 0;
     if( servers_str==NULL) return 0;

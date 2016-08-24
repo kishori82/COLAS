@@ -16,6 +16,8 @@ void _zframe_int(zframe_t *f, int *i) ;
 
 void _zframe_str(zframe_t *f, char *buf) ;
 
+void _zframe_value(zframe_t *f, char *buf) ;
+
 char *create_destinations(char **servers, unsigned int num_servers, char *port, char type) ;
 
 char *create_destination(char *server, char *port) ;
@@ -42,13 +44,11 @@ typedef struct  _TAG_VALUE {
 
 int compare_tag_ptrs(TAG *a, TAG *b) ;
 
-
 int compare_tags(TAG a, TAG b) ;
 
 void string_to_tag(char *str, TAG *tag) ;
 
 void tag_to_string(TAG tag, char *buf) ;
-
 
 TAG get_max_tag( zlist_t *tag_list) ;
      
