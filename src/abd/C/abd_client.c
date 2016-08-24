@@ -79,7 +79,7 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
     zframe_destroy(&op_num_frame);
 
 //    zframe_destroy (&payloadf);
-    unsigned int majority =  ceil((num_servers+1)/2);
+    unsigned int majority =  ceil(((float)num_servers+1)/2);
 //     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
      unsigned int responses =0;
      zlist_t *tag_list = zlist_new();
@@ -194,7 +194,7 @@ TAG get_max_tag_value_phase(char *obj_name, unsigned int op_num,
     zframe_destroy(&op_num_frame);
 
 //    zframe_destroy (&payloadf);
-    unsigned int majority =  ceil((num_servers+1)/2);
+    unsigned int majority =  ceil(((float)num_servers+1)/2);
 //     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
      unsigned int responses =0;
      zlist_t *tag_list = zlist_new();
