@@ -2,3 +2,4 @@
 logs/*
 abdprocess
 src/abd/C/abd_server
+src/logs/logs.txt

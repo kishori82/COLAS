@@ -49,8 +49,9 @@ func writer_deamon() {
 	data.active = true
 	data.write_rate = 0.6
 	data.name = "writer_1"
-	data.servers["127.1.1.45"] = true
-	data.servers["127.1.1.46"] = true
+
+	data.servers["172.17.0.2"] = true
+
 	var servers_str string = ""
 	i := 0
 	for key, _ := range data.servers {

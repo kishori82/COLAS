@@ -12,12 +12,12 @@ all: abd_client abd_server
 
 #asyncsrv: asyncsrv.o
 
-abd_client: abd_client.c   algo_utils.o  $(DEPS)
-	$(CC) -DASLIBRARY -DASMAIN -o $@ $<  algo_utils.o  $(CFLAGS)
+abd_client: abd_client.c   algo_utils.o  base64.o $(DEPS)
+	$(CC) -DASLIBRARY -DASMAIN -o $@ $<  algo_utils.o base64.o  $(CFLAGS)
 
 
-abd_server: abd_server.c algo_utils.o  $(DEPS)
-	$(CC) -DASLIBRARY -DASMAIN -o $@ $< algo_utils.o  $(CFLAGS)
+abd_server: abd_server.c algo_utils.o  base64.o  $(DEPS)
+	$(CC) -DASLIBRARY -DASMAIN -o $@ $< algo_utils.o base64.o  $(CFLAGS)
 
 static: abd_client.c abd_server.c
 	$(CC) -static -c  -o abd_client.o  abd_client.c  -DASLIBRARY #$(CFLAGS)

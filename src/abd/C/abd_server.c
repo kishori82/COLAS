@@ -3,10 +3,7 @@
 //  While this example runs in a single process, that is to make
 //  it easier to start and stop the example. Each task has its own
 //  context and conceptually acts as a separate process.
-
-#include <czmq.h>
-#include <zmq.h>
-#include <stdio.h>
+#include <czmq.h> #include <zmq.h> #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

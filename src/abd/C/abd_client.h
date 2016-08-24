@@ -40,7 +40,15 @@ TAG write_value_phase(
                       TAG max_tag
                    ) ;
 
-bool ABD_write(char *obj_name, char *writer_id, unsigned int op_num,  byte *payload, unsigned int size, char **servers, unsigned int num_servers, char *port);
+bool ABD_write(char *obj_name, 
+               char *writer_id, 
+               unsigned int op_num,  
+               char *payload, 
+               unsigned int size, 
+               char **servers, 
+               unsigned int num_servers, 
+               char *port
+             );
 
 bool ABD_write1(char *obj_name, char *writer_id, 
              unsigned int op_num,  char *payload, 
