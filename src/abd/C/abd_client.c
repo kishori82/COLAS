@@ -410,35 +410,7 @@ bool ABD_write1(
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
 
    printf("     WRITE_VALUE\n");
-   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
-  //}
-
-    zsocket_destroy(ctx, sock_to_servers);
-    zctx_destroy(&ctx);
-  //}
-
-
-    return true;
-}
-
-
-
-
-
-
-
-=======
->>>>>>> refs/remotes/origin/master
-
-  //for( i=0; i < 50; i++) {
-   // printf("WRITE %d\n", i);
-   printf("     MAX_TAG\n");
-   TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
-
-   printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
-
-   printf("     WRITE_VALUE\n");
-   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, 
+   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
                      num_servers, port, payload, size, max_tag);
   //}
 
