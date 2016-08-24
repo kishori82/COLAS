@@ -5,3 +5,4 @@ src/abd/C/abd_server
 src/abd/C/abd_client
 src/logs/logs.txt
 src/abd/C/libabd_shared.so
+src/abd/C/abd_client
