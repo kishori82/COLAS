@@ -325,7 +325,7 @@ func getName(ip string) (logs string) {
 func sendCommandToControllers(controllers []string, route string, queryStr string) (ack string) {
 	var url string
 
-	if ( len(controllers) < 1 ) {
+	if len(controllers) < 1 {
 		log.Fatal("No available controllers to send commands to. Exiting...")
 	}
 

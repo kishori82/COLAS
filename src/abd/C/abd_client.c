@@ -509,12 +509,11 @@ bool ABD_write(
 }
 
 
-bool ABD_read(
+char *ABD_read(
                 char *obj_name,
                 char *writer_id, 
                 unsigned int op_num ,
-                char *payload, 
-                unsigned int size, 
+//                char *payload, 
                 char *servers_str, 
                 char *port
              )
@@ -524,8 +523,6 @@ bool ABD_read(
     printf("Obj name       : %s\n",obj_name);
     printf("Writer name    : %s\n",writer_id);
     printf("Operation num  : %d\n",op_num);
-    printf("Size           : %d\n", size);
-    printf("Size of        : %u\n", (unsigned int)strlen(payload));
 
    /* char *myb64 = (char *)malloc(strlen(payload));
     b64_decode(payload, myb64);
@@ -559,15 +556,17 @@ bool ABD_read(
        free(destination);
     }
 
-   printf("WRITE %d\n", op_num);
-   printf("     MAX_TAG (READER)\n");
+   printf("READ %d\n", op_num);
+   printf("     MAX_TAG_VALUE (READER)\n");
 
+   char *payload;
    TAG max_tag;
    get_max_tag_value_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port, &max_tag, &payload);
 
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
 
    printf("     WRITE_VALUE (READER)\n");
+   int size = strlen(payload);
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
                      num_servers, port, payload, size, max_tag);
 
@@ -575,7 +574,7 @@ bool ABD_read(
     zctx_destroy(&ctx);
 
 
-    return true;
+    return payload;
 }
 
 

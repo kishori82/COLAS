@@ -24,11 +24,10 @@ bool ABD_write(char *obj_name,
                char *servers, 
                char *port
              ); 
-bool ABD_read(char *obj_name, 
+char * ABD_read(char *obj_name, 
                char *writer_id, 
                unsigned int op_num,  
-               char *payload, 
-               unsigned int size, 
+               //char *payload, 
                char *servers, 
                char *port
              );

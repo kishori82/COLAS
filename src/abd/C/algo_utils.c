@@ -104,8 +104,6 @@ char *create_destination(char *server, char *port) {
       char *dest = (char *)malloc( (size + 8)*sizeof(char));
       assert(dest!=0);
       sprintf(dest, "tcp://%s:%s", server, port);
-      printf("desit %s\n",dest);
-
       return dest;
 }
 

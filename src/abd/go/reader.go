@@ -1,14 +1,14 @@
 package abd_processes
 
 import (
-	utilities "../../utilities"
+	//	utilities "../../utilities"
 	"container/list"
-	"encoding/base64"
+	//	"encoding/base64"
 	"fmt"
 	"log"
 	"math/rand"
 	"time"
-	"unsafe"
+	//"unsafe"
 	//utilities "../utilities/"
 )
 
@@ -56,30 +56,22 @@ func reader_daemon() {
 
 				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
 
-				rand_data_file_size := int64(1024 * rand.ExpFloat64() / data.file_size)
-
-				rand_data := make([]byte, rand_data_file_size)
-				_ = utilities.Generate_random_data(rand_data, rand_data_file_size)
-
-				encoded := base64.StdEncoding.EncodeToString(rand_data)
-				fmt.Println("Encoded data   : ", encoded)
-
 				//decoded, _ := base64.StdEncoding.DecodeString(encoded)
 				//fmt.Println("Decoded data", decoded)
-
 				//		rawdata := (*C.byte)(unsafe.Pointer(&rand_data))
-				rawdata := C.CString(encoded)
-				defer C.free(unsafe.Pointer(&rawdata))
 
-				C.ABD_read(
+				fmt.Println("READ", data.name, data.write_counter, "RAND TIME INT", rand_wait)
+				data_read := C.GoString(C.ABD_read(
 					C.CString(object_name),
 					C.CString(data.name),
-					(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
-					C.CString(servers_str), C.CString(data.port))
+					(C.uint)(data.write_counter),
+					C.CString(servers_str),
+					C.CString(data.port)))
 
 				//	fmt.Println(rand_wait, len(rand_data), data.active)
 
-				log.Println("WRITE", data.name, data.write_counter, rand_wait, len(rand_data))
+				fmt.Println("\t\t\tREAD DATA : ", data_read)
+				log.Println("READ", data.name, data.write_counter, rand_wait, data_read)
 				data.write_counter += 1
 			} else {
 				time.Sleep(5 * 1000000 * time.Microsecond)
