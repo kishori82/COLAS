@@ -10,6 +10,24 @@
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
 
+static int se_interrupted=0;
+void se_signal_handler(int signal_value)
+{
+    se_interrupted=1;
+}
+
+void se_catch_signals ()
+{
+    struct sigaction action;
+    action.sa_handler = se_signal_handler;
+    //  Doesn't matter if SA_RESTART set because self-pipe will wake up zmq_poll
+    //  But setting to 0 will allow zmq_read to be interrupted.
+    action.sa_flags = 0;
+    sigemptyset (&action.sa_mask);
+    sigaction (SIGINT, &action, NULL);
+    sigaction (SIGTERM, &action, NULL);
+}
+
 
 #ifdef ASLIBRARY
 #include "algo_utils.h"
@@ -86,6 +104,7 @@ void *server_task (void *args)
     //  Connect backend to frontend via a proxy
     zmq_proxy (frontend, backend, NULL);
     zctx_destroy (&ctx);
+
     return NULL;
 }
 
@@ -233,7 +252,10 @@ server_worker (void *args, zctx_t *ctx, void *pipe)
     while (true) {
         //  The DEALER socket gives us the reply envelope and message
    //     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
-        zmq_poll(items, 1, -1);
+        int rc = zmq_poll(items, 1, -1);
+        if( rc < 0 || se_interrupted ) {
+             exit(0);
+        }
         zclock_sleep(5);
        
         if (items[0].revents & ZMQ_POLLIN) {
@@ -273,13 +295,25 @@ server_worker (void *args, zctx_t *ctx, void *pipe)
        }
    }
 }
+
+int ABD_server_process(char *server_id, char *port)
+{
+   int i ; 
+   se_catch_signals();
+   zthread_new(server_task, NULL);
+   printf("Starting the thread with id %d\n", server_id);
+   while(true) {
+      zclock_sleep(60*60*1000); 
+   }
+   return 0;
+}
+
 #endif
 
 //  The main thread simply starts several clients and a server, and then
 //  waits for the server to finish.
 
 #ifdef ASMAIN
-void *server_task (void *args);
 int main (void)
 {
    int i ; 

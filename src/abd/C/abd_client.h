@@ -48,8 +48,7 @@ bool ABD_write(char *obj_name,
                unsigned int size, 
                char *servers, 
                char *port
-             );
-
+             ); 
 bool ABD_read(char *obj_name, 
                char *writer_id, 
                unsigned int op_num,  

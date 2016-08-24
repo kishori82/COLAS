@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 void _zframe_int(zframe_t *f, int *i) ;
 

@@ -9,13 +9,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <signal.h>
-#include <unistd.h>
-#include <fcntl.h>
 
 
 static int s_interrupted=0;
-
 void s_signal_handler(int signal_value)
 {
     s_interrupted=1;
