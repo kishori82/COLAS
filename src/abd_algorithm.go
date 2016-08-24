@@ -54,8 +54,6 @@ func main() {
 
 	args := os.Args
 
-	fmt.Println(C.ABD_hello(5, 6))
-
 	// reader, writer and servers are 0, 1 and 2
 	//  var proc_type string="--process-type"
 	var proc_type uint64

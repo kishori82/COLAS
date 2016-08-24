@@ -1,174 +1,105 @@
 package abd_processes
 
 import (
+	utilities "../../utilities"
 	"container/list"
+	"encoding/base64"
 	"fmt"
 	"log"
-	"math"
 	"math/rand"
-	"sync"
 	"time"
+	"unsafe"
 	//utilities "../utilities/"
 )
 
-var (
-	readers        []Reader
-	writers        []Writer
-	nodes          []Server
-	nextId         int
-	numReaders     int = 1
-	numWriters     int = 1
-	numNodes       int = 3
-	numNodesToKill int = 0
-	wg             sync.WaitGroup
-	path           string = "./tmp/"
-	maxDelay       int    = 100
-)
-
-type Reader struct {
-	Id           int
-	ip_addresses []string
-}
+/*
+#cgo CFLAGS: -I../C
+#cgo LDFLAGS: -L../C  -labd_shared -lzmq -lczmq
+#include <abd_client.h>
+*/
+import "C"
 
 var active_chan chan bool
 var reset_chan chan bool
 
-/**
-* Read a value from a set of nodes
-* @param objectId the id of the object to be read
-* @return value the value of the object
- */
-func (r Reader) Read(objectId int) (value int) {
-	PrintHeader("Reading")
+func reader_daemon() {
+	active_chan = make(chan bool)
 
-	//	defer wg.Done()
+	data.active = true
+	data.write_rate = 0.6
+	data.name = "reader_1"
 
-	var stateVariables []StateVariable
-	queryAll(objectId, &stateVariables)
-	stateVariable := getMaxTag(stateVariables)
+	data.servers["172.17.0.2"] = true
 
-	sendAll(objectId, stateVariable)
-	value = stateVariable.Value
-
-	PrintFooter()
-	return value
-}
-
-/**
-* Queries all nodes for their state variables associated with an objectId
-* @param objectId the id of the object for which we are querying
-* @stateVariables the slice to which the state variable is added
- */
-func queryAll(objectId int, stateVariables *[]StateVariable) {
-	fmt.Println("Querying for Tag...")
-	majority := int(math.Ceil(float64((len(nodes) + 1)) / float64(2)))
-	c := make(chan int, len(nodes))
-	for i := 0; i < len(nodes); i++ {
-		fmt.Println("	Querying node", nodes[i].Id)
-		go getStateVariable(nodes[i], objectId, stateVariables, c)
+	var servers_str string = ""
+	i := 0
+	for key, _ := range data.servers {
+		if i > 0 {
+			servers_str += " "
+		}
+		servers_str += key
+		i++
 	}
-	for j := 0; j < majority; j++ {
-		<-c
-		fmt.Println("	Received Tag", j)
-	}
-	fmt.Println("Majority received")
-}
 
-/**
-* Gets the state variable stored in a single node for an object
-* @param node the node being queried
-* @param objectId the id of the object for which we are querying
-* @param stateVariables the slice to which the state variable is added
-* @param c the channel used to wait for all nodes to complete
- */
-func getStateVariable(node Server, objectId int, stateVariables *[]StateVariable, c chan int) {
-	if node.isAlive {
-		r := rand.Intn(1000)
-		time.Sleep(time.Duration(r) * time.Millisecond)
-		fmt.Println("		Server", node.Id, "is alive")
-		stateVariable := node.readFromCache(objectId)
-		*stateVariables = append(*stateVariables, stateVariable)
-		c <- 1
-		return
-	} else {
-		fmt.Println("		Server", node.Id, "is dead")
-	}
-}
+	var object_name string = "atomic_object"
 
-/**
-* Sends the state variable with a certain id to all nodes
-* to be written to storage and cache
-* @param objectId the state variable's object id
-* @param stateVariable the state variable to be sent
- */
-func sendAll(objectId int, stateVariable StateVariable) {
-	fmt.Println("Sending to nodes...")
-	majority := int(math.Ceil(float64((len(nodes) + 1)) / float64(2)))
-	c := make(chan int, len(nodes))
-	for i := 0; i < len(nodes); i++ {
-		fmt.Println("	Sending to node", nodes[i].Id, "the state variable", stateVariable)
-		go sendStateVariable(nodes[i], objectId, stateVariable, c)
-	}
-	for j := 0; j < majority; j++ {
-		<-c
-		fmt.Println("	ACK Received", j)
-	}
-	fmt.Println("Majority received")
-}
+	for {
+		select {
+		case active := <-active_chan:
+			data.active = active
+		case active := <-reset_chan:
+			data.active = active
+			data.write_counter = 0
+		default:
+			if data.active == true {
+				rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
 
-/**
-* Sends the state variable to a certain node to be written
-* to storage and cache
-* @param node the node to which the state variable is sent
-* @param objectId the state variable's objectId
-* @param stateVariable the state variable to be sent
-* @param c the channel used to wait for all nodes to complete
- */
-func sendStateVariable(node Server, objectId int, stateVariable StateVariable, c chan int) {
-	r := rand.Intn(maxDelay - 1)
-	time.Sleep(time.Duration(r) * time.Millisecond)
-	if !node.isAlive {
-		fmt.Println("		Server", node.Id, "is dead")
-		return
-	}
-	fmt.Println("		Server", node.Id, "is alive")
-	node.writeToStorage(objectId, stateVariable)
-	node.updateCache(objectId, stateVariable)
-	c <- 1
-}
+				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
 
-/**
-* Calculate the maximum tag among a slice of state variables
-* @param stateVariables the slice of state variables
-* @return maxStateVariable the state variable containing the
-* maximum tag
- */
-func getMaxTag(stateVariables []StateVariable) (maxStateVariable StateVariable) {
-	fmt.Println("Calculating Maximum Tag")
-	maxStateVariable = stateVariables[0]
+				rand_data_file_size := int64(1024 * rand.ExpFloat64() / data.file_size)
 
-	for i := 1; i < len(stateVariables); i++ {
-		currValue := stateVariables[i].Tag.Value
-		maxValue := maxStateVariable.Tag.Value
-		currId := stateVariables[i].Tag.Id
-		maxId := maxStateVariable.Tag.Id
-		if (currValue > maxValue) || (currValue == maxValue && currId > maxId) {
-			maxStateVariable = stateVariables[i]
+				rand_data := make([]byte, rand_data_file_size)
+				_ = utilities.Generate_random_data(rand_data, rand_data_file_size)
+
+				encoded := base64.StdEncoding.EncodeToString(rand_data)
+				fmt.Println("Encoded data   : ", encoded)
+
+				//decoded, _ := base64.StdEncoding.DecodeString(encoded)
+				//fmt.Println("Decoded data", decoded)
+
+				//		rawdata := (*C.byte)(unsafe.Pointer(&rand_data))
+				rawdata := C.CString(encoded)
+				defer C.free(unsafe.Pointer(&rawdata))
+
+				C.ABD_read(
+					C.CString(object_name),
+					C.CString(data.name),
+					(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
+					C.CString(servers_str), C.CString(data.port))
+
+				//	fmt.Println(rand_wait, len(rand_data), data.active)
+
+				log.Println("WRITE", data.name, data.write_counter, rand_wait, len(rand_data))
+				data.write_counter += 1
+			} else {
+				time.Sleep(5 * 1000000 * time.Microsecond)
+			}
 		}
 	}
 
-	return maxStateVariable
 }
 
 func Reader_process(ip_addrs *list.List) {
 
 	// This should become part of the standard init function later when we refactor...
-	active_chan = make(chan bool, 10)
-	fmt.Println("Starting reader\n")
 	SetupLogging()
+	fmt.Println("Starting reader\n")
 
 	InitializeParameters()
+
 	go HTTP_Server()
+
+	reader_daemon()
 
 	for {
 		select {

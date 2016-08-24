@@ -16,13 +16,8 @@ import (
 )
 
 type Tag struct {
-	Id    int
-	Value int
-}
-
-type StateVariable struct {
-	Tag   Tag
-	Value int
+	z  int
+	id string
 }
 
 type Nodes struct {

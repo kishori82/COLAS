@@ -18,32 +18,7 @@ import (
 */
 import "C"
 
-type Writer struct {
-	Id int
-}
-
-/**
-* Write a value to the set of nodes
-* @param objectId the id of the object to be written
-* @param value the value to be written
- */
-func (w Writer) Write(objectId, value int) {
-	PrintHeader("Writing")
-
-	defer wg.Done()
-
-	var stateVariables []StateVariable
-	queryAll(objectId, &stateVariables)
-	stateVariable := getMaxTag(stateVariables)
-	newTag := Tag{w.Id, stateVariable.Tag.Value + 1}
-	newStateVariable := StateVariable{newTag, value}
-	sendAll(objectId, newStateVariable)
-
-	PrintFooter()
-}
-
 func writer_deamon() {
-	fmt.Println(C.ABD_hello(5, 7))
 	active_chan = make(chan bool)
 
 	data.active = true
@@ -92,7 +67,7 @@ func writer_deamon() {
 				rawdata := C.CString(encoded)
 				defer C.free(unsafe.Pointer(&rawdata))
 
-				C.ABD_write1(
+				C.ABD_write(
 					C.CString(object_name),
 					C.CString(data.name),
 					(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
