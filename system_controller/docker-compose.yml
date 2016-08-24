@@ -1,18 +1,24 @@
 reader:
     image: kishori82/dev:COLAS
-    command: /home/docker/COLAS/abdprocess --process-type 0
+    command: /home/docker/COLAS/src/abdprocess --process-type 0
+    environment:
+    - LD_LIBRARY_PATH=/usr/local/lib:/home/docker/COLAS/src/abd/C
 
 writer:
     image: kishori82/dev:COLAS
-    command: /home/docker/COLAS/abdprocess --process-type 1
+    command: /home/docker/COLAS/src/abdprocess --process-type 1
+    environment:
+    - LD_LIBRARY_PATH=/usr/local/lib:/home/docker/COLAS/src/abd/C
 
 server:
     image: kishori82/dev:COLAS
-#    command: /home/docker/COLAS/abdprocess --process-type 2
-    command: /home/docker/COLAS/src/abd/abd_server
+    command: /home/docker/COLAS/src/abdprocess --process-type 2
+#   command: /home/docker/COLAS/src/abd/abd_server
     environment:
-    - LD_LIBRARY_PATH=/usr/local/lib
+    - LD_LIBRARY_PATH=/usr/local/lib;/home/docker/COLAS/src/abd/C
 
 controller:
     image: kishori82/dev:COLAS
-    command: /home/docker/COLAS/abdprocess --process-type 3
+    command: /home/docker/COLAS/src/abdprocess --process-type 3
+    environment:
+    - LD_LIBRARY_PATH=/usr/local/lib;/home/docker/COLAS/src/abd/C
