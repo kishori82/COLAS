@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 /*
-#cgo CFLAGS: -I../C
-#cgo LDFLAGS: -L../C  -labd_shared -lzmq -lczmq
+#cgo CFLAGS: -I../abd  -I../soda
+#cgo LDFLAGS: -L../abd  -labd  -L../soda -lsoda -lzmq -lczmq
 #include <abd_server.h>
 */
 import "C"

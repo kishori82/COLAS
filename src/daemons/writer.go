@@ -1,7 +1,7 @@
 package abd_processes
 
 import (
-	utilities "../../utilities"
+	utilities "../utilities/GO"
 	"container/list"
 	"encoding/base64"
 	"fmt"
@@ -12,14 +12,16 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I../C
-#cgo LDFLAGS: -L../C  -labd_shared -lzmq -lczmq
+#cgo CFLAGS: -I../abd  -I../soda
+#cgo LDFLAGS: -L../abd  -labd  -L../soda -lsoda  -lzmq -lczmq
 #include <abd_client.h>
+#include <soda_client.h>
 */
 import "C"
 
 func writer_deamon() {
 	active_chan = make(chan bool)
+
 
 	var object_name string = "atomic_object"
 

@@ -1,7 +1,7 @@
 package abd_processes
 
 import (
-	utilities "../../utilities"
+	utilities "../utilities/GO"
 	"container/list"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 )
+
 
 type Tag struct {
 	z  int
@@ -35,6 +36,7 @@ type Params struct {
 
 	read_counter, write_counter int64
 	name                        string
+	algorithm string
 }
 
 var data Params
@@ -311,6 +313,9 @@ func InitializeParameters() {
 	data.active = false
 
 	data.port = "8081"
+
+  data.algorithm="ABD"
+
 }
 
 //http server

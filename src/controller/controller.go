@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 	"strconv"
-	utilities  "../utilities"
+	utilities  "../utilities/GO"
 	"math/rand"
 	"os"
 )

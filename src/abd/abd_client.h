@@ -9,13 +9,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "algo_utils.h"
-#include "base64.h"
+#include <algo_utils.h>
+#include <base64.h>
 
 
 //   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
 
-
+void HiKodo();
 bool ABD_write(char *obj_name, 
                char *writer_id, 
                unsigned int op_num,  

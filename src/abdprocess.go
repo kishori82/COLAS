@@ -1,7 +1,7 @@
 package main
 
 import (
-	abd "./abd/go/"
+	abd "./daemons/"
 	controller "./controller/"
 	"container/list"
 	"fmt"
@@ -10,10 +10,11 @@ import (
 	"strconv"
 )
 
+
 /*
-#cgo CFLAGS: -Iabd/C
-#cgo LDFLAGS: -Labd/C  -labd_shared -lzmq -lczmq
-#include <abd_client.h>
+#cgo CFLAGS: -Iabd  -Isoda  -Iutilities/C
+#cgo LDFLAGS: -Labd  -labd -Lsoda -lsoda -lzmq -lczmq -Lcodes -lreed -Wl,-rpath=codes
+#include <soda_client.h>
 */
 import "C"
 

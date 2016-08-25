@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <algo_utils.h>
+#include "abd_client.h"
+#include <base64.h>
+
 
 
 static int s_interrupted=0;
@@ -31,13 +35,16 @@ void s_catch_signals ()
 
 
 #ifdef ASLIBRARY
-#include "algo_utils.h"
-#include "abd_client.h"
-#include "base64.h"
 
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
 #define GET_TAG_VALUE "GET_TAG_VALUE"
+
+void HiKodo() {
+  printf("Hi Kodo\n");
+
+}
+
 
 // this fethers the max tag
 TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
@@ -588,7 +595,6 @@ char *ABD_read(
 //#define ASMAIN
 
 #ifdef ASMAIN
-#include "abd_client.h"
 
 int main (void)
 {
