@@ -1,24 +1,27 @@
 CC=gcc
 CPP=g++
 
-CPPFLAGS= -std=c++11 -I/home/docker/shared_kodocpp/include
+CPPFLAGS= -std=c++11 -I/home/sgeadmin/shared_kodocpp/include
 CFLAGS= -lm -lzmq  -lczmq -Wimplicit-function-declaration -fpic #-Wall 
-LDFLAGS=-L/home/docker/shared_kodocpp/ -Wl,-Bdynamic -lkodoc -Wl,-rpath /home/docker/shared_kodocpp 
+LDFLAGS=-L/home/sgeadmin/shared_kodocpp/ -Wl,-Bdynamic -lkodoc -Wl,-rpath /home/sgeadmin/shared_kodocpp 
 
 DEPS=reed_solomon.h  
-SRCS=reed_solomon.cpp 
+SRCS=reed_solomon.cpp  example.cpp
 
-OBJSCPP=$(SRCS:%o=%cpp)
 OBJSC=$(SRCS:%o=%cpp)
 
-all: libreed.so  
+TARGET=libreed.so example 
+all: $(TARGET) 
 
+%.o:%.cpp
+	$(CPP) -c $< -o $@ -DASLIBRARY $(CPPFLAGS)
 
-%.o: %.cpp
-	$(CCP) -c -o $@  $< -DASLIBRARY $(CPPFLAGS) $(LDFLAGS)
+example: $(OBJS)
+	$(CPP)   -fPIC $<  -o $@  -DASLIBRARY  $(CPPFLAGS) $(LDFLAGS) 
+
 
 libreed.so: $(SRCS) $(DEPS) $(OBJS)
 	$(CPP) -fPIC -shared reed_solomon.cpp  -o libreed.so  -DASLIBRARY  $(CPPFLAGS) $(LDFLAGS) 
 
 clean:
-	rm -f abd libreed.so  *.o lib* *.so
+	rm -f abd $(TARGET)  *.o lib* *.so
