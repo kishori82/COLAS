@@ -20,6 +20,9 @@
 
 #include "reed_solomon.h"
 
+
+
+#ifdef ASLIBRARY
 int demo_main()
 {
     // Seed the random number generator to produce different data every time
@@ -119,3 +122,5 @@ int demo_main()
 
     return 0;
 }
+#endif
+
