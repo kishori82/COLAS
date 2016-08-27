@@ -20,7 +20,7 @@
 
 #include <kodocpp/kodocpp.hpp>
 
-//#include "reed_solomon.h"
+#include "rlnc_rs.h"
 
 // Prints out the elements of a vector to the
 // screen for debugging purposes
@@ -49,28 +49,31 @@ void printVectorCharsN(std::vector<uint8_t> vector, int N){
 } 
 
 
-typedef struct _ENCODED_DATA {
-     uint8_t *encoded_raw_data;
-    // std::vector< std::vector< std::vector<uint8_t> > >  *vdata;
-     int encoded_symbol_size;
-     int num_blocks;
-     int k, N;
-     
-} ENCODED_DATA;
-
-
+#ifdef ASLIBRARY
 
 ENCODED_DATA encode(uint32_t N, uint32_t max_symbols, 
-         uint32_t max_symbol_size, kodocpp::field  field_size, char *data_in_char, 
-          int data_size) {
+         uint32_t max_symbol_size, char *data_in_char, 
+          int data_size, enum CodingAlgorithm algo ) {
 
-    kodocpp::encoder_factory encoder_factory(
+    kodocpp::encoder_factory *encoder_factory;
+ 
+    if( algo==full_vector ) {
+        encoder_factory = new  kodocpp::encoder_factory(
         kodocpp::codec::full_vector,
-        field_size,
+        kodocpp::field::binary8,
         max_symbols,
         max_symbol_size);
+    }
 
-    kodocpp::encoder encoder = encoder_factory.build();
+    if( algo==reed_solomon ) {
+        encoder_factory = new kodocpp::encoder_factory(
+        kodocpp::codec::reed_solomon,
+        kodocpp::field::binary8,
+        max_symbols,
+        max_symbol_size);
+    }
+
+    kodocpp::encoder encoder = encoder_factory->build();
 
     std::cout << "Payload size : " << encoder.payload_size() << std::endl;
     std::vector<uint8_t> payload(encoder.payload_size());
@@ -198,24 +201,29 @@ std::vector< std::vector < std::vector<uint8_t> > > *convert_from_C_to_vector(EN
 
 
 uint8_t *decode(uint32_t N, uint32_t max_symbols, uint32_t max_symbol_size, 
-        kodocpp::field  field_size, ENCODED_DATA encoded_data_info) {
+         ENCODED_DATA encoded_data_info, enum CodingAlgorithm algo) {
 
-    kodocpp::decoder_factory decoder_factory(
-        //kodocpp::codec::reed_solomon,
+    kodocpp::decoder_factory *decoder_factory;
+    if( algo==full_vector ) {
+        decoder_factory= new kodocpp::decoder_factory(
         kodocpp::codec::full_vector,
-        field_size,
+        kodocpp::field::binary8,
         max_symbols,
         max_symbol_size);
+    }
 
-
+    if( algo==reed_solomon ) {
+        decoder_factory = new kodocpp::decoder_factory(
+        kodocpp::codec::reed_solomon,
+        kodocpp::field::binary8,
+        max_symbols,
+        max_symbol_size);
+    }
 
    //std::vector< std::vector < std::vector<uint8_t> > > *encoded_data  = encoded_data_info.vdata;
-    
    std::vector< std::vector < std::vector<uint8_t> > > *encoded_data  
        = convert_from_C_to_vector(encoded_data_info);
      
-
-    std::cout << "decode=======================" << std::endl;
     std::vector< uint8_t *> decoded_symbols;
 
     int num_blocks  = encoded_data_info.num_blocks;
@@ -223,11 +231,8 @@ uint8_t *decode(uint32_t N, uint32_t max_symbols, uint32_t max_symbol_size,
 
 
     for(int i=0; i < num_blocks; i++) {
-   // std::cout << "decode=======================" << std::endl;
-    //std::cout << "encoded_dat " << encoded_data_info.num_blocks << std::endl;
-    //std::cout << "encoded_dat " << encoded_data_info.encoded_symbol_size << std::endl;
 
-       kodocpp::decoder decoder = decoder_factory.build();
+       kodocpp::decoder decoder = decoder_factory->build();
        std::vector<uint8_t> data_out(decoder.block_size());
        decoder.set_mutable_symbols(data_out.data(), decoder.block_size());
 
@@ -255,26 +260,22 @@ uint8_t *decode(uint32_t N, uint32_t max_symbols, uint32_t max_symbol_size,
    }
    decoded_data[data_size] = '\0';
    decoded_symbols.clear();
-
    return decoded_data;
-
 }
+#endif
 
-
+#ifdef ASMAIN
 int main() {
 
     char a[] = " Tip: When you define a named closure, the compiler generates a corresponding function class for it. Every time you call the lambda through its named variable, the compiler instantiates a closure object at the place of call. Therefore, named closures are useful for reusable functionality (factorial, absolute value, etc.), whereas unnamed lambdas are more suitable for inline ad-hoc computations. Unquestionably, the rising popularity of functional programming will make lambdas widely-used in new C++ projects. It’s true that lambdas don’t offer anything you haven’t been able to do before with function objects. However, lambdas are more convenient than function objects because the tedium of writing boilerplate code for every function class (a constructor, data members and an overloaded operator() among the rest) is relegated to compiler. Additionally, lambdas tend to be more efficient because the compiler is able to optimize them more aggressively than it would a user-declared function or class. Finally, lambdas provide a higher level of security because they let you localize (or even hide) functionality from other clients and modules.";
 
    std::cout << "ENCODED :" << a << std::endl;
    ENCODED_DATA encoded_data_info = 
-         encode(15, 10, 30, kodocpp::field::binary8, a, strlen(a)) ;
+         encode(15, 10, 30,  a, strlen(a)) ;
 
    //std::cout << "Total Num coded symbols " << encoded_data_info.vdata->size() << std::endl;
-
- 
-  char *decoded = (char *)decode(15, 10, 30, kodocpp::field::binary8, encoded_data_info);
+  char *decoded = (char *)decode(15, 10, 30,  encoded_data_info);
   std::cout << "DECODED :" << decoded << std::endl;
-
  //  std::cout << "Total Num coded symbols " << encoded_data->size() << std::endl;
-
 }
+#endif
