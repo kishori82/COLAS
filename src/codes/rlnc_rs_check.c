@@ -1,27 +1,105 @@
 #include "rlnc_rs.h"
+#include <stdlib.h>
+#include <string.h>
 
+#define RLNC
 
+unsigned int decoded_correctly(char *a, char *b, int size) {
+     int i;
+    for(i=0; i < size; i++) {
+        if( a[i]!=b[i] ) { 
+          printf("ERROR : %d\n",i);
+          return 0;
+        }
+    }
+    return 1;
+}
+
+void destroy_encoded_data(ENCODED_DATA encoded_data_info){
+    int i;
+    for(i=0; i < encoded_data_info.N; i++) {
+        free(encoded_data_info.encoded_raw_data[i]);
+    }
+    free(encoded_data_info.encoded_raw_data);
+}
 
 
 int main() {
 
-    char a[] = " Tip: When you define a named closure, the compiler generates a corresponding function class for it. Every time you call the lambda through its named variable, the compiler instantiates a closure object at the place of call. Therefore, named closures are useful for reusable functionality (factorial, absolute value, etc.), whereas unnamed lambdas are more suitable for inline ad-hoc computations. Unquestionably, the rising popularity of functional programming will make lambdas widely-used in new C++ projects. It’s true that lambdas don’t offer anything you haven’t been able to do before with function objects. However, lambdas are more convenient than function objects because the tedium of writing boilerplate code for every function class (a constructor, data members and an overloaded operator() among the rest) is relegated to compiler. Additionally, lambdas tend to be more efficient because the compiler is able to optimize them more aggressively than it would a user-declared function or class. Finally, lambdas provide a higher level of security because they let you localize (or even hide) functionality from other clients and modules.  ver the years, a number of tools for analyzing and understanding systems described using CSP have been produced. Early tool implementations used a variety of machine-readable syntaxes for CSP, making input files written for different tools incompatible. However, most CSP tools have now standardized on the machine-readable dialect of CSP devised by Bryan Scattergood, sometimes referred to as CSPM.[16] The CSPM dialect of CSP possesses a formally defined operational semantics, which includes an embedded functional programming language.  The most well-known CSP tool is probably Failures/Divergence Refinement 2 (FDR2), which is a commercial product developed by Formal Systems (Europe) Ltd. FDR2 is often described as a model checker, but is technically a refinement checker, in that it converts two CSP process expressions into Labelled Transition Systems (LTSs), and then determines whether one of the processes is a refinement of the other within some specified semantic model (traces, failures, or failures/divergence).[17] FDR2 applies various state-space compression algorithms to the process LTSs in order to reduce the size of the state-space that must be explored during a refinement check. FDR2 has been succeeded by FDR3, a completely re-written version incorporating amongst other things parallel execution and an integrated type checker. It is released by the University of Oxford, which also released FDR2 in the period 2008-12.[18] The Adelaide Refinement Checker (ARC) [19] is a CSP refinement checker developed by the Formal Modelling and Verification Group at The University of Adelaide. ARC differs from FDR2 in that it internally represents CSP processes as Ordered Binary Decision Diagrams (OBDDs), which alleviates the state explosion problem of explicit LTS representations without requiring theuse";
-   
+
+    int data = 10000000;    
+    int size=0;
+    int i =0;
+    char buf[20];
+    for( i=0; i < data; i++ ) {
+        sprintf(buf, " %d", i);
+        size += strlen(buf);
+    }
+    size += 2;
+
+    char *a = (char *)malloc((size)*sizeof(char));
+    char * p = a;
+    *p ='<';
+    p++;
+
+    for( i=0; i < data; i++ ) {
+        sprintf(buf, " %d", i);
+        sprintf(p, " %d", i);
+        p += strlen(buf);
+    }
+    *p ='>'; p++; *p='\0';
+
     int K = 40; //K
     int N = 55;
-    int symbol_size = 70;
+    int symbol_size = 1024;
+    int j;
+    char *decoded;
 
+   // printf("UNENCODED DATA : %s\n",a);
+    printf("UNENCODED DATA SIZE: %d\n",(int)strlen(a));
+    printf("UNENCODED DATA SIZE: %d\n",size);
+    ENCODED_DATA encoded_data_info;
+
+    for(j=0; j < 4; j++) {
+#ifdef RS
     printf("CHECKING REED-SOLOMON CODE  \n");
-    ENCODED_DATA encoded_data_info = encode(N, K, symbol_size, a, strlen(a), reed_solomon) ;
-    char *decoded = (char *)decode(N, K, symbol_size, encoded_data_info, reed_solomon);
-    printf("DECODED DATA : %s\n",decoded);
+//    printf("UNCODED:%s\n",a);
+    
+    encoded_data_info = encode(N, K, symbol_size, a, strlen(a), reed_solomon) ;
+    decoded = (char *)decode(N, K, K, symbol_size, encoded_data_info, reed_solomon);
+    destroy_encoded_data(encoded_data_info);
+
+    printf("DECODED DATA SIZE: %d\n",(int)strlen(decoded));
+
+    if( decoded_correctly(decoded, a, size)) {
+       printf("REED-SOLOMON encoder/decoder worked correctly for %d bytes. CONGRATULATIONS!!\n",encoded_data_info.actual_data_size); 
+    }
+    else {
+       printf("REED-SOLOMON encoder/decoder failed!\n") ;
+    }
+//    printf("DECODED:%s\n",decoded);
+    free(decoded);
 
     printf("\n");
+#endif
 
-    printf("CHECKING REED-SOLOMON CODE \n");
+#ifdef RLNC
+    printf("CHECKING RLNC CODE \n");
     encoded_data_info = encode(N, K, symbol_size, a, strlen(a), full_vector) ;
-    decoded = (char *)decode(N, K, symbol_size, encoded_data_info, full_vector);
-    printf("DECODED DATA : %s\n",decoded);
+    decoded = (char *)decode(N, K, K+ 2,  symbol_size, encoded_data_info, full_vector);
+    destroy_encoded_data(encoded_data_info);
+
+    if( decoded_correctly(decoded, a, size)) {
+       printf("RLNC encoder/decoder worked correctly for %d bytes. CONGRATULATIONS!!\n",encoded_data_info.actual_data_size); 
+    }
+    else {
+       printf("RLNC encoder/decoder failed!\n") ;
+    }
+    free(decoded);
+
+   // printf("DECODED DATA : %s\n",decoded);
+#endif
+}
 
 
 

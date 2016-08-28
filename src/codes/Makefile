@@ -1,9 +1,10 @@
 CC=gcc
 CPP=g++
+ROOT=/home/sgeadmin
 
-CPPFLAGS= -std=c++11 -I/home/kishori/shared_kodocpp/include
-CFLAGS= -lm -lzmq  -lczmq -Wimplicit-function-declaration -fpic #-Wall 
-LDFLAGS=-L/home/kishori/shared_kodocpp/ -Wl,-Bdynamic -lkodoc -Wl,-rpath /home/kishori/shared_kodocpp 
+CPPFLAGS= -g -std=c++11 -I$(ROOT)/shared_kodocpp/include
+CFLAGS= -g -lm #-Wall 
+LDFLAGS=-L$(ROOT)/shared_kodocpp/ -Wl,-Bdynamic -lkodoc -Wl,-rpath $(ROOT)/shared_kodocpp 
 
 DEPS=reed_solomon.h  
 SRCS=reed_solomon.cpp  rlnc_example.cpp reed_solomon_example.cpp rlnc_rs_check.c
@@ -27,10 +28,10 @@ reed_solomon_example: reed_solomon_example.cpp
 	$(CPP) -fPIC reed_solomon_example.cpp  -o $@   $(CPPFLAGS) $(LDFLAGS) 
 
 librlnc_rs.so: rlnc_rs.cpp
-	$(CPP) -fPIC -shared -DASLIBRARY $<  -o $@   $(CPPFLAGS) $(LDFLAGS) 
+	$(CPP) -fPIC -shared -DDEBUG_MODE -DASLIBRARY $<  -o $@   $(CPPFLAGS) $(LDFLAGS) 
 
 rlnc_rs_check: rlnc_rs_check.c
-	$(CC) -fPIC  $<  -o $@   $(LDFLAGS)  -L. -lrlnc_rs
+	$(CC) -fPIC  $<  -o $@  $(CFLAGS)  $(LDFLAGS)  -L. -lrlnc_rs
 
 clean:
 	rm -f abd $(TARGET)  *.o lib* *.so
