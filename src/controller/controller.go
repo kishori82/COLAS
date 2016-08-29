@@ -15,7 +15,7 @@ import (
 )
 
 
-type Nodes struct{
+type Params struct{
     readers map[string]bool
     servers map[string]bool
     writers map[string]bool
@@ -23,14 +23,23 @@ type Nodes struct{
 		writer_delta float32
 	reader_delta float32
 		*/
+   active bool 
+    read_counter , write_counter int64
+		name string
 	  write_rate float64
 		read_rate float64
 		file_size float64
 		rand_seed int64
+		port string
+
+		algorithm string
+		run_id string
+
+		 writeto string
 
 }
 
-var data Nodes
+var data Params
 var DELIM string ="_"
 
 // GetLogs will send the current logfiles back through the HTTP request.
@@ -368,6 +377,42 @@ func configClients(r *http.Request, clients map[string]bool, client string)  {
 	}
 }
 
+//set run id
+func SetRunId(w http.ResponseWriter, r *http.Request)  {
+	log.Println("Set Run ID")
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	
+	for key, _ := range data.readers {
+	    url := "http://" + key + ":8080" + "/SetRunId/" + id
+		  fmt.Println(url)
+	      _, err := http.Get(url)
+	     if err != nil {
+		      log.Fatal(err)
+	    }
+	}
+			
+	for key, _ := range data.writers {
+	    url := "http://" + key + ":8080" + "/SetRunId/" + id
+		  fmt.Println(url)
+	      _, err := http.Get(url)
+	     if err != nil {
+		      log.Fatal(err)
+       }
+	}
+   for key, _ := range data.servers {
+	    url := "http://" + key + ":8080" + "/SetRunId/" + id
+		  fmt.Println(url)
+	      _, err := http.Get(url)
+	     if err != nil {
+		      log.Fatal(err)
+       }
+
+	}
+	data.run_id = id
+
+}
 
 
 //set seed
@@ -475,7 +520,24 @@ func SetFileSize(w http.ResponseWriter, r *http.Request)  {
   s, _ := strconv.ParseFloat(ips[0], 64)
   data.file_size = s 
   commandAll(data.writers, "SetFileSize", ip)
+  commandAll(data.readers, "SetFileSize", ip)
+  commandAll(data.servers, "SetFileSize", ip)
+
 }
+
+// set write to option disk or mem
+func SetWriteTo(w http.ResponseWriter, r *http.Request)  {
+	log.Println("Set Write To")
+	vars := mux.Vars(r)
+	ip := vars["param"]
+
+  commandAll(data.writers, "SetWriteTo", ip)
+  commandAll(data.readers, "SetWriteTo", ip)
+  commandAll(data.servers, "SetWriteTo", ip)
+
+	data.writeto=ip
+}
+
 
 
 // get file size
@@ -505,9 +567,26 @@ func commandAll(processes map[string]bool, route string,  mesg string) {
 	}
 }
 
+
+
+
 func GetParams(w http.ResponseWriter, r *http.Request)  {
-	log.Println("Get Params")
+	log.Println("INFO\tGet Params")
+
+  fmt.Fprintf(w, "Algorithm\t%s\n", data.algorithm)
+  fmt.Fprintf(w, "Random Seed\t%d\n", data.rand_seed)
+  fmt.Fprintf(w, "File Size\t%g KB\n", data.file_size)
+  fmt.Fprintf(w, "Run Id\t%s\n", data.run_id)
+  fmt.Fprintf(w, "Port\t%s\n", data.port)
+  fmt.Fprintf(w, "WriteTo\t%s\n", data.writeto)
+
+
+
+
+/*  fmt.Fprintf(w, "Read Rate\t%g\n", data.file_size)
   fmt.Fprintf(w, "%d %g %g %g\n", data.rand_seed, data.file_size, data.read_rate, data.write_rate)
+	*/
+
 }
 
 
@@ -535,7 +614,25 @@ func SetupLogging() (f *os.File) {
   return 
 }
 
+func InitializeParameters() {
+	data.readers = make(map[string]bool)
+	data.servers = make(map[string]bool)
+	data.writers = make(map[string]bool)
 
+	data.write_rate = 0.6
+	data.read_rate = 0.6
+	data.file_size = 10
+	data.rand_seed = 1
+	data.read_counter = 0
+	data.write_counter = 0
+	data.active = false 
+	data.port = "8081"
+
+  data.algorithm="ABD"
+  data.run_id = "DEFULT_RUN"
+  data.writeto="ram"
+
+}
 
 func Controller_process() {
   f := SetupLogging() 
@@ -546,6 +643,10 @@ func Controller_process() {
 	defer f.Close()
 
 	//router.HandleFunc("/GetLogs/{ip}", GetProcessLogs)
+
+  router.HandleFunc("/SetRunId/{id}", SetRunId)
+  router.HandleFunc("/SetWriteTo/{param}", SetWriteTo)
+
 	router.HandleFunc("/GetLogs", GetLogs)
 	router.HandleFunc("/FlushLogs", FlushLogs)
 
@@ -585,14 +686,7 @@ func Controller_process() {
   router.HandleFunc("/SetFileSize/{param:[0-9.]+}", SetFileSize)
   router.HandleFunc("/GetFileSize", GetFileSize)
 
-  data.readers = make(map[string]bool)
-  data.servers = make(map[string]bool)
-  data.writers = make(map[string]bool)
-
-  data.write_rate = 2
-  data.read_rate = 1
-	data.file_size = 1
-	data.rand_seed = 1
+  InitializeParameters() 
 
 	http.ListenAndServe(":8080", router)
 

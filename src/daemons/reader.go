@@ -24,8 +24,8 @@ func reader_daemon() {
 
 	var object_name string = "atomic_object"
 
-	C.HiKodo()
-	C.HelloKodo()
+//	C.HiKodo()
+//	C.HelloKodo()
 
 	for {
 		select {

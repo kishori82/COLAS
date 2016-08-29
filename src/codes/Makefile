@@ -1,6 +1,6 @@
 CC=gcc
 CPP=g++
-ROOT=/home/sgeadmin
+ROOT=/home/docker
 
 CPPFLAGS= -g -std=c++11 -I$(ROOT)/shared_kodocpp/include
 CFLAGS= -g -lm #-Wall 

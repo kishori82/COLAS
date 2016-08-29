@@ -1,5 +1,9 @@
 *.o
 *.swp
+*.so
+*rlnc_rs_check
+*rlnc_example
+*reed_solomon_example
 logs/*
 abdprocess
 src/abd/C/abd_server

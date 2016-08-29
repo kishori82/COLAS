@@ -38,7 +38,8 @@ func writer_deamon() {
 
 				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
 
-				rand_data_file_size := int64(1024 * rand.ExpFloat64() / data.file_size)
+				//rand_data_file_size := int64(1024 * rand.ExpFloat64() / data.file_size)
+				rand_data_file_size := int64(1024 * data.file_size)
 
 				rand_data := make([]byte, rand_data_file_size)
 				_ = utilities.Generate_random_data(rand_data, rand_data_file_size)

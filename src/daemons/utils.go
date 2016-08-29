@@ -36,7 +36,10 @@ type Params struct {
 
 	read_counter, write_counter int64
 	name                        string
+
 	algorithm string
+	run_id string
+  writeto string
 }
 
 var data Params
@@ -95,35 +98,34 @@ func SetServers(w http.ResponseWriter, r *http.Request) {
 	log.Println("INFO\tSetServers\t"+ip)
 }
 
-func SetParams(w http.ResponseWriter, r *http.Request) {
+func SetRunId(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("INFO\tConfig Params")
+	log.Println("INFO\tSetting RunID")
 	vars := mux.Vars(r)
-	ip := vars["params"]
-	ips := strings.Split(ip, DELIM)
+	ip := vars["id"]
 
-	if len(ips) != 4 {
-		fmt.Println(ip)
-		fmt.Printf("Expect 2 parameters, found %d", len(ips))
-	}
+	data.run_id =ip
+}
 
-	s, _ := strconv.ParseInt(ips[0], 10, 64)
-	data.rand_seed = s
+// set write to option disk or mem
+func SetWriteTo(w http.ResponseWriter, r *http.Request)  {
+	log.Println("Set Write To")
+	vars := mux.Vars(r)
+	ip := vars["param"]
 
-	f, _ := strconv.ParseFloat(ips[1], 64)
-	data.file_size = f
-
-	f, _ = strconv.ParseFloat(ips[2], 64)
-	data.read_rate = float64(f)
-
-	f, _ = strconv.ParseFloat(ips[3], 64)
-	data.write_rate = float64(f)
-
+  data.writeto= ip
+  
 }
 
 func GetParams(w http.ResponseWriter, r *http.Request) {
 	log.Println("INFO\tGet Params")
-	fmt.Fprintf(w, "%d %g %g %g\n", data.rand_seed, data.file_size, data.read_rate, data.write_rate)
+
+  fmt.Fprintf(w, "Algorithm\t%s\n", data.algorithm)
+  fmt.Fprintf(w, "Random Seed\t%d\n", data.rand_seed)
+  fmt.Fprintf(w, "File Size\t%g KB\n", data.file_size)
+  fmt.Fprintf(w, "Run Id\t%s\n", data.run_id)
+
+//	fmt.Fprintf(w, "%d %g %g %g\n", data.rand_seed, data.file_size, data.read_rate, data.write_rate)
 }
 
 // Panic/error handling file closing
@@ -316,6 +318,9 @@ func InitializeParameters() {
 
   data.algorithm="ABD"
 
+  data.writeto="ram"
+  data.run_id="DEFAULT_RUN"
+
 }
 
 //http server
@@ -325,6 +330,8 @@ func HTTP_Server() {
 	router := mux.NewRouter()
 
 	fmt.Println("Running http server")
+	router.HandleFunc("/SetRunId/{id}", SetRunId)
+	router.HandleFunc("/SetWriteTo/{param}", SetWriteTo)
 
 	router.HandleFunc("/GetLogs", GetLogs)
 	router.HandleFunc("/FlushLogs", FlushLogs)
@@ -335,8 +342,6 @@ func HTTP_Server() {
 	router.HandleFunc("/KillProcess", KillProcess)
 	router.HandleFunc("/SetServers/{ip:[0-9._]+}", SetServers)
 	router.HandleFunc("/GetServers", GetServers)
-
-	router.HandleFunc("/SetParams/{params:[0-9._]+}", SetParams)
 
 	router.HandleFunc("/SetSeed/{seed:[0-9]+}", SetSeed)
 	router.HandleFunc("/GetSeed", GetSeed)

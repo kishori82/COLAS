@@ -25,5 +25,6 @@ func Server_process() {
 	defer f.Close()
 	// Run the server for now
 	go HTTP_Server()
-    server_daemon()
+	InitializeParameters()
+   server_daemon()
 }
