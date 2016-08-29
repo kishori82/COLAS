@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"fmt"
 	"log"
-	"math/rand"
+//	"math/rand"
 	"time"
 )
 
@@ -20,7 +20,7 @@ var active_chan chan bool
 var reset_chan chan bool
 
 func reader_daemon() {
-	active_chan = make(chan bool)
+	active_chan = make(chan bool, 2)
 
 	var object_name string = "atomic_object"
 
@@ -36,12 +36,14 @@ func reader_daemon() {
 			data.write_counter = 0
 		default:
 			if data.active == true && len(data.servers) > 0 {
-				rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
 
-				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
+				rand_wait :=  rand_wait_time() * int64(time.Millisecond)
+				log.Println("OPERATION\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
 
-				fmt.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
-				log.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
+				time.Sleep(time.Duration(rand_wait))
+
+				//fmt.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
+				log.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait/int64(time.Millisecond))
 				servers_str := create_server_string_to_C()
 				log.Println("INFO\tUsing Servers\t" + servers_str)
 
@@ -76,12 +78,13 @@ func Reader_process(ip_addrs *list.List) {
 	// This should become part of the standard init function later when we refactor...
 	data.processType=0
 	SetupLogging()
-	fmt.Println("Starting reader\n")
+	fmt.Println("INFO\tStarting reader\n")
 
 	InitializeParameters()
 
 	go HTTP_Server()
 
 	log.Println("INFO\tStarting reader process\n")
+	log.Println("INFO\tTIME in Milliseconds\n")
 	reader_daemon()
 }

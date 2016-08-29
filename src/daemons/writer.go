@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"math/rand"
+//	"math/rand"
 	"time"
 	"unsafe"
 )
@@ -20,7 +20,7 @@ import (
 import "C"
 
 func writer_deamon() {
-	active_chan = make(chan bool)
+	active_chan = make(chan bool, 2)
 
 	var object_name string = "atomic_object"
 
@@ -33,9 +33,12 @@ func writer_deamon() {
 			data.write_counter = 0
 		default:
 			if data.active == true && len(data.servers) > 0 {
-				rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
+				//rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
 
-				time.Sleep(time.Duration(rand_wait) * 1000 * time.Microsecond)
+				rand_wait :=  rand_wait_time() * int64(time.Millisecond)
+				log.Println("OPERATION\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
+				time.Sleep(time.Duration(rand_wait))
+
 
 				//rand_data_file_size := int64(1024 * rand.ExpFloat64() / data.file_size)
 				rand_data_file_size := int64(1024 * data.file_size)
@@ -50,8 +53,8 @@ func writer_deamon() {
 				fmt.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
 					rand_wait, "DATA SIZE", len(encoded))
 
-				log.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
-					rand_wait, "DATA SIZE", encoded)
+				log.Println("OPERATION\tWRITE\t", data.name, "\t", data.write_counter, "RAND TIME INTERVAL",
+					rand_wait/int64(time.Millisecond), "DATA SIZE", encoded)
 
 				servers_str := create_server_string_to_C()
 				log.Println("INFO\tUsing Servers\t" + servers_str)

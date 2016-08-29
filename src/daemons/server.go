@@ -11,7 +11,7 @@ import (
 import "C"
 
 func server_daemon() {
-	active_chan = make(chan bool)
+	active_chan = make(chan bool, 2)
 
 	data.active = true
 	data.name = "server"
