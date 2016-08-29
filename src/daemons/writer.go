@@ -22,7 +22,6 @@ import "C"
 func writer_deamon() {
 	active_chan = make(chan bool)
 
-
 	var object_name string = "atomic_object"
 
 	for {
@@ -48,16 +47,16 @@ func writer_deamon() {
 				fmt.Println("Encoded data   : ", encoded)
 
 				rawdata := C.CString(encoded)
-		   	fmt.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
-				rand_wait, "DATA SIZE", len(encoded))
+				fmt.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
+					rand_wait, "DATA SIZE", len(encoded))
 
 				log.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
-				rand_wait, "DATA SIZE", encoded)
+					rand_wait, "DATA SIZE", encoded)
 
-        servers_str:=create_server_string_to_C() 
-	      log.Println("INFO\tUsing Servers\t"+servers_str)
+				servers_str := create_server_string_to_C()
+				log.Println("INFO\tUsing Servers\t" + servers_str)
 
-		defer C.free(unsafe.Pointer(&rawdata))
+				defer C.free(unsafe.Pointer(&rawdata))
 
 				C.ABD_write(
 					C.CString(object_name),

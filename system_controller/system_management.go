@@ -45,7 +45,7 @@ func main() {
 		},
 		{
 			Name: "setread_rate_dist",
-			Usage: "-------the inter read wait time distribution \"erlang k m\",\n" +
+			Usage: "the inter read wait time distribution \"erlang k m\",\n" +
 				"                        k is shape, and m is scale parameter (inverse of rate)",
 			Action: setReadRateDistribution,
 		},
@@ -286,6 +286,7 @@ func getlogs(c *cli.Context) error {
 		_name := getName(e)
 		name := strings.TrimSpace(_name)
 		logstr := getLogFile(e)
+		fmt.Println(logstr)
 		f, err := os.Create(folder + "/" + name + ".log")
 		if err != nil {
 			log.Fatal(err)
@@ -302,6 +303,7 @@ func getlogs(c *cli.Context) error {
 		_name := getName(e)
 		name := strings.TrimSpace(_name)
 		logstr := getLogFile(e)
+		fmt.Println(logstr)
 		f, err := os.Create(folder + "/" + name + ".log")
 		if err != nil {
 			log.Fatal(err)
@@ -391,9 +393,13 @@ func setup(c *cli.Context) error {
 	fmt.Println("Servers      :", servers)
 	fmt.Println("Controller/s :", controllers)
 
-	// send servers to controllers
+	// setup servers to controllers
 	fmt.Println("Setting up the Servers\n")
+
+	// send servers to controllers
+
 	serverIPsStack := joinIPs(servers)
+	fmt.Println("Setting up the Servers\n", serverIPsStack)
 	sendCommandToControllers(controllers, "SetServers", serverIPsStack)
 
 	// send reader ids to controllers; and then controllers sends servers ids  to readers
@@ -414,7 +420,7 @@ func setup(c *cli.Context) error {
 }
 
 func getLogFile(ip string) (logs string) {
-	url := "http://" + ip + ":8080" + "/GetLogs"
+	url := "http://" + ip + ":8080" + "/GetLog"
 	resp, err := http.Get(url)
 
 	if err != nil {
@@ -427,10 +433,10 @@ func getLogFile(ip string) (logs string) {
 	}
 	logs = string(contents)
 
-	return
+	return logs
 }
 
-func getName(ip string) (logs string) {
+func getName(ip string) (name string) {
 	url := "http://" + ip + ":8080" + "/GetName"
 	resp, err := http.Get(url)
 
@@ -442,7 +448,8 @@ func getName(ip string) (logs string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logs = string(contents)
+	name = string(contents)
+	fmt.Println("====", name)
 	return
 }
 
