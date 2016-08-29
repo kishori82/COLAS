@@ -39,26 +39,18 @@ func main() {
 			Action: status,
 		},
 		{
-			Name:   "setread_rate",
-			Usage:  "mean rate of invoking reads",
-			Action: setReadRate,
-		},
-		{
-			Name: "setread_rate_dist",
-			Usage: "the inter read wait time distribution \"erlang k m\",\n" +
-				"                        k is shape, and m is scale parameter (inverse of rate)",
+			Name: "setread_dist",
+			Usage: "the inter read wait time distribution (i) \"erlang k m\",\n" +
+				"                   k is shape, and m is scale parameter (inverse of rate)\n" + 
+				"                   (ii) \"const k\" k is the inter read wait time in milliseconds\n" ,
 			Action: setReadRateDistribution,
 		},
 		{
-			Name:   "setwrite_rate",
-			Usage:  "mean rate of invoking writes",
-			Action: setWriteRate,
-		},
-		{
-			Name: "setwrite_rate_dist",
-			Usage: "-------the inter write wait time distribution \"erlang k m\",\n" +
-				"                        k is shape, and m is scale parameter (inverse of rate)",
-			Action: setReadWriteDistribution,
+			Name: "setwrite_dist",
+			Usage: "the inter write wait time distribution (i) \"erlang k m\",\n" +
+				"                   k is shape, and m is scale parameter (inverse of rate)\n" + 
+				"                   (ii) \"const k\" k is the inter read wait time in milliseconds\n" ,
+			Action: setWriteRateDistribution,
 		},
 		{
 			Name:   "setwriteto",
@@ -161,6 +153,7 @@ func start(c *cli.Context) error {
 }
 
 //set the read rate
+/*
 func setReadRate(c *cli.Context) error {
 	if !isSystemRunning() {
 		return nil
@@ -171,46 +164,48 @@ func setReadRate(c *cli.Context) error {
 	sendCommandToControllers(controllers, "SetReadRate", rateString)
 	return nil
 }
+*/
 
 //set the read rate
 func setReadRateDistribution(c *cli.Context) error {
 	if !isSystemRunning() {
 		return nil
 	}
-	distribution := c.Args().First()
-	var k, m string
 
-	if len(c.Args()) == 2 && distribution == "erlang" {
-		k = c.Args()[1]
-		m = c.Args()[2]
-	}
 	_, _, _, controllers := getIPAddresses()
-
-	rateParametersString := string(k) + "_" + string(m)
-	fmt.Println(rateParametersString)
-	fmt.Println("yet to implement")
+    var rateParametersString string
+	if len(c.Args()) == 0  {
+        fmt.Println("No distribution provided")
+        return nil
+	}
+    rateParametersString = c.Args().First()
+    for i:=1; i < len(c.Args()); i++ {
+        rateParametersString += "_" + c.Args()[i]
+    }
 	sendCommandToControllers(controllers, "SetReadRateDistribution", rateParametersString)
+
 	return nil
 }
 
 //set the write rate distribution
-func setReadWriteDistribution(c *cli.Context) error {
+func setWriteRateDistribution(c *cli.Context) error {
 	if !isSystemRunning() {
 		return nil
 	}
-	distribution := c.Args().First()
-	var k, m string
-
-	if len(c.Args()) == 2 && distribution == "erlang" {
-		k = c.Args()[1]
-		m = c.Args()[2]
-	}
 	_, _, _, controllers := getIPAddresses()
 
-	rateParametersString := string(k) + "_" + string(m)
-	fmt.Println(rateParametersString)
-	fmt.Println("yet to implement")
-	sendCommandToControllers(controllers, "SetReadWriteDistribution", rateParametersString)
+    var rateParametersString string
+
+	if len(c.Args()) == 0  {
+        fmt.Println("No distribution provided")
+        return nil
+	}
+
+    rateParametersString = c.Args().First()
+    for i:=1; i < len(c.Args()); i++ {
+        rateParametersString += "_" + c.Args()[i]
+    }
+	sendCommandToControllers(controllers, "SetWriteRateDistribution", rateParametersString)
 	return nil
 }
 
@@ -227,6 +222,7 @@ func setWriteTo(c *cli.Context) error {
 }
 
 //set the write rate
+/*
 func setWriteRate(c *cli.Context) error {
 	if !isSystemRunning() {
 		return nil
@@ -237,6 +233,7 @@ func setWriteRate(c *cli.Context) error {
 	sendCommandToControllers(controllers, "SetWriteRate", rateString)
 	return nil
 }
+*/
 
 //set the file size
 func setFileSize(c *cli.Context) error {
@@ -246,6 +243,7 @@ func setFileSize(c *cli.Context) error {
 	size := c.Args().First()
 	_, _, _, controllers := getIPAddresses()
 	sizeString := size
+
 	sendCommandToControllers(controllers, "SetFileSize", sizeString)
 	return nil
 }
@@ -282,11 +280,11 @@ func getlogs(c *cli.Context) error {
 
 	readers, writers, _, _ := getIPAddresses()
 
+   // pulll logs from the readers
 	for _, e := range readers {
 		_name := getName(e)
 		name := strings.TrimSpace(_name)
 		logstr := getLogFile(e)
-		fmt.Println(logstr)
 		f, err := os.Create(folder + "/" + name + ".log")
 		if err != nil {
 			log.Fatal(err)
@@ -299,11 +297,11 @@ func getlogs(c *cli.Context) error {
 		f.Close()
 	}
 
+   // pulll logs from the writers
 	for _, e := range writers {
 		_name := getName(e)
 		name := strings.TrimSpace(_name)
 		logstr := getLogFile(e)
-		fmt.Println(logstr)
 		f, err := os.Create(folder + "/" + name + ".log")
 		if err != nil {
 			log.Fatal(err)
@@ -399,7 +397,6 @@ func setup(c *cli.Context) error {
 	// send servers to controllers
 
 	serverIPsStack := joinIPs(servers)
-	fmt.Println("Setting up the Servers\n", serverIPsStack)
 	sendCommandToControllers(controllers, "SetServers", serverIPsStack)
 
 	// send reader ids to controllers; and then controllers sends servers ids  to readers
@@ -449,7 +446,6 @@ func getName(ip string) (name string) {
 		log.Fatal(err)
 	}
 	name = string(contents)
-	fmt.Println("====", name)
 	return
 }
 
@@ -543,7 +539,7 @@ func getIPAddresses() ([]string, []string, []string, []string) {
 			log.Fatal(err)
 		}
 
-		matched3, err := regexp.MatchString("controller", string(out))
+		matched3, err := regexp.MatchString("_controller_", string(out))
 		if err != nil {
 			log.Fatal(err)
 		}
