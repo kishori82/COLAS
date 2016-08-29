@@ -1,4 +1,4 @@
-package abd_processes
+package daemons
 
 import (
 	"container/list"
@@ -74,6 +74,7 @@ func reader_daemon() {
 func Reader_process(ip_addrs *list.List) {
 
 	// This should become part of the standard init function later when we refactor...
+	data.processType=0
 	SetupLogging()
 	fmt.Println("Starting reader\n")
 

@@ -1,4 +1,4 @@
-package abd_processes
+package daemons
 
 import (
 	"fmt"
@@ -14,13 +14,15 @@ func server_daemon() {
 	active_chan = make(chan bool)
 
 	data.active = true
-	data.name = "server_1"
+	data.name = "server"
 
 	C.ABD_server_process( C.CString(data.name), C.CString(data.port) )
 }
 
 func Server_process() {
 	fmt.Println("Starting server\n")
+	data.processType=2
+
 	f := SetupLogging()
 	defer f.Close()
 	// Run the server for now

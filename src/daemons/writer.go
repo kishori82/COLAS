@@ -1,4 +1,4 @@
-package abd_processes
+package daemons
 
 import (
 	utilities "../utilities/GO"
@@ -79,6 +79,7 @@ func Writer_process(ip_addrs *list.List) {
 	SetupLogging()
 	log.Println("INFO", data.name, "Starting")
 
+  data.processType=1
 	//Initialize the parameters
 	InitializeParameters()
 

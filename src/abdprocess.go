@@ -1,8 +1,7 @@
 package main
 
 import (
-	abd "./daemons/"
-	controller "./controller/"
+   daemons "./daemons/"
 	"container/list"
 	"fmt"
 	"math"
@@ -76,20 +75,17 @@ func main() {
 		os.Exit(9)
 	}
 
-	_ = proc_type
 
 	if proc_type == 0 {
-		abd.Reader_process(ip_addrs)
+		daemons.Reader_process(ip_addrs)
 	} else if proc_type == 1 {
-		abd.Writer_process(ip_addrs)
+		daemons.Writer_process(ip_addrs)
 	} else if proc_type == 2 {
-		abd.Server_process()
+		daemons.Server_process()
 	} else if proc_type == 3 {
-		controller.Controller_process()
+		daemons.Controller_process()
 	} else {
 		fmt.Println("unknown type\n")
 	}
-
-	abd.PrintFooter()
-	os.Exit(0)
+  daemons.PrintFooter()
 }
