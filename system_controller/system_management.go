@@ -41,15 +41,15 @@ func main() {
 		{
 			Name: "setread_dist",
 			Usage: "the inter read wait time distribution (i) \"erlang k m\",\n" +
-				"                   k is shape, and m is scale parameter (inverse of rate)\n" + 
-				"                   (ii) \"const k\" k is the inter read wait time in milliseconds\n" ,
+				"                   k is shape, and m is scale parameter (inverse of rate)\n" +
+				"                   (ii) \"const k\" k is the inter read wait time in milliseconds\n",
 			Action: setReadRateDistribution,
 		},
 		{
 			Name: "setwrite_dist",
 			Usage: "the inter write wait time distribution (i) \"erlang k m\",\n" +
-				"                   k is shape, and m is scale parameter (inverse of rate)\n" + 
-				"                   (ii) \"const k\" k is the inter read wait time in milliseconds\n" ,
+				"                   k is shape, and m is scale parameter (inverse of rate)\n" +
+				"                   (ii) \"const k\" k is the inter read wait time in milliseconds\n",
 			Action: setWriteRateDistribution,
 		},
 		{
@@ -173,15 +173,15 @@ func setReadRateDistribution(c *cli.Context) error {
 	}
 
 	_, _, _, controllers := getIPAddresses()
-    var rateParametersString string
-	if len(c.Args()) == 0  {
-        fmt.Println("No distribution provided")
-        return nil
+	var rateParametersString string
+	if len(c.Args()) == 0 {
+		fmt.Println("No distribution provided")
+		return nil
 	}
-    rateParametersString = c.Args().First()
-    for i:=1; i < len(c.Args()); i++ {
-        rateParametersString += "_" + c.Args()[i]
-    }
+	rateParametersString = c.Args().First()
+	for i := 1; i < len(c.Args()); i++ {
+		rateParametersString += "_" + c.Args()[i]
+	}
 	sendCommandToControllers(controllers, "SetReadRateDistribution", rateParametersString)
 
 	return nil
@@ -194,17 +194,17 @@ func setWriteRateDistribution(c *cli.Context) error {
 	}
 	_, _, _, controllers := getIPAddresses()
 
-    var rateParametersString string
+	var rateParametersString string
 
-	if len(c.Args()) == 0  {
-        fmt.Println("No distribution provided")
-        return nil
+	if len(c.Args()) == 0 {
+		fmt.Println("No distribution provided")
+		return nil
 	}
 
-    rateParametersString = c.Args().First()
-    for i:=1; i < len(c.Args()); i++ {
-        rateParametersString += "_" + c.Args()[i]
-    }
+	rateParametersString = c.Args().First()
+	for i := 1; i < len(c.Args()); i++ {
+		rateParametersString += "_" + c.Args()[i]
+	}
 	sendCommandToControllers(controllers, "SetWriteRateDistribution", rateParametersString)
 	return nil
 }
@@ -280,7 +280,7 @@ func getlogs(c *cli.Context) error {
 
 	readers, writers, _, _ := getIPAddresses()
 
-   // pulll logs from the readers
+	// pulll logs from the readers
 	for _, e := range readers {
 		_name := getName(e)
 		name := strings.TrimSpace(_name)
@@ -293,11 +293,10 @@ func getlogs(c *cli.Context) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		f.Close()
 	}
 
-   // pulll logs from the writers
+	// pulll logs from the writers
 	for _, e := range writers {
 		_name := getName(e)
 		name := strings.TrimSpace(_name)

@@ -12,7 +12,7 @@ writer:
 
 server:
     image: kishori82/dev:COLAS2
-    command: /home/docker/COLAS/src/abdprocess --process-type 2
+    command: /home/docker/COLAS/src/abdprocess --process-type 2 --init-file-size 2.51
     environment:
     - LD_LIBRARY_PATH=/usr/local/lib:/home/docker/COLAS/src/abd:/home/docker/COLAS/src/soda:/home/docker/COLAS/src/codes
 
