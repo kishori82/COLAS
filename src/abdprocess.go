@@ -32,7 +32,8 @@ func printHeader(title string) {
 }
 
 func usage() {
-	fmt.Println("Usage : abdprocess --process-type [0(reader), 1(writer), 2(server), 3(controller)] --ip-address ip1 [ --ip-address ip2]")
+	//fmt.Println("Usage : abdprocess --process-type [0(reader), 1(writer), 2(server), 3(controller)] --ip-address ip1 [ --ip-address ip2]")
+	fmt.Println("Usage : abdprocess --process-type [0(reader), 1(writer), 2(server), 3(controller)] --init-file-size s [in KB]")
 }
 
 func main() {
@@ -42,6 +43,7 @@ func main() {
 	// reader, writer and servers are 0, 1 and 2
 	//  var proc_type string="--process-type"
 	var proc_type uint64
+	var init_file_size uint64 = 1
 	ip_addrs := list.New()
 	var usage_err bool = false
 
@@ -58,9 +60,14 @@ func main() {
 
 				i++
 			}
-		} else if args[i] == "--ip-address" {
+		} else if args[i] == "--init-file-size" {
 			if i < len(args)+1 {
-				ip_addrs.PushBack(args[i+1])
+				_size, err:=strconv.ParseFloat(args[i+1], 64)
+				if err == nil {
+				   init_file_size= uint64(_size*1024)
+				} else {
+					fmt.Println("Incorrect file size type")
+				}
 			}
 			i++
 		} else {
@@ -73,13 +80,13 @@ func main() {
 		usage()
 		os.Exit(9)
 	}
-
+  
 	if proc_type == 0 {
 		daemons.Reader_process(ip_addrs)
 	} else if proc_type == 1 {
 		daemons.Writer_process(ip_addrs)
 	} else if proc_type == 2 {
-		daemons.Server_process()
+		daemons.Server_process(init_file_size)
 	} else if proc_type == 3 {
 		daemons.Controller_process()
 	} else {

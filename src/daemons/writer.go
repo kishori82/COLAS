@@ -4,11 +4,11 @@ import (
 	utilities "../utilities/GO"
 	"container/list"
 	"encoding/base64"
-	"fmt"
+	//"fmt"
 	"log"
-//	"math/rand"
+	//	"math/rand"
 	"time"
-	"unsafe"
+//	"unsafe"
 )
 
 /*
@@ -34,43 +34,38 @@ func writer_deamon() {
 		default:
 			if data.active == true && len(data.servers) > 0 {
 				//rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
+				//start := time.Now()
 
-				rand_wait :=  rand_wait_time() * int64(time.Millisecond)
-				log.Println("OPERATION\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
+				rand_wait := rand_wait_time()*int64(time.Millisecond) + int64(time.Millisecond)
 				time.Sleep(time.Duration(rand_wait))
-
 
 				//rand_data_file_size := int64(1024 * rand.ExpFloat64() / data.file_size)
 				rand_data_file_size := int64(1024 * data.file_size)
 
 				rand_data := make([]byte, rand_data_file_size)
 				_ = utilities.Generate_random_data(rand_data, rand_data_file_size)
-
 				encoded := base64.StdEncoding.EncodeToString(rand_data)
-				fmt.Println("Encoded data   : ", encoded)
-
 				rawdata := C.CString(encoded)
-				fmt.Println("OPERATION\tWRITE", data.name, data.write_counter, "RAND TIME INTERVAL",
-					rand_wait, "DATA SIZE", len(encoded))
 
-				log.Println("OPERATION\tWRITE\t", data.name, "\t", data.write_counter, "RAND TIME INTERVAL",
-					rand_wait/int64(time.Millisecond), "DATA SIZE", encoded)
 
 				servers_str := create_server_string_to_C()
-				log.Println("INFO\tUsing Servers\t" + servers_str)
-
-				defer C.free(unsafe.Pointer(&rawdata))
-
+				//defer C.free(unsafe.Pointer(&rawdata))
+				start := time.Now()
 				C.ABD_write(
 					C.CString(object_name),
 					C.CString(data.name),
 					(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
 					C.CString(servers_str), C.CString(data.port))
 
-				log.Println("OPERATION\tWRITE", data.name, data.write_counter, rand_wait, len(rand_data))
+				elapsed := time.Since(start)
+
+				log.Println(data.run_id, "WRITE", string(data.name), data.write_counter,
+					rand_wait/int64(time.Millisecond), elapsed, len(encoded))
+
 				data.write_counter += 1
+	//			C.free(unsafe.Pointer(&rawdata))
 			} else {
-				time.Sleep(5 * 1000000 * time.Microsecond)
+				time.Sleep(5 * 1000 * time.Microsecond)
 			}
 		}
 	}
@@ -81,7 +76,7 @@ func Writer_process(ip_addrs *list.List) {
 	SetupLogging()
 	log.Println("INFO", data.name, "Starting")
 
-  data.processType=1
+	data.processType = 1
 	//Initialize the parameters
 	InitializeParameters()
 

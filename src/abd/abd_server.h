@@ -3,8 +3,14 @@
 
 int ABD_server_process(
                char *server_id, 
-               char *port
+               char *port,
+               char *init_data
              );
+
+typedef struct _SERVER_ARGS {
+    char *init_data;
+} SERVER_ARGS;
+
 
 
 #endif

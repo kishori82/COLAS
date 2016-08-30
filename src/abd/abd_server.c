@@ -13,6 +13,7 @@
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
 #define GET_TAG_VALUE "GET_TAG_VALUE"
+#include "abd_server.h"
 
 static int se_interrupted=0;
 void se_signal_handler(int signal_value)
@@ -57,7 +58,7 @@ int has_object( char *obj_name) {
 
 
 
-int create_object( char *obj_name) {
+int create_object(char *obj_name, char *init_data) {
     void *item =NULL;
     char tag_str[100];
     TAG tag;
@@ -71,9 +72,9 @@ int create_object( char *obj_name) {
        tag_to_string(tag, tag_str);
 
 
-       char *value =(void *)malloc(3);
-       strcpy(value, "v0");
-       value[3]= '\0';
+       char *value =(void *)malloc(strlen(init_data)+1);
+       strcpy(value, init_data);
+       value[strlen(init_data)]= '\0';
        zhash_insert(hash_hash, tag_str, (void *)value); 
 
        //add it to the main list 
@@ -83,7 +84,9 @@ int create_object( char *obj_name) {
     return 0;
 }
 
-void *server_task (void *args)
+
+
+void *server_task (void *server_args)
 {
 
     hash = zhash_new();
@@ -104,7 +107,7 @@ void *server_task (void *args)
     //  Launch pool of worker threads, precise number is not critical
     int thread_nbr;
  //   for (thread_nbr = 0; thread_nbr < 5; thread_nbr++)
-    zthread_fork (ctx, server_worker, NULL);
+    zthread_fork (ctx, server_worker, server_args);
 
     //  Connect backend to frontend via a proxy
     zmq_proxy (frontend, backend, NULL);
@@ -278,7 +281,7 @@ static void algorithm_ABD( zmsg_t *msg, void *worker, char *object_name) {
 
 
 static void
-server_worker (void *args, zctx_t *ctx, void *pipe)
+server_worker (void *server_args, zctx_t *ctx, void *pipe)
 {
     int i, j;
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
@@ -288,8 +291,10 @@ server_worker (void *args, zctx_t *ctx, void *pipe)
     char tag[10]; 
     int  round;
 
-    printf("Receiving something\n");
     
+    printf("Initial value size %ld\n", strlen( ((SERVER_ARGS *)server_args)->init_data));
+    printf("Initial value  %s\n", ((SERVER_ARGS *)server_args)->init_data);
+
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
         //  The DEALER socket gives us the reply envelope and message
@@ -315,7 +320,7 @@ server_worker (void *args, zctx_t *ctx, void *pipe)
 
             //crate object if it is not found
            if( has_object(object_name)==0) {
-               create_object(object_name);
+               create_object(object_name, ((SERVER_ARGS *)server_args)->init_data);
                printf("\t\tCreated object %s\n",object_name);
            }
 
@@ -338,15 +343,19 @@ server_worker (void *args, zctx_t *ctx, void *pipe)
    }
 }
 
-int ABD_server_process(char *server_id, char *port)
+int ABD_server_process(char *server_id, char *port, char *init_data)
 {
    int i ; 
    se_catch_signals();
-   zthread_new(server_task, NULL);
+   SERVER_ARGS *server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
+   server_args->init_data = init_data;
+
+   zthread_new(server_task, (void *)server_args);
    printf("Starting the thread with id %s\n", server_id);
    while(true) {
-      zclock_sleep(60*60*1000); 
+      zclock_sleep(60*600*1000); 
    }
+   free(server_args);
    return 0;
 }
 

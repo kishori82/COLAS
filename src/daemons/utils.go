@@ -22,6 +22,7 @@ type Tag struct {
 
 type Params struct {
 	processType int8
+	init_file_size  uint64
 
 	readers map[string]bool
 	servers map[string]bool
