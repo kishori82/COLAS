@@ -278,7 +278,7 @@ func getlogs(c *cli.Context) error {
 		}
 	}
 
-	readers, writers, _, _ := getIPAddresses()
+	readers, writers, servers, _ := getIPAddresses()
 
 	// pulll logs from the readers
 	for _, e := range readers {
@@ -309,9 +309,25 @@ func getlogs(c *cli.Context) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		f.Close()
 	}
+
+	// pulll logs from the servers
+	for _, e := range servers {
+		_name := getName(e)
+		name := strings.TrimSpace(_name)
+		logstr := getLogFile(e)
+		f, err := os.Create(folder + "/" + name + ".log")
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = f.WriteString(logstr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		f.Close()
+	}
+
 
 	return nil
 }
