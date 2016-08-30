@@ -231,7 +231,6 @@ func StopProcess(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartProcess(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("StopProcess called")
 	active_chan <- true
 	fmt.Println("StartProcess called")
 	log.Println("INFO\tProcess Started")
@@ -322,7 +321,18 @@ func SetServers(w http.ResponseWriter, r *http.Request) {
 		data.servers[ips[i]] = true
 	}
 
-  fmt.Println(data.servers)
+	if data.processType == 3 {
+		var clients map[string]bool = data.servers
+		serverListStr := create_server_list_string()
+		j := 0
+		for ipaddr := range clients {
+			send_command_to_process(ipaddr, "SetServers", serverListStr)
+			name := "server_" + fmt.Sprintf("%d", j)
+			send_command_to_process(ipaddr, "SetName", name)
+			j = j + 1
+		}
+	}
+
 }
 
 // this process registers the writers in the controller and then

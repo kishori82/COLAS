@@ -51,6 +51,7 @@ func reader_daemon() {
 
 				start := time.Now()
 
+				//log.Println(data.run_id, "READ", string(data.name), data.write_counter)
 				if data.algorithm == "ABD" {
 
 					data_read_c := C.ABD_read(
