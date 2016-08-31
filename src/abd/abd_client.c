@@ -467,6 +467,7 @@ bool ABD_write(
     printf("Size of        : %u\n", (unsigned int)strlen(payload));
 
     char *myb64 = (char *)malloc(strlen(payload));
+
     b64_decode(payload, myb64);
 
     printf("Encoded string  : %s\n", payload);
@@ -500,9 +501,10 @@ bool ABD_write(
 
    printf("WRITE %d\n", op_num);
    printf("     MAX_TAG (WRITER)\n");
+
    TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 
-   printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
+//   printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
 
    printf("     WRITE_VALUE (WRITER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
