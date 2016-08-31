@@ -8,7 +8,6 @@ CFLAGS= -lm -lzmq  -lczmq -Wimplicit-function-declaration -fPIC #-Wall
 UT_DEPS=../utilities/C/algo_utils.h ../utilities/C/base64.h
 UT_SRCS=../utilities/C/algo_utils.c ../utilities/C/base64.c
 
-LIB_SRCS=abd_client.c abd_server.c
 
 UT_OBJS=$(UT_SRCS:%c=%o)
 
@@ -30,7 +29,7 @@ static: abd_client.c abd_server.c
 	$(CC) -static -c  -o abd_server.o  abd_server.c  -DASLIBRARY #$(CFLAGS)
 	ar -cvq libabd.a  abd_server.o abd_client.o
 
-libabd.so: abd_client.o abd_server.o  $(UT_OBJS) 
+libabd.so: abd_client.o abd_server.o client.o  server.o  $(UT_OBJS) 
 	$(CC) -shared -fPIC -o $@  $?
 
 clean:

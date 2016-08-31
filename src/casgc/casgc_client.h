@@ -1,5 +1,5 @@
-#ifndef _ABD_CLIENT
-#define _ABD_CLIENT
+#ifndef _CASGC_CLIENT
+#define _CASGC_CLIENT
 
 #include "czmq.h"
 #include <stdio.h>
@@ -16,7 +16,7 @@
 
 //   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
 
-bool ABD_write(char *obj_name, 
+bool CASGC_write(char *obj_name, 
                char *writer_id, 
                unsigned int op_num,  
                char *payload, 
@@ -24,7 +24,7 @@ bool ABD_write(char *obj_name,
                char *servers, 
                char *port
              ); 
-char * ABD_read(char *obj_name, 
+char *CASGC_read(char *obj_name, 
                char *writer_id, 
                unsigned int op_num,  
                //char *payload, 

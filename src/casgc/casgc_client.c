@@ -25,6 +25,8 @@ extern int s_interrupted;
 
 
 // this fethers the max tag
+
+/*
 TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
                       zsock_t *sock_to_servers,  char **servers, 
                           unsigned int num_servers, char *port)
@@ -137,9 +139,10 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
      zlist_destroy(&tag_list);
      return  max_tag;
 }
+*/
 
 // this fetches the max tag and value
-
+/*
 TAG get_max_tag_value_phase(
             char *obj_name, 
             unsigned int op_num, 
@@ -272,7 +275,8 @@ TAG get_max_tag_value_phase(
      free_items_in_list(tag_list);
      zlist_destroy(&tag_list);
 }
-
+*/
+/*
 
 // this is the write tag value phase of ABD
 TAG write_value_phase(  
@@ -403,9 +407,10 @@ TAG write_value_phase(
      return max_tag;
 }
 
+*/
 
 // ABD write
-bool ABD_write(
+bool CASGC_write(
                 char *obj_name,
                 char *writer_id, 
                 unsigned int op_num ,
@@ -479,8 +484,7 @@ bool ABD_write(
     return true;
 }
 
-
-char *ABD_read(
+char *CASGC_read(
                 char *obj_name,
                 char *writer_id, 
                 unsigned int op_num ,
