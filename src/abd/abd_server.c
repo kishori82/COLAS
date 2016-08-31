@@ -33,7 +33,8 @@ void algorithm_ABD_WRITE_VALUE( zmsg_t *msg, void *worker, char *object_name) {
 
     //zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
     //zframe_send(&tag_frame, worker, ZFRAME_REUSE);
-    //zframe_destroy(&tag_frame);
+   // zframe_destroy(&tag_frame);
+    //return;
 
     if( DEBUG_MODE ) printf("\t\t INSIDE WRITE VALUE\n");
     TAG tag; 
@@ -162,10 +163,12 @@ void algorithm_ABD( zmsg_t *msg, void *worker, char *object_name) {
 
      printf("algorithm ABD\n");
      zframe_t *phase_frame= zmsg_pop (msg);
+
      _zframe_str(phase_frame, buf) ;
      zframe_send(&phase_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
      zframe_t *op_num_frame= zmsg_pop (msg);
+
      zframe_send(&op_num_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
      printf("algorithm ABD tag %s\n", buf);

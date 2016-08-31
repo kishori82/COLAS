@@ -462,11 +462,9 @@ bool ABD_write(
 
    TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 
-   //Create a new tag
     TAG new_tag;
     new_tag.z = max_tag.z + 1;
     strcpy(new_tag.id, writer_id);
-
 
    printf("     WRITE_VALUE (WRITER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
