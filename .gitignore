@@ -5,6 +5,8 @@
 *rlnc_example
 *reed_solomon_example
 logs/*
+**/ZMQ/czmqlibs
+
 abdprocess
 src/abd/C/abd_server
 src/abd/C/abd_client
@@ -14,4 +16,3 @@ src/abd/C/abd_client
 system_controller/system_management
 *.a
 *.la
-*libzmq*
