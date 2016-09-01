@@ -11,7 +11,7 @@ import (
 
 /*
 #cgo CFLAGS: -Iabd  -Isodaw  -Iutilities/C
-#cgo LDFLAGS: -Labd  -labd -Lsodaw -lsodaw -lzmq -lczmq -Lcodes -lreed -Wl,-rpath=codes
+#cgo LDFLAGS: -Labd  -labd -Lsodaw -lsodaw -lzmq  -LZMQ/zmqlibs/lib -LZMQ/czmqlibs/lib/ -lczmq -Lcodes -lreed -Wl,-rpath=codes
 */
 import "C"
 
@@ -61,9 +61,9 @@ func main() {
 			}
 		} else if args[i] == "--init-file-size" {
 			if i < len(args)+1 {
-				_size, err:=strconv.ParseFloat(args[i+1], 64)
+				_size, err := strconv.ParseFloat(args[i+1], 64)
 				if err == nil {
-				   init_file_size= uint64(_size*1024)
+					init_file_size = uint64(_size * 1024)
 				} else {
 					fmt.Println("Incorrect file size type")
 				}
@@ -79,7 +79,7 @@ func main() {
 		usage()
 		os.Exit(9)
 	}
-  
+
 	if proc_type == 0 {
 		daemons.Reader_process(ip_addrs)
 	} else if proc_type == 1 {

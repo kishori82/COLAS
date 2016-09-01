@@ -1,8 +1,8 @@
 CC=gcc
 
 UTILS=../utilities/C
-CIFLAGS= -I$(UTILS) 
-CFLAGS= -lm -lzmq  -lczmq -Wimplicit-function-declaration -fPIC #-Wall 
+CIFLAGS= -I$(UTILS) -I../ZMQ/czmqlibs/include
+CFLAGS= -lm -L../ZMQ/zmqlibs -lzmq  -L../ZMQ/czmqlibs/lib -lczmq -Wimplicit-function-declaration -fPIC #-Wall 
 
 #SOURCES: hwserver.c asyncsrv.c
 UT_DEPS=$(UTILS)/algo_utils.h $(UTILS)/base64.h  $(UTILS)/client.h $(UTILS)/server.h
@@ -30,7 +30,7 @@ static: abd_client.c abd_server.c
 	ar -cvq libabd.a  abd_server.o abd_client.o
 
 libabd.so: abd_client.o abd_server.o  $(UT_OBJS) 
-	$(CC) -shared -fPIC -o $@  $?
+	$(CC) -shared -fPIC -o $@  $?  $(CFLAGS)
 
 clean:
 	rm -f abd abd_client abd_server $(UT_OBJS)  *.o  *.so
