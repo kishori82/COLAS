@@ -9,8 +9,8 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I../abd  -I../soda
-#cgo LDFLAGS: -L../abd  -labd  -L../soda -lsoda -lzmq -lczmq
+#cgo CFLAGS: -I../abd  -I../sodaw
+#cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw -lzmq -lczmq
 #include <abd_server.h>
 */
 import "C"

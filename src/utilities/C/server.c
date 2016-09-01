@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "abd_server.h"
 #include "client.h"
 #include "server.h"
 #include "algo_utils.h"
+
+#include "../../abd/abd_server.h"
 
 #define DEBUG_MODE 0
 extern int s_interrupted;

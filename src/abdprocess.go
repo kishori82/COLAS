@@ -10,9 +10,8 @@ import (
 )
 
 /*
-#cgo CFLAGS: -Iabd  -Isoda  -Iutilities/C
-#cgo LDFLAGS: -Labd  -labd -Lsoda -lsoda -lzmq -lczmq -Lcodes -lreed -Wl,-rpath=codes
-#include <soda_client.h>
+#cgo CFLAGS: -Iabd  -Isodaw  -Iutilities/C
+#cgo LDFLAGS: -Labd  -labd -Lsodaw -lsodaw -lzmq -lczmq -Lcodes -lreed -Wl,-rpath=codes
 */
 import "C"
 
