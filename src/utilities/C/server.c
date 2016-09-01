@@ -164,7 +164,7 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
    
            if( strcmp(buf, "SODAW")==0)  {
                 printf("\tSODAW\n");
-                algorithm_SODA(msg, worker, object_name);
+                algorithm_SODAW(msg, worker, object_name);
                 printf("\tSODAW DONE\n");
            }
 
