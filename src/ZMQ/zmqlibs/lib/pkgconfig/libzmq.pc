@@ -5,7 +5,6 @@ includedir=${prefix}/include
 
 Name: libzmq
 Description: 0MQ c++ library
-Version: 4.2.0
+Version: 3.2.5
 Libs: -L${libdir} -lzmq
-Libs.private: -lstdc++
-Cflags: -I${includedir} -DZMQ_BUILD_DRAFT_API=1
+Cflags: -I${includedir}
