@@ -557,10 +557,6 @@ char *SODAW_read(
                       port
                   );
 
- 
-
-
-
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
 
    printf("     WRITE_VALUE (READER)\n");
