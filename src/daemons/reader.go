@@ -22,6 +22,7 @@ func reader_daemon() {
 
 	var object_name string = "atomic_object"
 
+    
 	for {
 		select {
 		case active := <-active_chan:
@@ -49,6 +50,7 @@ func reader_daemon() {
 
 				start := time.Now()
 
+                fmt.Println("read operation\n")
 				//log.Println(data.run_id, "READ", string(data.name), data.write_counter)
 				if data.algorithm == "ABD" {
 

@@ -666,6 +666,7 @@ func InitializeParameters() {
 	data.algorithm = "SODAW"
 	data.run_id = "DEFULT_RUN"
 	data.writeto = "ram"
+    data.name = "default"
 
 	data.servers[string("172.17.0.2")] = true
 	data.active = true
