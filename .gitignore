@@ -5,7 +5,7 @@
 *rlnc_example
 *reed_solomon_example
 logs/*
-**/ZMQ/czmqlibs
+src/ZMQ/czmqlibs/lib/*
 
 abdprocess
 src/abd/C/abd_server
