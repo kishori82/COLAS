@@ -8,11 +8,11 @@ import (
 	"log"
 	//	"math/rand"
 	"time"
-//	"unsafe"
+	//	"unsafe"
 )
 
 /*
-#cgo CFLAGS: -I../abd  -I../sodaw
+#cgo CFLAGS: -I../abd  -I../sodaw -I../utilities/C
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw  -lzmq -lczmq
 #include <abd_client.h>
 #include <sodaw_client.h>
@@ -51,18 +51,29 @@ func writer_deamon() {
 				//defer C.free(unsafe.Pointer(&rawdata))
 				start := time.Now()
 				//log.Println(len( C.GoString(rawdata)), servers_str)
-				C.ABD_write(
-					C.CString(object_name),
-					C.CString(data.name),
-					(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
-					C.CString(servers_str), C.CString(data.port))
+				if data.algorithm == "ABD" {
+					C.ABD_write(
+						C.CString(object_name),
+						C.CString(data.name),
+						(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
+						C.CString(servers_str), C.CString(data.port))
+				}
+
+				if data.algorithm == "SODAW" {
+					C.SODAW_write(
+						C.CString(object_name),
+						C.CString(data.name),
+						(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
+						C.CString(servers_str), C.CString(data.port))
+				}
+
 				elapsed := time.Since(start)
 
 				log.Println(data.run_id, "WRITE", string(data.name), data.write_counter,
 					rand_wait/int64(time.Millisecond), elapsed, len(encoded))
 
 				data.write_counter += 1
-	//			C.free(unsafe.Pointer(&rawdata))
+				//			C.free(unsafe.Pointer(&rawdata))
 			} else {
 				time.Sleep(5 * 1000 * time.Microsecond)
 			}

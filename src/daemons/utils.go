@@ -21,8 +21,8 @@ type Tag struct {
 }
 
 type Params struct {
-	processType int8
-	init_file_size  uint64
+	processType    int8
+	init_file_size uint64
 
 	readers map[string]bool
 	servers map[string]bool
@@ -49,6 +49,9 @@ type Params struct {
 
 var data Params
 var DELIM string = "_"
+
+var active_chan chan bool
+var reset_chan chan bool
 
 func PrintHeader(title string) {
 	length := len(title)
@@ -117,7 +120,6 @@ func send_command_to_process(ipaddr string, route string, param string) string {
 		url = "http://" + ipaddr + ":8080" + "/" + route
 	}
 
-
 	log.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -133,7 +135,7 @@ func send_command_to_process(ipaddr string, route string, param string) string {
 
 // send command to all processes
 func send_command_to_processes(processes map[string]bool, route string, mesg string) {
-  //fmt.Println(route, mesg)
+	//fmt.Println(route, mesg)
 	for ipaddr := range processes {
 		send_command_to_process(ipaddr, route, mesg)
 	}
@@ -374,7 +376,7 @@ func SetReaders(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("tyin to set readers", ip)
 
 	if data.processType == 3 {
-	  fmt.Println("readers", data.readers)
+		fmt.Println("readers", data.readers)
 		var clients map[string]bool = data.readers
 		serverListStr := create_server_list_string()
 		j := 0
@@ -486,17 +488,17 @@ func SetReadRateDistribution(w http.ResponseWriter, r *http.Request) {
 	}
 	name := ips[0]
 	/*
-	k, _ := strconv.ParseFloat(ips[0], 64)
-	m, _ := strconv.ParseFloat(ips[0], 64)
+		k, _ := strconv.ParseFloat(ips[0], 64)
+		m, _ := strconv.ParseFloat(ips[0], 64)
 	*/
 	var m string
 	k := ips[1]
 
-	if len(ips) >2 {
-	  m  = ips[2]
-	  data.inter_read_wait_distribution = []string{name, k, m}
+	if len(ips) > 2 {
+		m = ips[2]
+		data.inter_read_wait_distribution = []string{name, k, m}
 	} else {
-	  data.inter_read_wait_distribution = []string{name, k}
+		data.inter_read_wait_distribution = []string{name, k}
 	}
 
 	log.Println("INFO\tSet Inter  Read Wait Time  Distribution\t" + ip)
@@ -521,21 +523,20 @@ func SetWriteRateDistribution(w http.ResponseWriter, r *http.Request) {
 	}
 	name := ips[0]
 
-
 	log.Println("INFO\tSet Inter Write Wait Time  Distribution--\t" + ip)
 	var m string
 	k := ips[1]
 
-	if len(ips) >2 {
-	  m  = ips[2]
-	  data.inter_write_wait_distribution = []string{name, k, m}
+	if len(ips) > 2 {
+		m = ips[2]
+		data.inter_write_wait_distribution = []string{name, k, m}
 	} else {
-	  data.inter_write_wait_distribution = []string{name, k}
+		data.inter_write_wait_distribution = []string{name, k}
 	}
 
 	log.Println("INFO\tSet Inter Write Wait Time  Distribution\t" + ip)
 	if data.processType == 3 {
-	 fmt.Println(data.inter_write_wait_distribution )
+		fmt.Println(data.inter_write_wait_distribution)
 		send_command_to_processes(data.readers, "SetReadWriteDistribution", ip)
 		send_command_to_processes(data.writers, "SetReadWriteDistribution", ip)
 	}
@@ -564,21 +565,20 @@ func SetWriteTo(w http.ResponseWriter, r *http.Request) {
 
 // set file size
 func SetFileSize(w http.ResponseWriter, r *http.Request) {
-  vars := mux.Vars(r)
+	vars := mux.Vars(r)
 	ip := vars["size"]
 	k, err := strconv.ParseFloat(ip, 64)
 
-	if err !=nil {
-     data.file_size = 0.1
+	if err != nil {
+		data.file_size = 0.1
 	}
-  data.file_size = k
+	data.file_size = k
 	log.Println("INFO\tSETTING FILE SIZE (KB) \t" + ip)
 
 	if data.processType == 3 {
-		  send_command_to_processes(data.writers, "SetFileSize", ip)
-  }
+		send_command_to_processes(data.writers, "SetFileSize", ip)
+	}
 }
-
 
 func GetFileSize(w http.ResponseWriter, r *http.Request) {
 	log.Println("Get Params")
@@ -599,21 +599,19 @@ func GetParams(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Run Id\t%s\n", data.run_id)
 	fmt.Fprintf(w, "Port\t%s\n", data.port)
 	fmt.Fprintf(w, "WriteTo\t%s\n", data.writeto)
-  numparams := len(data.inter_read_wait_distribution)-1
+	numparams := len(data.inter_read_wait_distribution) - 1
 
 	fmt.Fprintf(w, "Read Rate Distribution\t%s", data.inter_read_wait_distribution)
-	for i:=1; i< numparams; i++ {
-	   fmt.Fprintf(w, "\t%s", data.inter_read_wait_distribution[i])
+	for i := 1; i < numparams; i++ {
+		fmt.Fprintf(w, "\t%s", data.inter_read_wait_distribution[i])
 	}
 	fmt.Fprintf(w, "\n")
-
 
 	fmt.Fprintf(w, "Write Rate Distribution\t%s", data.inter_write_wait_distribution)
-	for i:=1; i< numparams; i++ {
-	   fmt.Fprintf(w, "\t%s", data.inter_write_wait_distribution[i])
+	for i := 1; i < numparams; i++ {
+		fmt.Fprintf(w, "\t%s", data.inter_write_wait_distribution[i])
 	}
 	fmt.Fprintf(w, "\n")
-
 
 	/*  fmt.Fprintf(w, "Read Rate\t%g\n", data.file_size)
 	    fmt.Fprintf(w, "%d %g %g %g\n", data.rand_seed, data.file_size, data.read_rate, data.write_rate)
@@ -665,18 +663,19 @@ func InitializeParameters() {
 	data.port = "8081"
 
 	//data.algorithm = "ABD"
-	data.algorithm = "SODA"
+	data.algorithm = "SODAW"
 	data.run_id = "DEFULT_RUN"
 	data.writeto = "ram"
 
+	data.servers[string("172.17.0.2")] = true
+	data.active = true
 }
 
+func rand_wait_time_const(distrib []string) int64 {
 
-func rand_wait_time_const( distrib [] string) int64 {
-     
-	k, err := strconv.ParseInt(distrib[1], 10,  64)
-	if err!=nil {
-      return 100
+	k, err := strconv.ParseInt(distrib[1], 10, 64)
+	if err != nil {
+		return 100
 	}
 
 	return k
@@ -684,17 +683,13 @@ func rand_wait_time_const( distrib [] string) int64 {
 
 func rand_wait_time() int64 {
 
-   var rand_dur int64
-   if data.processType==0 {
-       rand_dur = rand_wait_time_const(data.inter_read_wait_distribution)
-	 }
+	var rand_dur int64
+	if data.processType == 0 {
+		rand_dur = rand_wait_time_const(data.inter_read_wait_distribution)
+	}
 
-
-   return rand_dur
+	return rand_dur
 }
-
-
-
 
 //http server
 func HTTP_Server() {

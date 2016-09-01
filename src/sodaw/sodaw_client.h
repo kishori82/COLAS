@@ -1,5 +1,5 @@
-#ifndef _ABD_CLIENT
-#define _ABD_CLIENT
+#ifndef _SODAW_CLIENT
+#define _SODAW_CLIENT
 
 #include "czmq.h"
 #include <stdio.h>
@@ -12,7 +12,6 @@
 #include <algo_utils.h>
 #include <base64.h>
 #include "client.h"
-
 
 //   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
 

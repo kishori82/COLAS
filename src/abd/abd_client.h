@@ -8,7 +8,6 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
-
 #include <algo_utils.h>
 #include <base64.h>
 #include "client.h"

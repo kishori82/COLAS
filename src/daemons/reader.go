@@ -6,26 +6,22 @@ import (
 	"log"
 	//	"math/rand"
 	"time"
-//	"unsafe"
+	//	"unsafe"
 )
 
 /*
 #cgo CFLAGS: -I../abd -I../sodaw -I../utilities/C
-#cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw -lzmq -lczmq
+#cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw
 #include <abd_client.h>
 #include <sodaw_client.h>
 */
 import "C"
 
-var active_chan chan bool
-var reset_chan chan bool
-
 func reader_daemon() {
 	active_chan = make(chan bool, 2)
 
 	var object_name string = "atomic_object"
-	//	C.HiKodo()
-	//	C.HelloKodo()
+
 	for {
 		select {
 		case active := <-active_chan:
@@ -36,6 +32,7 @@ func reader_daemon() {
 		default:
 			if data.active == true && len(data.servers) > 0 {
 
+				fmt.Println(data.algorithm)
 				rand_wait := rand_wait_time()*int64(time.Millisecond) + int64(time.Millisecond)
 				//				log.Println("OPERATION\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
 
@@ -48,30 +45,35 @@ func reader_daemon() {
 
 				// call the ABD algorithm
 				var data_read string
+				var data_read_c *C.char
 
 				start := time.Now()
 
 				//log.Println(data.run_id, "READ", string(data.name), data.write_counter)
 				if data.algorithm == "ABD" {
 
-					data_read_c := C.ABD_read(
+					data_read_c = C.ABD_read(
 						C.CString(object_name),
 						C.CString(data.name),
 						(C.uint)(data.write_counter),
 						C.CString(servers_str),
 						C.CString(data.port))
 
-            data_read = C.GoString(data_read_c)
-//            C.free(unsafe.Pointer(&data_read_c))
+					data_read = C.GoString(data_read_c)
+					//            C.free(unsafe.Pointer(&data_read_c))
+				}
+
+				// call the ABD algorithm
+				if data.algorithm == "SODAW" {
+					data_read_c = C.SODAW_read(
+						C.CString(object_name),
+						C.CString(data.name),
+						(C.uint)(data.write_counter),
+						C.CString(servers_str),
+						C.CString(data.port))
 				}
 
 				elapsed := time.Since(start)
-
-				// call the ABD algorithm
-				if data.algorithm == "SODA" {
-					data_read = "SODA" //C.HelloKodo()
-				}
-
 				log.Println(data.run_id, "READ", string(data.name), data.write_counter,
 					rand_wait/int64(time.Millisecond), elapsed, len(data_read))
 

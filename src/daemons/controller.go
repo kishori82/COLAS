@@ -1,24 +1,19 @@
 //package main
-package daemons 
+package daemons
 
 import (
+	_ "fmt"
 	"log"
-_	"fmt"
 )
 
-
 func Controller_process() {
-  f := SetupLogging() 
+	f := SetupLogging()
 	defer f.Close()
 	log.Println("Starting Controller")
-	data.processType=3
+	data.processType = 3
 
-  
-  InitializeParameters()
+	InitializeParameters()
 
 	HTTP_Server()
-	
-
-
 
 }
