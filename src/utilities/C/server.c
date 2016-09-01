@@ -14,6 +14,8 @@
 #include "server.h"
 #include "algo_utils.h"
 
+#include "../../sodaw/sodaw_server.h"
+
 #include "../../abd/abd_server.h"
 
 #define DEBUG_MODE 0
