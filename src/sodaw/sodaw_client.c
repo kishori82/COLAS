@@ -14,6 +14,7 @@
 #include "client.h"
 #include <base64.h>
 
+#include <rlnc_rs.h>
 
 extern int s_interrupted;
 
@@ -297,7 +298,14 @@ TAG SODAW_write_put_phase(
     char tag_str[64];
     char buf1[400];
     char *value;
+
+    int N = num_servers;
+    int K = (N-1)/2;
+    int symbol_size = 1024;
+
     
+    ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), full_vector) ;
+//    destroy_encoded_data(encoded_data_info);
 
     int round;
 

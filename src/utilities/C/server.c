@@ -159,9 +159,15 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
            if( strcmp(buf, "ABD")==0)  {
                 printf("\tABD\n");
                 algorithm_ABD(msg, worker, object_name);
+                printf("\tABD DONE\n");
            }
    
-           printf("\tABD DONE\n");
+           if( strcmp(buf, "SODAW")==0)  {
+                printf("\tSODAW\n");
+                algorithm_SODA(msg, worker, object_name);
+                printf("\tSODAW DONE\n");
+           }
+
            zframe_destroy (&identity);
            zframe_destroy (&object_name_frame);
            zframe_destroy (&algo_frame);
