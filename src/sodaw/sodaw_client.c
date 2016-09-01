@@ -163,6 +163,8 @@ TAG SODAW_read_value(
     int round;
     int size;
 
+    printf("hello\n");
+
     TAG *tag;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
@@ -507,6 +509,7 @@ char *SODAW_read(
     int j;
     int num_servers = count_num_servers(servers_str);
 
+    printf("hello=======1\n");
     char **servers = create_server_names(servers_str);
 #ifdef DEBUG_MODE
     printf("Obj name       : %s\n",obj_name);
@@ -530,12 +533,14 @@ char *SODAW_read(
 #endif
 
     
+    printf("hello=========2\n");
     zctx_t *ctx  = zctx_new();
     void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
     zctx_set_linger(ctx, 0);
     assert (sock_to_servers);
 
     zsocket_set_identity(sock_to_servers,  writer_id);
+    printf("hello=========2\n");
     for(j=0; j < num_servers; j++) {    
        char *destination = create_destination(servers[j], port);
        int rc = zsocket_connect(sock_to_servers, destination);

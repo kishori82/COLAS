@@ -1,4 +1,4 @@
-prefix=/home/sgeadmin/COLAS/src/ZMQ/zmqlibs
+prefix=/home/docker/COLAS/src/ZMQ/zmqlibs
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

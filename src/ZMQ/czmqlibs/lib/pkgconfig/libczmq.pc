@@ -3,7 +3,7 @@
 #  Please refer to the README for information about making permanent changes.  #
 ################################################################################
 
-prefix=/home/sgeadmin/COLAS/src/ZMQ/czmqlibs
+prefix=/home/docker/COLAS/src/ZMQ/czmqlibs
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

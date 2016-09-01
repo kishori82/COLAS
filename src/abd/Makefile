@@ -1,5 +1,7 @@
 CC=gcc
 
+
+
 UTILS=../utilities/C
 CIFLAGS= -I$(UTILS) -I../ZMQ/czmqlibs/include
 CFLAGS= -lm -L../ZMQ/zmqlibs -lzmq  -L../ZMQ/czmqlibs/lib -lczmq -Wimplicit-function-declaration -fPIC #-Wall 

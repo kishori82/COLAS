@@ -11,6 +11,8 @@ CSRCS = abd/abd_client.c abd/abd_server.c abd/abd_client.h abd/abd_server.h  abd
 abdprocess: $(TARGET) $(SRCS)  #$(CSRCS)
 	go build -x -o abdprocess $(TARGET)
 
+all=CODES ABD SODAW $(TARGET)
+
 ABD:
 	@echo "Building ABD"
 	make -C abd clean
