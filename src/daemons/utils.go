@@ -121,14 +121,17 @@ func send_command_to_process(ipaddr string, route string, param string) string {
 	}
 
 	log.Println(url)
+	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+	 	 //log.Fatal(err)
+	 	 fmt.Println(err)
 	}
 	contents, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		log.Fatal(err)
+	//	log.Fatal(err)
+	 	 fmt.Println(err)
 	}
 	return string(contents)
 }
@@ -323,6 +326,7 @@ func SetServers(w http.ResponseWriter, r *http.Request) {
 		data.servers[ips[i]] = true
 	}
 
+  fmt.Println(" servers  ", data.processType);
 	if data.processType == 3 {
 		var clients map[string]bool = data.servers
 		serverListStr := create_server_list_string()
@@ -330,6 +334,7 @@ func SetServers(w http.ResponseWriter, r *http.Request) {
 		for ipaddr := range clients {
 			send_command_to_process(ipaddr, "SetServers", serverListStr)
 			name := "server_" + fmt.Sprintf("%d", j)
+			fmt.Println(name, ipaddr)
 			send_command_to_process(ipaddr, "SetName", name)
 			j = j + 1
 		}
@@ -400,7 +405,6 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Expected 1 parameters, found %d\n", len(ips))
 	}
 	fmt.Println(ip)
-
 	data.name = ip
 }
 
@@ -443,6 +447,22 @@ func SetRunId(w http.ResponseWriter, r *http.Request) {
 		send_command_to_processes(data.servers, "SetRunId", data.run_id)
 	}
 }
+
+//set run id
+func SetAlgorithm(w http.ResponseWriter, r *http.Request) {
+	log.Println("Set Algorithm ID")
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	data.algorithm = id
+
+	if data.processType == 3 {
+		send_command_to_processes(data.readers, "SetAlgorithm", data.algorithm)
+		send_command_to_processes(data.writers, "SetAlgorithm", data.algorithm)
+		send_command_to_processes(data.servers, "SetAlgorithm", data.algorithm)
+	}
+}
+
 
 //set randdom seed to a controller and then set random seed  each
 // writer and readers
@@ -700,6 +720,8 @@ func HTTP_Server() {
 	// Setup HTTP functionality
 	router := mux.NewRouter()
 	fmt.Println("Running http server")
+
+	router.HandleFunc("/SetAlgorithm/{id}", SetAlgorithm)
 
 	router.HandleFunc("/SetRunId/{id}", SetRunId)
 	router.HandleFunc("/SetWriteTo/{param}", SetWriteTo)
