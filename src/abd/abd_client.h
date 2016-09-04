@@ -32,4 +32,5 @@ char * ABD_read(char *obj_name,
              );
 
 
+zhash_t *receive_message_frames_from_server_ABD(zmsg_t *msg) ;
 #endif

@@ -51,8 +51,6 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
     TAG local_tag;
     get_object_tag(hash_object_ABD, object_name, &local_tag);
 
-
-
 //    if( DEBUG_MODE )printf("\t\t WRITE TAG for COMP (%d, %s)  (%d, %s)\n", local_tag.z, local_tag.id, tag.z, tag.id);
 
     if( compare_tags(local_tag, tag)==-1 ) {
@@ -104,7 +102,7 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
        if( DEBUG_MODE ) printf("\t\tSENT BEHIND\n");
     }
 
-    send_frames(frames, worker, SEND_FINAL, 1,  "acknowledge");
+    send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
     return;
 }
@@ -146,11 +144,14 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      
      assert(key!=NULL);
 
+     zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
+     zhash_insert(frames, "tag", (void *)tag_frame);
+
      void *item = zhash_lookup(temp_hash_hash,key);
      zframe_t *data_frame= zframe_new((char *)item, strlen(item));
      zhash_insert(frames, "payload", (void *)data_frame);
 
-     send_frames(frames, worker, SEND_MORE, 5,  "sender", "object",  "algorithm", "phase", "opnum", "tag", "payload" );
+     send_frames(frames, worker, SEND_FINAL, 7,  "sender", "object",  "algorithm", "phase", "opnum", "tag", "payload" );
 
 }
 
@@ -193,13 +194,9 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *server_args) {
            algorithm_ABD_GET_TAG_VALUE(frames, worker);
       }
 
-
-     destroy_frames(frames);     
-
    /* zframe_t *payloadf= zmsg_pop (msg);
            printf("%d\n",  (int)zframe_size(payloadf));
    */
-   
    
  }
 

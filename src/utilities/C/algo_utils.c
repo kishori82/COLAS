@@ -244,7 +244,8 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
      zhash_insert(frames, "opnum", (void *)opnum_frame);
 
      get_string_frame(algorithm_name, frames, "algorithm");
-     get_string_frame(phae_name, frames, "phase");
+     get_string_frame(phase_name, frames, "phase");
+
      if( strcmp(algorithm_name, "ABD") ==0 ) {
          if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
            zframe_t *tag_frame= zmsg_pop (msg);
@@ -255,6 +256,7 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
 
          }
      }
+     return frames;
 
 }
 

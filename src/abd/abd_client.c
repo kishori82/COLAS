@@ -33,9 +33,9 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
     // send out the messages to all servers
 
     char buf[400];
-    char algorithm[64];
-    char phase[64];
-    char tag_str[64];
+    char algorithm[100];
+    char phase[100];
+    char tag_str[100];
     char buf1[400];
     int round;
 
@@ -80,55 +80,29 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
            // zclock_sleep(300); 
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
+                zhash_t* frames = receive_message_frames_from_server_ABD(msg);
 
-                //object
-                zframe_t *object_frame = zmsg_pop(msg);
-                _zframe_str(object_frame, buf);
-                printf("\t\tobject    : %s\n",buf);
-
-                // algorithm
-                zframe_t *algorithm_frame = zmsg_pop(msg);
-                _zframe_str(algorithm_frame, buf);
-                printf("\t\talgorithm : %s\n",buf);
-
-                // phase
-                zframe_t *phase_frame = zmsg_pop(msg);
-                _zframe_str(phase_frame, phase);
-                printf("\t\tphase     : %s\n",phase);
-
-                // operation number
-                zframe_t *op_num_frame = zmsg_pop(msg);
-                _zframe_int(op_num_frame, &round);
-                printf("\t\tOP_NUM    : %d\n", round);
-
-               //tag 
-                zframe_t *tag_str_frame = zmsg_pop(msg);
-                _zframe_str(tag_str_frame, tag_str);
-                printf("\t\tTAG    : %s\n", tag_str);
+                get_string_frame(phase, frames, "phase");
+                round = get_int_frame(frames, "opnum");
+                get_string_frame(tag_str, frames, "tag");
                   
-                zframe_destroy(&object_frame);
-                zframe_destroy(&algorithm_frame);
-                zframe_destroy(&phase_frame);
-                zframe_destroy(&op_num_frame);
-                zframe_destroy(&tag_str_frame);
 
-                zmsg_destroy (&msg);
                 if(round==op_num && strcmp(phase, GET_TAG)==0) {
-                   responses++;
+                     responses++;
+                     // add tag to list                
+                     tag = (TAG *)malloc(sizeof(TAG));
+                     string_to_tag(tag_str, tag);
+                     zlist_append(tag_list, (void *)tag);
 
-                   // add tag to list                
-                   tag = (TAG *)malloc(sizeof(TAG));
-                   string_to_tag(tag_str, tag);
-                   zlist_append(tag_list, (void *)tag);
-
-                   if(responses >= majority) break;
+                     if(responses >= majority) break;
                    //if(responses >= num_servers) break;
                 }
                 else{
-                     printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
-
+                    printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
                 }
-            }
+
+                zmsg_destroy (&msg);
+           }
      }
    //comute the max tag now and return 
      TAG max_tag = get_max_tag(tag_list);
@@ -290,9 +264,9 @@ TAG write_value_phase(
 {
     // send out the messages to all servers
     char buf[400];
-    char algorithm[64];
-    char phase[64];
-    char tag_str[64];
+    char algorithm[100];
+    char phase[100];
+    char tag_str[100];
     char buf1[400];
     char *value;
     
@@ -303,8 +277,8 @@ TAG write_value_phase(
 
     int i; 
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
-    zframe_t *algo = zframe_new("ABD", 3);
-    zframe_t *phase_frame = zframe_new(WRITE_VALUE, 11);
+    zframe_t *algo = zframe_new("ABD", strlen("ABD"));
+    zframe_t *phase_frame = zframe_new(WRITE_VALUE, strlen(WRITE_VALUE));
     zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
 
 
@@ -349,47 +323,16 @@ TAG write_value_phase(
            // zclock_sleep(300); 
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
-
-                //object name
-                zframe_t *object_frame = zmsg_pop(msg);
-                _zframe_str(object_frame, buf);
-                printf("\t\tobject    : %s\n",buf);
-
-                // algorithm
-                zframe_t *algorithm_frame = zmsg_pop(msg);
-                _zframe_str(algorithm_frame, buf);
-                printf("\t\talgorithm : %s\n",buf);
-
-                // phase
-                zframe_t *phase_frame = zmsg_pop(msg);
-                _zframe_str(phase_frame, phase);
-                printf("\t\tphase     : %s\n",phase);
-
-                // operation number
-                zframe_t *op_num_frame = zmsg_pop(msg);
-                _zframe_int(op_num_frame, &round);
-                printf("\t\tOP_NUM    : %d\n", round);
-
-                // tag string
-                zframe_t *tag_str_frame = zmsg_pop(msg);
-                _zframe_str(tag_str_frame, tag_str);
-                printf("\t\tTAG STRING    : %s\n", tag_str);
+                zhash_t* frames = receive_message_frames_from_server_ABD(msg);
 
 
-                zframe_destroy(&object_frame);
-                zframe_destroy(&algorithm_frame);
-                zframe_destroy(&phase_frame);
-                zframe_destroy(&op_num_frame);
-                zframe_destroy(&tag_str_frame);
-
+               get_string_frame(phase, frames, "phase");
+               round = get_int_frame(frames, "opnum");
+                  
                 zmsg_destroy (&msg);
+        
                 if(round==op_num && strcmp(phase, WRITE_VALUE)==0) {
                    responses++;
-
-                   // add tag to list                
-                   tag = (TAG *)malloc(sizeof(TAG));
-                   string_to_tag(tag_str, tag);
-                   zlist_append(tag_list, (void *)tag);
 
                    if(responses >= majority) break;
                    //if(responses >= num_servers) break;
@@ -428,7 +371,7 @@ bool ABD_write(
 
     b64_decode(payload, myb64);
 
-    printf("Encoded string  : %s\n", payload);
+    printf("Base64 Encoded string  : %s\n", payload);
     printf("Server string   : %s\n", servers_str);
     printf("Port to Use     : %s\n", port);
 
@@ -533,6 +476,7 @@ char *ABD_read(
    get_max_tag_value_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port, &max_tag, &payload);
 
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
+   printf("\tdata read (%s)\n", payload);
 
    printf("     WRITE_VALUE (READER)\n");
    int size = strlen(payload);
@@ -545,6 +489,55 @@ char *ABD_read(
 
     return payload;
 }
+
+
+zhash_t *receive_message_frames_from_server_ABD(zmsg_t *msg)  {
+     char algorithm_name[100];
+     char phase_name[100];
+     char buf[100];
+     zhash_t *frames = zhash_new();
+
+     zframe_t *object_name_frame= zmsg_pop (msg);
+     zhash_insert(frames, "object", (void *)object_name_frame);
+
+     zframe_t *algorithm_frame= zmsg_pop (msg);
+     zhash_insert(frames, "algorithm", (void *)algorithm_frame);
+
+     zframe_t *phase_frame= zmsg_pop (msg);
+     zhash_insert(frames, "phase", (void *)phase_frame);
+
+     zframe_t *opnum_frame= zmsg_pop (msg);
+     zhash_insert(frames, "opnum", (void *)opnum_frame);
+
+     get_string_frame(algorithm_name, frames, "algorithm");
+     get_string_frame(phase_name, frames, "phase");
+     
+
+     if( strcmp(algorithm_name, "ABD") ==0 ) {
+         if( strcmp(phase_name, GET_TAG) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           get_string_frame(buf, frames, "tag");
+         }
+
+         if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           get_string_frame(buf, frames, "tag");
+         }
+
+         if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           get_string_frame(buf, frames, "tag");
+
+           zframe_t *payload_frame= zmsg_pop (msg);
+           zhash_insert(frames, "payload", (void *)payload_frame);
+         }
+     }
+     return frames;
+}
+
 
 
 

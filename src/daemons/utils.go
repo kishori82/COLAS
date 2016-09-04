@@ -656,7 +656,7 @@ func InitializeParameters() {
 	data.write_rate = 0.6
 	data.read_rate = 0.6
 	data.file_size = 0.1
-	data.init_file_size = 0.1
+	data.init_file_size = 0.4
 	data.rand_seed = 1
 	data.read_counter = 0
 	data.write_counter = 0

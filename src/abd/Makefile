@@ -4,7 +4,7 @@ CC=gcc
 
 UTILS=../utilities/C
 CIFLAGS= -I$(UTILS) -I../ZMQ/czmqlibs/include
-CFLAGS= -lm -L../ZMQ/zmqlibs -lzmq  -L../ZMQ/czmqlibs/lib -lczmq -Wimplicit-function-declaration -fPIC #-Wall 
+CFLAGS= -lm -L../ZMQ/zmqlibs -lzmq  -L../ZMQ/czmqlibs/lib -lczmq -Wimplicit-function-declaration -fPIC -Wall 
 
 #SOURCES: hwserver.c asyncsrv.c
 UT_DEPS=$(UTILS)/algo_utils.h $(UTILS)/base64.h  $(UTILS)/client.h $(UTILS)/server.h
