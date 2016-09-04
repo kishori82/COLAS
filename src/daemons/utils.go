@@ -662,13 +662,15 @@ func InitializeParameters() {
 	data.active = false
 	data.port = "8081"
 
-	//data.algorithm = "ABD"
-	data.algorithm = "SODAW"
+	data.algorithm = "ABD"
+	//data.algorithm = "SODAW"
 	data.run_id = "DEFULT_RUN"
 	data.writeto = "ram"
     data.name = "default"
 
 	data.servers[string("172.17.0.2")] = true
+	data.servers[string("172.17.0.3")] = true
+	data.servers[string("172.17.0.4")] = true
 	data.active = true
 }
 

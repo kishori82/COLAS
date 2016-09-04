@@ -20,10 +20,13 @@ extern int s_interrupted;
 
 #ifdef ASLIBRARY
 
-#define WRITE_VALUE "WRITE_VALUE"
-#define GET_TAG "GET_TAG"
-#define GET_TAG_VALUE "GET_TAG_VALUE"
+#define WRITE_GET "WRITE_GET"
+#define WRITE_PUT "WRITE_PUT"
+#define READ_GET "READ_GET"
+#define READ_VALUE "READ_VALUE"
+#define READ_COMPLETE "READ_COMPLETE"
 
+#
 
 // this fethers the max tag
 TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num, 
@@ -44,8 +47,8 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
 
     int i; 
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
-    zframe_t *algo = zframe_new("SODAW", 3);
-    zframe_t *phase_frame = zframe_new(GET_TAG, 7);
+    zframe_t *algo = zframe_new("SODAW", strlen("SODAW"));
+    zframe_t *phase_frame = zframe_new(WRITE_GET, strlen(WRITE_GET));
     zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
 
     for(i=0; i < num_servers; i++) {
@@ -63,6 +66,7 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
 
 //    zframe_destroy (&payloadf);
     unsigned int majority =  ceil(((float)num_servers+1)/2);
+    majority = 1;
 //     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
      unsigned int responses =0;
      zlist_t *tag_list = zlist_new();
@@ -114,7 +118,7 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
                 zframe_destroy(&tag_str_frame);
 
                 zmsg_destroy (&msg);
-                if(round==op_num && strcmp(phase, GET_TAG)==0) {
+                if(round==op_num && strcmp(phase, WRITE_GET)==0) {
                    responses++;
 
                    // add tag to list                
@@ -140,7 +144,6 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
 }
 
 // this fetches the max tag and value
-
 TAG SODAW_read_value(
             char *obj_name, 
             unsigned int op_num, 
@@ -164,7 +167,6 @@ TAG SODAW_read_value(
     int round;
     int size;
 
-    printf("hello\n");
 
     TAG *tag;
 
@@ -172,8 +174,8 @@ TAG SODAW_read_value(
 
     int i; 
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
-    zframe_t *algo = zframe_new("SODAW", 3);
-    zframe_t *phase_frame = zframe_new(GET_TAG_VALUE, 13);
+    zframe_t *algo = zframe_new("SODAW", strlen("SODAW"));
+    zframe_t *phase_frame = zframe_new(READ_VALUE, strlen(READ_VALUE));
     zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
 
     for(i=0; i < num_servers; i++) {
@@ -252,7 +254,7 @@ TAG SODAW_read_value(
 
                 zmsg_destroy (&msg);
 
-                if(round==op_num && strcmp(phase, GET_TAG_VALUE)==0) {
+                if(round==op_num && strcmp(phase, READ_VALUE)==0) {
                    responses++;
                    // add tag to list                
                    tag = (TAG *)malloc(sizeof(TAG));
@@ -278,7 +280,7 @@ TAG SODAW_read_value(
 
 
 // this is the write tag value phase of SODAW
-TAG SODAW_write_put_phase(  
+void SODAW_write_put_phase(  
                       char *obj_name,
                       char *writer_id, 
                       unsigned int op_num, 
@@ -292,7 +294,7 @@ TAG SODAW_write_put_phase(
                    )
 {
     // send out the messages to all servers
-    char buf[400];
+    char buf[4000];
     char algorithm[64];
     char phase[64];
     char tag_str[64];
@@ -312,35 +314,42 @@ TAG SODAW_write_put_phase(
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
     int i; 
-    zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
-    zframe_t *algo = zframe_new("SODAW", 3);
-    zframe_t *phase_frame = zframe_new(WRITE_VALUE, 11);
-    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
-
+    zframe_t *object_name_frame = zframe_new(obj_name, strlen(obj_name));
+    zframe_t *algorithm_frame = zframe_new("SODAW", strlen("SODAW"));
+    zframe_t *phase_frame = zframe_new(WRITE_PUT, strlen(WRITE_PUT));
+    zframe_t *opnum_frame = zframe_new((const void *)&op_num, sizeof(int));
 
     tag_to_string(max_tag, tag_str); 
     zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
 
-    zframe_t *payload_frame = zframe_new(payload, size);
+    zframe_t *payload_frame;
+
+    size =  encoded_data_info.num_blocks*encoded_data_info.encoded_symbol_size;
+    printf("Size of the data %d\n", size);
 
     for(i=0; i < num_servers; i++) {
-       zframe_send(&obj_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-       zframe_send(&algo, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+       zframe_send(&object_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+       zframe_send(&algorithm_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        zframe_send(&phase_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-       zframe_send(&op_num_frame, sock_to_servers, ZFRAME_REUSE+ ZFRAME_MORE);
+       zframe_send(&opnum_frame, sock_to_servers, ZFRAME_REUSE+ ZFRAME_MORE);
        zframe_send(&tag_frame, sock_to_servers, ZFRAME_REUSE+ ZFRAME_MORE);
+
+       payload_frame = zframe_new(encoded_data_info.encoded_raw_data[i], size);
+       printf("size of the frame %d\n", zframe_data(payload_frame));
+         
+
        zframe_send(&payload_frame, sock_to_servers, ZFRAME_REUSE);
-       printf("     \tsending to server %d\n",i);
+       zframe_destroy(&payload_frame);
     }
 
-    zframe_destroy(&obj_name_frame);
-    zframe_destroy(&algo);
+    zframe_destroy(&object_name_frame);
+    zframe_destroy(&algorithm_frame);
     zframe_destroy(&phase_frame);
-    zframe_destroy(&op_num_frame);
+    zframe_destroy(&opnum_frame);
     zframe_destroy(&tag_frame);
-    zframe_destroy(&payload_frame);
 
     unsigned int majority =  ceil((num_servers+1)/2);
+    majority =  1;
      unsigned int responses =0;
      int j =0;
      zlist_t *tag_list = zlist_new();
@@ -380,27 +389,14 @@ TAG SODAW_write_put_phase(
                 _zframe_int(op_num_frame, &round);
                 printf("\t\tOP_NUM    : %d\n", round);
 
-                // tag string
-                zframe_t *tag_str_frame = zmsg_pop(msg);
-                _zframe_str(tag_str_frame, tag_str);
-                printf("\t\tTAG STRING    : %s\n", tag_str);
-
-
                 zframe_destroy(&object_frame);
                 zframe_destroy(&algorithm_frame);
                 zframe_destroy(&phase_frame);
                 zframe_destroy(&op_num_frame);
-                zframe_destroy(&tag_str_frame);
 
                 zmsg_destroy (&msg);
-                if(round==op_num && strcmp(phase, WRITE_VALUE)==0) {
+                if(round==op_num && strcmp(phase, WRITE_PUT)==0) {
                    responses++;
-
-                   // add tag to list                
-                   tag = (TAG *)malloc(sizeof(TAG));
-                   string_to_tag(tag_str, tag);
-                   zlist_append(tag_list, (void *)tag);
-
                    if(responses >= majority) break;
                    //if(responses >= num_servers) break;
                 }
@@ -410,7 +406,6 @@ TAG SODAW_write_put_phase(
                 }
             }
      }
-     return max_tag;
 }
 
 
@@ -517,7 +512,6 @@ char *SODAW_read(
     int j;
     int num_servers = count_num_servers(servers_str);
 
-    printf("hello=======1\n");
     char **servers = create_server_names(servers_str);
 #ifdef DEBUG_MODE
     printf("Obj name       : %s\n",obj_name);
@@ -541,14 +535,13 @@ char *SODAW_read(
 #endif
 
     
-    printf("hello=========2\n");
     zctx_t *ctx  = zctx_new();
     void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
     zctx_set_linger(ctx, 0);
     assert (sock_to_servers);
 
     zsocket_set_identity(sock_to_servers,  writer_id);
-    printf("hello=========2\n");
+
     for(j=0; j < num_servers; j++) {    
        char *destination = create_destination(servers[j], port);
        int rc = zsocket_connect(sock_to_servers, destination);
@@ -573,12 +566,18 @@ char *SODAW_read(
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
 
    printf("     WRITE_VALUE (READER)\n");
+
    int size = strlen(payload);
-   SODAW_write_put_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
-                     num_servers, port, payload, size, max_tag);
+ //  SODAW_write_put_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
+  //                   num_servers, port, payload, size, max_tag);
 
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
+
+
+    payload = (char *)malloc( 3* sizeof(char));
+
+
 
 
     return payload;

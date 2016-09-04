@@ -16,3 +16,5 @@ src/abd/C/abd_client
 system_controller/system_management
 *.a
 *.la
+
+system_controller/log*

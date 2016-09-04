@@ -72,8 +72,7 @@ char *create_destinations(char **servers, unsigned int num_servers, char *port, 
       }
       
       char *dest = (char *)malloc( (size + 1)*sizeof(char));
-      assert(dest!=0);
-
+      assert(dest!=0); 
       unsigned int pos =0;
       for(i=0; i < num_servers; i++) { 
          if(i==0)  dest[pos]=type;
@@ -94,7 +93,11 @@ char *create_destinations(char **servers, unsigned int num_servers, char *port, 
       return dest;
 }
 
+void init_tag(TAG *tag) {
+       tag->z = 0;
+       sprintf(tag->id, "%s", "client_0");
 
+}
 
 char *create_destination(char *server, char *port) {
       int size = 0;
@@ -202,4 +205,125 @@ int  get_object_tag(zhash_t *hash, char * object_name, TAG *tag) {
     string_to_tag(tag_str, tag);
     return 1;
 }
+
+
+int  get_string_frame(char *buf, zhash_t *frames, const char *str)  {
+      zframe_t *frame= zhash_lookup(frames, str);
+      if( frame==0) { buf[0]='\0'; return 0;}
+      _zframe_str(frame, buf) ;
+      return 1;     
+}
+
+int  get_int_frame(zhash_t *frames, const char *str)  {
+      zframe_t *frame= zhash_lookup(frames, str);
+      int val;
+      if( frame==0) { return 0;}
+      _zframe_int(frame, &val) ;
+      return val;     
+}
+
+zhash_t *receive_message_frames(zmsg_t *msg)  {
+     char algorithm_name[100];
+     char phase_name[100];
+     zhash_t *frames = zhash_new();
+
+     zframe_t *sender_frame = zmsg_pop (msg);
+     zhash_insert(frames, "sender", (void *)sender_frame);
+   
+     zframe_t *object_name_frame= zmsg_pop (msg);
+     zhash_insert(frames, "object", (void *)object_name_frame);
+       //    zframe_send (&object_name_frame, worker, ZFRAME_REUSE +ZFRAME_MORE );
+
+     zframe_t *algorithm_frame= zmsg_pop (msg);
+     zhash_insert(frames, "algorithm", (void *)algorithm_frame);
+
+     zframe_t *phase_frame= zmsg_pop (msg);
+     zhash_insert(frames, "phase", (void *)phase_frame);
+
+     zframe_t *opnum_frame= zmsg_pop (msg);
+     zhash_insert(frames, "opnum", (void *)opnum_frame);
+
+     if( strcmp(algorithm_name, "ABD") ==0 ) {
+         if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+
+           zframe_t *payload_frame= zmsg_pop (msg);
+           zhash_insert(frames, "payload", (void *)payload_frame);
+
+         }
+     }
+
+}
+
+
+zhash_t *send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...) {
+    char *buf[100];
+    char *key;
+    va_list valist;
+    int i =0;
+
+    va_start(valist, n);
+     
+    for(i=0; i < n; i++ ) {
+        key = va_arg(valist, char *); 
+        zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);
+        if( i == n-1 && type==SEND_FINAL) 
+            zframe_send(&frame, worker, ZFRAME_REUSE);
+        else
+            zframe_send(&frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+    }
+
+    va_end(valist);
+}
+
+zhash_t *destroy_frames(zhash_t *frames) {
+     zlist_t *keys = zhash_keys(frames);
+     char *key;
+     for(  key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
+           zframe_t *frame = zhash_lookup(frames, key);         
+           if( frame!= NULL) zframe_destroy(&frame);
+     }
+}
+
+
+int has_object(zhash_t *object_hash,  char *obj_name) {
+    void *item;
+    item = zhash_lookup(object_hash, obj_name);
+    if( item==NULL) {
+       return 0;
+    }
+    return 1;
+}
+
+
+int create_object(zhash_t *object_hash, char *obj_name, char *init_data, SERVER_STATUS *status) {
+    void *item =NULL;
+    char tag_str[100];
+    TAG tag;
+
+    item = zhash_lookup(object_hash, obj_name);
+
+    if( item==NULL) {
+       zhash_t *hash_hash = zhash_new();
+
+       init_tag(&tag);
+       tag_to_string(tag, tag_str);
+
+       char *value =(void *)malloc(strlen(init_data)+1);
+       strcpy(value, init_data);
+       value[strlen(init_data)]= '\0';
+       zhash_insert(hash_hash, tag_str, (void *)value); 
+
+       status->metadata_memory += (float) strlen(tag_str);
+       status->data_memory += (float) strlen(init_data);
+        
+       //add it to the main list 
+       zhash_insert(object_hash, obj_name, (void *)hash_hash); 
+       return 1;
+    }
+    return 0;
+}
+
+
 

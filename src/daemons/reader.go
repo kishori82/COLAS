@@ -67,7 +67,7 @@ func reader_daemon() {
 
 				// call the ABD algorithm
 				if data.algorithm == "SODAW" {
-          fmt.Println("reader----------------\n")
+                   fmt.Println("INIT READ OP---->\n")
 					data_read_c = C.SODAW_read(
 						C.CString(object_name),
 						C.CString(data.name),
