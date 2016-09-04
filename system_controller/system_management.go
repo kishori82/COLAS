@@ -152,19 +152,6 @@ func start(c *cli.Context) error {
 	return nil
 }
 
-//set the read rate
-/*
-func setReadRate(c *cli.Context) error {
-	if !isSystemRunning() {
-		return nil
-	}
-	rate := c.Args().First()
-	_, _, _, controllers := getIPAddresses()
-	rateString := rate
-	sendCommandToControllers(controllers, "SetReadRate", rateString)
-	return nil
-}
-*/
 
 //set the read rate
 func setReadRateDistribution(c *cli.Context) error {
@@ -410,7 +397,6 @@ func setup(c *cli.Context) error {
 	fmt.Println("Setting up the Servers\n")
 
 	// send servers to controllers
-
 	serverIPsStack := joinIPs(servers)
 	sendCommandToControllers(controllers, "SetServers", serverIPsStack)
 

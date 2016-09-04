@@ -1,6 +1,7 @@
 docker-compose down
-docker commit  agitated_shaw kishori82/dev:COLAS2
-docker-compose scale reader=3 writer=3 server=5 controller=1
+docker commit  tiny_snyder kishori82/dev:COLAS3
+docker-compose scale reader=2 writer=2 server=3 controller=1
+
 ./system_management setup
 ./system_management setfile_size 1000
 ./system_management setread_dist const 200

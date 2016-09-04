@@ -86,38 +86,12 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
 
-                //object
-                zframe_t *object_frame = zmsg_pop(msg);
-                _zframe_str(object_frame, buf);
-                printf("\t\tobject    : %s\n",buf);
+                zhash_t* frames = receive_message_frames_from_server_ABD(msg);
+  
+                get_string_frame(phase, frames, "phase");
+                round = get_int_frame(frames, "opnum");
+                get_string_frame(tag_str, frames, "tag");
 
-                // algorithm
-                zframe_t *algorithm_frame = zmsg_pop(msg);
-                _zframe_str(algorithm_frame, buf);
-                printf("\t\talgorithm : %s\n",buf);
-
-                // phase
-                zframe_t *phase_frame = zmsg_pop(msg);
-                _zframe_str(phase_frame, phase);
-                printf("\t\tphase     : %s\n",phase);
-
-                // operation number
-                zframe_t *op_num_frame = zmsg_pop(msg);
-                _zframe_int(op_num_frame, &round);
-                printf("\t\tOP_NUM    : %d\n", round);
-
-               //tag 
-                zframe_t *tag_str_frame = zmsg_pop(msg);
-                _zframe_str(tag_str_frame, tag_str);
-                printf("\t\tTAG    : %s\n", tag_str);
-                  
-                zframe_destroy(&object_frame);
-                zframe_destroy(&algorithm_frame);
-                zframe_destroy(&phase_frame);
-                zframe_destroy(&op_num_frame);
-                zframe_destroy(&tag_str_frame);
-
-                zmsg_destroy (&msg);
                 if(round==op_num && strcmp(phase, WRITE_GET)==0) {
                    responses++;
 
@@ -133,6 +107,7 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
                      printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
 
                 }
+                zmsg_destroy (&msg);
             }
      }
    //comute the max tag now and return 
@@ -478,7 +453,9 @@ bool SODAW_write(
     new_tag.z = max_tag.z + 1;
     strcpy(new_tag.id, writer_id);
 
-   printf("     WRITE_VALUE (WRITER)\n");
+
+
+/*   printf("     WRITE_VALUE (WRITER)\n");
    SODAW_write_put_phase(
                           obj_name, 
                           writer_id,  
@@ -491,6 +468,7 @@ bool SODAW_write(
                           max_tag
                         );
 
+*/
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
 
