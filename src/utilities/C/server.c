@@ -24,7 +24,6 @@ extern int s_interrupted;
 SERVER_STATUS *status;
 
 #ifdef ASLIBRARY
-zhash_t *hash;
 
 //  .split server task
 //  This is our server task.
@@ -35,55 +34,10 @@ zhash_t *hash;
 
 static void server_worker (void *args, zctx_t *ctx, void *pipe);
 
-int has_object( char *obj_name) {
-    void *item;
-    item = zhash_lookup(hash, obj_name);
-    if( item==NULL) {
-       return 0;
-    }
-    return 1;
-}
-
-
-
-int create_object(char *obj_name, char *init_data) {
-    void *item =NULL;
-    char tag_str[100];
-    TAG tag;
-
-    item = zhash_lookup(hash, obj_name);
-
-    if( item==NULL) {
-       zhash_t *hash_hash = zhash_new();
-       tag.z = 0;
-       sprintf(tag.id, "%s", "client_0");
-       tag_to_string(tag, tag_str);
-
-       char *value =(void *)malloc(strlen(init_data)+1);
-       strcpy(value, init_data);
-       value[strlen(init_data)]= '\0';
-       zhash_insert(hash_hash, tag_str, (void *)value); 
-
-       status->metadata_memory += (float) strlen(tag_str);
-       status->data_memory += (float) strlen(init_data);
-        
-       //add it to the main list 
-       zhash_insert(hash, obj_name, (void *)hash_hash); 
-       return 1;
-    }
-    return 0;
-}
-
-
+char *ID;
 
 void *server_task (void *server_args)
 {
-
-    hash = zhash_new();
-    assert (hash);
-    assert (zhash_size (hash) == 0);
-    assert (zhash_first (hash) == NULL);
-
 
     //  Frontend socket talks to clients over TCP
     zctx_t *ctx = zctx_new ();
@@ -115,7 +69,8 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
     int i, j;
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
     zsocket_connect(worker, "inproc://backend");
-    char buf[100];
+    char algorithm_name[100];
+    char senderbuf[100];
     char object_name[100];
     char tag[10]; 
     int  round;
@@ -135,52 +90,32 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
         zclock_sleep(5);
         if (items[0].revents & ZMQ_POLLIN) {
            zmsg_t *msg = zmsg_recv (worker);
+
+           // receive the frames
+           zhash_t *frames = receive_message_frames(msg);
            status->network_data += zmsg_content_size(msg) ;
-            
-           zframe_t *identity = zmsg_pop (msg);
-           _zframe_str(identity, buf) ;
-    //       printf("\n\n%s\n",  buf);
-           zframe_send (&identity, worker, ZFRAME_REUSE +ZFRAME_MORE );
-   
-           zframe_t *object_name_frame= zmsg_pop (msg);
-           _zframe_str(object_name_frame, object_name) ;
-           zframe_send (&object_name_frame, worker, ZFRAME_REUSE +ZFRAME_MORE );
 
-
-            //crate object if it is not found
-           if( has_object(object_name)==0) {
-               create_object(object_name, ((SERVER_ARGS *)server_args)->init_data);
-               printf("\t\tCreated object %s\n",object_name);
-           }
-
-           zframe_t *algo_frame= zmsg_pop (msg);
-           _zframe_str(algo_frame, buf) ;
-           zframe_send (&algo_frame, worker, ZFRAME_REUSE +ZFRAME_MORE );
-           //printf("%s\n",  buf);
-
-           if( strcmp(buf, "ABD")==0)  {
+           get_string_frame(algorithm_name, frames, "algorithm");
+           if( strcmp(algorithm_name, "ABD")==0)  {
                 printf("\tABD\n");
-                algorithm_ABD(msg, worker, object_name);
+                algorithm_ABD(frames, worker, server_args);
                 printf("\tABD DONE\n");
            }
    
-           if( strcmp(buf, "SODAW")==0)  {
-                printf("\tSODAW\n");
-                algorithm_SODAW(msg, worker, object_name);
+           if( strcmp(algorithm_name, "SODAW")==0)  {
+                printf("\tSODAW at server %s\n", ID);
+                algorithm_SODAW(ID, frames, msg, worker, senderbuf,  object_name, algorithm_name);
                 printf("\tSODAW DONE\n");
            }
 
-           zframe_destroy (&identity);
-           zframe_destroy (&object_name_frame);
-           zframe_destroy (&algo_frame);
-   
-       }
-   }
+   } }
 }
 
 int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *_status)
 {
    int i ; 
+
+   ID=server_id;
 
    s_catch_signals();
 
@@ -188,9 +123,11 @@ int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *
    server_args->init_data = init_data;
 
    status = _status;
+   SODAW_initialize();
 
    zthread_new(server_task, (void *)server_args);
-   printf("Starting the thread with id %s\n", server_id);
+   printf("Starting the thread id %s\n", server_id);
+   printf("Starting server  name : %s\n", ID);
 
    while(true) {
       zclock_sleep(60*600*1000); 
