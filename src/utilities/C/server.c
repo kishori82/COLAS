@@ -94,6 +94,9 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
            zhash_t *frames = receive_message_frames(msg);
            status->network_data += zmsg_content_size(msg) ;
 
+           zframe_t *id =  zframe_new(ID, strlen(ID));
+           zhash_insert(frames, "ID", id);
+
            get_string_frame(algorithm_name, frames, "algorithm");
            if( strcmp(algorithm_name, "ABD")==0)  {
                 printf("\tABD\n");
@@ -103,7 +106,7 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
    
            if( strcmp(algorithm_name, "SODAW")==0)  {
                 printf("\tSODAW at server %s\n", ID);
-                algorithm_SODAW(ID, frames, msg, worker, senderbuf,  object_name, algorithm_name);
+                algorithm_SODAW(frames, worker, server_args);
                 printf("\tSODAW DONE\n");
            }
            destroy_frames(frames);

@@ -323,35 +323,20 @@ void algorithm_SODAW_READ_DISPERSE(char *ID, zmsg_t *msg, void *worker, char *cl
 
 
 
+void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,  void *worker) {
+     char object_name[100];
+     char tag_buf[100];
 
-
-void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zmsg_t *msg, zhash_t *frames,  void *worker, char *object_name) {
-     char buf[100];
-
-     //get the tag for the object
+     get_string_frame(object_name, frames, "object");
      TAG tag;
-     get_object_tag(hash_object_SODAW, object_name, &tag); 
+     get_object_tag(hash_object_SODAW, object_name, &tag);
+     tag_to_string(tag, tag_buf);
 
-     zframe_t *sender_frame = (zframe_t *)zhash_lookup(frames, "sender");
-     zframe_send(&sender_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+     zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
+     zhash_insert(frames, "tag", (void *)tag_frame);
 
-     zframe_t *object_frame = (zframe_t *) zhash_lookup(frames, "object");
-     zframe_send(&object_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
-     zframe_t *algorithm_frame = (zframe_t *) zhash_lookup(frames, "algorithm");
-     zframe_send(&algorithm_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
-
-     zframe_t *phase_frame = (zframe_t *) zhash_lookup(frames, "phase");
-     zframe_send(&phase_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
-
-     zframe_t *opnum_frame = zmsg_pop(msg);
-     zframe_send(&opnum_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
-
-     tag_to_string(tag, buf);
-     zframe_t *tag_frame= zframe_new(buf, strlen(buf));
-     zframe_send(&tag_frame, worker, ZFRAME_REUSE);
-     
-     zframe_destroy(&tag_frame);
 }
 
 void algorithm_SODAW_READ_VALUE( zmsg_t *msg, void *worker, char *object_name) {
@@ -382,39 +367,36 @@ void algorithm_SODAW_READ_VALUE( zmsg_t *msg, void *worker, char *object_name) {
 
 }
 
-void algorithm_SODAW(char *ID, zhash_t *frames,  zmsg_t *msg, void *worker, char *client, char *object_name, char *algorithm) {
+void algorithm_SODAW(zhash_t *frames, void *worker, void *server_args) {
      char phasebuf[100];
-     char tag[10]; 
+     char tag[100]; 
+     char buf[100]; 
      int  round;
 
      printf("algorithm SODAW\n");
 
      if(initialized==0) initialize_SODAW();
 
-     zframe_t *phase_frame= zmsg_pop (msg);
-     _zframe_str(phase_frame, phasebuf);
-     zhash_insert(frames, "phase", (void *) phase_frame);
+     get_string_frame(phasebuf, frames, "phase");
+     get_string_frame(buf, frames, "sender");
      
-     
-
       if( strcmp(phasebuf, WRITE_GET)==0)  {
            printf("\t-----------------\n");
-           printf("\tSODAW WRITE_GET from client %s\n", client);
-           algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(msg, frames,  worker, object_name);
+           printf("\tSODAW WRITE_GET from client %s\n", buf);
+           algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(frames,  worker);
       }
 
       if( strcmp(phasebuf, WRITE_PUT)==0)  {
            printf("\t-----------------\n");
            printf("\t SODAW WRITE PUT\n");
-           algorithm_SODAW_WRITE_PUT(ID, msg, frames, worker, client, object_name, algorithm);
+       //    algorithm_SODAW_WRITE_PUT(ID, msg, frames, worker, client, object_name, algorithm);
       }
 
-  
       if( strcmp(phasebuf, READ_GET)==0)  {
            printf("\tSODAW READ_GET\n");
-           printf("\tSODAW READ_GET from client %s\n", client);
+           printf("\tSODAW READ_GET from client %s\n",buf);
 
-           algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(msg, frames, worker, object_name);
+        //   algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(msg, frames, worker, object_name);
       }
 
       if( strcmp(phasebuf, READ_VALUE)==0)  {
@@ -427,7 +409,7 @@ void algorithm_SODAW(char *ID, zhash_t *frames,  zmsg_t *msg, void *worker, char
       if( strcmp(phasebuf, READ_COMPLETE)==0)  {
            printf("\t-----------------\n");
            printf("\tSODAW READ VALUE\n");
-           algorithm_SODAW_READ_VALUE(msg, worker, object_name);
+         //  algorithm_SODAW_READ_VALUE(msg, worker, object_name);
       }
 
 

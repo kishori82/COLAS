@@ -19,7 +19,7 @@ typedef struct _METADATA {
 //void algorithm_ABD_WRITE_VALUE( zmsg_t *msg, void *worker, char *object_name) ;
 //void algorithm_ABD_GET_TAG( zmsg_t *msg, void *worker, char *object_name) ;
 //void algorithm_ABD_GET_TAG_VALUE( zmsg_t *msg, void *worker, char *object_name) ;
-void algorithm_SODAW(char *ID, zhash_t *frames, zmsg_t *msg, void *worker, char *client,  char *object_name, char *algorithm_name) ;
+void algorithm_SODAW(zhash_t *frames, void *worker, void *server_args) ;
 
 void SODAW_initialize();
 
