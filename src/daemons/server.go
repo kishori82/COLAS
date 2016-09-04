@@ -36,7 +36,7 @@ func server_daemon() {
 	active_chan = make(chan bool, 2)
 
 	data.active = true
-	data.name = "server"
+	data.name = "server_x"
 
 	//var object_name string = "atomic_object"
 	//	C.HiKodo()
