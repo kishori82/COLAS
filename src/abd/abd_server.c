@@ -102,6 +102,9 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
        if( DEBUG_MODE ) printf("\t\tSENT BEHIND\n");
     }
 
+    get_string_frame(tag_str, frames, "phase"); 
+    printf("sending phase %s\n", tag_str);
+
     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
     return;
@@ -117,11 +120,10 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
 
-     send_frames(frames, worker, SEND_MORE, 5,  "sender", "object",  "algorithm", "phase", "opnum");
-
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
-     zframe_send(&tag_frame, worker, ZFRAME_REUSE);
-     zframe_destroy(&tag_frame);
+     zhash_insert(frames, "tag", (void *)tag_frame);
+
+     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 }
 
 void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
