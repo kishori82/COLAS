@@ -40,10 +40,10 @@ func server_daemon() {
 
 	//var object_name string = "atomic_object"
 	//	C.HiKodo()
-	rand_data := make([]byte, (uint64)(data.init_file_size))
+	rand_data := make([]byte, (uint64)(1024*data.init_file_size))
 
-    fmt.Println("init file ", data.init_file_size)
-	_ = utilities.Generate_random_data(rand_data, int64(data.init_file_size))
+  fmt.Println("init file ", 1024*data.init_file_size)
+	_ = utilities.Generate_random_data(rand_data, int64(1024*data.init_file_size))
 	encoded := base64.StdEncoding.EncodeToString(rand_data)
 	init_data := C.CString(encoded)
 

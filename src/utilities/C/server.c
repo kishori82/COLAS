@@ -77,7 +77,6 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
 
     
     printf("Initial value size %ld\n", strlen( ((SERVER_ARGS *)server_args)->init_data));
-    printf("Initial value  %s\n", ((SERVER_ARGS *)server_args)->init_data);
 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
@@ -107,8 +106,10 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
                 algorithm_SODAW(ID, frames, msg, worker, senderbuf,  object_name, algorithm_name);
                 printf("\tSODAW DONE\n");
            }
-
-   } }
+           destroy_frames(frames);
+        }
+    }
+   
 }
 
 int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *_status)
