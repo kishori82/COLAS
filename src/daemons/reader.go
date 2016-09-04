@@ -60,7 +60,6 @@ func reader_daemon() {
 						(C.uint)(data.write_counter),
 						C.CString(servers_str),
 						C.CString(data.port))
-
 					data_read = C.GoString(data_read_c)
 					//            C.free(unsafe.Pointer(&data_read_c))
 				}
@@ -74,11 +73,11 @@ func reader_daemon() {
 						(C.uint)(data.write_counter),
 						C.CString(servers_str),
 						C.CString(data.port))
+                   data_read = C.GoString(data_read_c)
 				}
 
 				elapsed := time.Since(start)
-				log.Println(data.run_id, "READ", string(data.name), data.write_counter,
-					rand_wait/int64(time.Millisecond), elapsed, len(data_read))
+				log.Println(data.run_id, "READ", string(data.name), data.write_counter, rand_wait/int64(time.Millisecond), elapsed, len(data_read))
 
 				data.write_counter += 1
 			} else {

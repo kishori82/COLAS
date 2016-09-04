@@ -86,7 +86,7 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
 
-                zhash_t* frames = receive_message_frames_from_server_ABD(msg);
+                zhash_t* frames = receive_message_frames_from_server_SODAW(msg);
   
                 get_string_frame(phase, frames, "phase");
                 round = get_int_frame(frames, "opnum");
@@ -369,7 +369,13 @@ void SODAW_write_put_phase(
                 zframe_destroy(&phase_frame);
                 zframe_destroy(&op_num_frame);
 
+
+
+
                 zmsg_destroy (&msg);
+
+
+
                 if(round==op_num && strcmp(phase, WRITE_PUT)==0) {
                    responses++;
                    if(responses >= majority) break;
@@ -379,6 +385,7 @@ void SODAW_write_put_phase(
                      printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
 
                 }
+                zmsg_destroy (&msg);
             }
      }
 }
@@ -455,7 +462,7 @@ bool SODAW_write(
 
 
 
-/*   printf("     WRITE_VALUE (WRITER)\n");
+   printf("     WRITE_VALUE (WRITER)\n");
    SODAW_write_put_phase(
                           obj_name, 
                           writer_id,  
@@ -468,7 +475,6 @@ bool SODAW_write(
                           max_tag
                         );
 
-*/
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
 
@@ -545,7 +551,9 @@ char *SODAW_read(
 
    printf("     WRITE_VALUE (READER)\n");
 
+    payload = (char *)malloc( 3* sizeof(char));
    int size = strlen(payload);
+    strcpy(payload, "hi");
  //  SODAW_write_put_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
   //                   num_servers, port, payload, size, max_tag);
 
@@ -553,13 +561,60 @@ char *SODAW_read(
     zctx_destroy(&ctx);
 
 
-    payload = (char *)malloc( 3* sizeof(char));
-
+     printf("HI %s\n", payload);
 
 
 
     return payload;
 }
+
+zhash_t *receive_message_frames_from_server_SODAW(zmsg_t *msg)  {
+     char algorithm_name[100];
+     char phase_name[100];
+     char buf[100];
+     zhash_t *frames = zhash_new();
+
+     zframe_t *object_name_frame= zmsg_pop (msg);
+     zhash_insert(frames, "object", (void *)object_name_frame);
+
+     zframe_t *algorithm_frame= zmsg_pop (msg);
+     zhash_insert(frames, "algorithm", (void *)algorithm_frame);
+
+     zframe_t *phase_frame= zmsg_pop (msg);
+     zhash_insert(frames, "phase", (void *)phase_frame);
+
+     zframe_t *opnum_frame= zmsg_pop (msg);
+     zhash_insert(frames, "opnum", (void *)opnum_frame);
+
+     get_string_frame(algorithm_name, frames, "algorithm");
+     get_string_frame(phase_name, frames, "phase");
+     
+
+     if( strcmp(algorithm_name, "SODAW") ==0 ) {
+         if( strcmp(phase_name, WRITE_GET) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           get_string_frame(buf, frames, "tag");
+         }
+
+         if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           get_string_frame(buf, frames, "tag");
+         }
+
+         if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           get_string_frame(buf, frames, "tag");
+
+           zframe_t *payload_frame= zmsg_pop (msg);
+           zhash_insert(frames, "payload", (void *)payload_frame);
+         }
+     }
+     return frames;
+}
+
 
 
 

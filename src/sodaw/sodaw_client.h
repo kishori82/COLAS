@@ -31,5 +31,6 @@ char *SODAW_read(char *obj_name,
                char *port
              );
 
+zhash_t *receive_message_frames_from_server_SODAW(zmsg_t *msg)  ;
 
 #endif
