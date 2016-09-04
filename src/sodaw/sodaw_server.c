@@ -389,7 +389,7 @@ void algorithm_SODAW(char *ID, zhash_t *frames,  zmsg_t *msg, void *worker, char
 
      printf("algorithm SODAW\n");
 
-     if(initialized==0) SODAW_initialize();
+     if(initialized==0) initialize_SODAW();
 
      zframe_t *phase_frame= zmsg_pop (msg);
      _zframe_str(phase_frame, phasebuf);

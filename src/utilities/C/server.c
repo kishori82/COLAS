@@ -123,7 +123,6 @@ int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *
    server_args->init_data = init_data;
 
    status = _status;
-   SODAW_initialize();
 
    zthread_new(server_task, (void *)server_args);
    printf("Starting the thread id %s\n", server_id);
