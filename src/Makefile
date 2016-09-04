@@ -28,5 +28,16 @@ CODES:
 	make -C codes clean
 	make -C codes
 
+
+rebuild:
+	make -C codes clean
+	make -C abd clean
+	make -C sodaw clean
+	rm -rf  abdprocess
+	make -C codes 
+	make -C abd 
+	make -C sodaw
+	go build -x -o abdprocess  $(TARGET)
+
 clean:
 	rm -rf logs abdprocess 
