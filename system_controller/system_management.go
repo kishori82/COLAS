@@ -420,10 +420,10 @@ func setup(c *cli.Context) error {
 func getLogFile(ip string) (logs string) {
 	url := "http://" + ip + ":8080" + "/GetLog"
 	resp, err := http.Get(url)
-
 	if err != nil {
 		log.Fatal(err)
 	}
+    defer resp.Body.Close()
 
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -441,6 +441,7 @@ func getName(ip string) (name string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+    defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
@@ -467,6 +468,7 @@ func sendCommandToControllers(controllers []string, route string, queryStr strin
 	if err != nil {
 		log.Fatal(err)
 	}
+    defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 
 	defer resp.Body.Close()

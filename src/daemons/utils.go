@@ -127,8 +127,8 @@ func send_command_to_process(ipaddr string, route string, param string) string {
 	 	 //log.Fatal(err)
 	 	 fmt.Println(err)
 	}
-	contents, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
+	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 	//	log.Fatal(err)
 	 	 fmt.Println(err)
