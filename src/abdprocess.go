@@ -43,7 +43,7 @@ func main() {
 	// reader, writer and servers are 0, 1 and 2
 	//  var proc_type string="--process-type"
 	var proc_type uint64
-	var init_file_size uint64 = 1
+	var init_file_size float64 = 1
 	ip_addrs := list.New()
 	var usage_err bool = false
 
@@ -64,7 +64,7 @@ func main() {
 			if i < len(args)+1 {
 				_size, err := strconv.ParseFloat(args[i+1], 64)
 				if err == nil {
-					init_file_size = uint64(_size * 1024)
+					init_file_size = float64(_size * 1024)
 				} else {
 					fmt.Println("Incorrect file size type")
 				}

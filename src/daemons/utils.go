@@ -22,7 +22,7 @@ type Tag struct {
 
 type Params struct {
 	processType    int8
-	init_file_size uint64
+	init_file_size float64
 
 	readers map[string]bool
 	servers map[string]bool
@@ -656,6 +656,7 @@ func InitializeParameters() {
 	data.write_rate = 0.6
 	data.read_rate = 0.6
 	data.file_size = 0.1
+	data.init_file_size = 0.1
 	data.rand_seed = 1
 	data.read_counter = 0
 	data.write_counter = 0
@@ -669,8 +670,8 @@ func InitializeParameters() {
     data.name = "default"
 
 	data.servers[string("172.17.0.2")] = true
-	data.servers[string("172.17.0.3")] = true
-	data.servers[string("172.17.0.4")] = true
+//	data.servers[string("172.17.0.3")] = true
+//	data.servers[string("172.17.0.4")] = true
 	data.active = true
 }
 
