@@ -1,5 +1,12 @@
 #include "algo_utils.h"
 
+#define WRITE_GET "WRITE_GET"
+#define WRITE_PUT "WRITE_PUT"
+#define READ_GET "READ_GET"
+#define READ_VALUE "READ_VALUE"
+#define READ_COMPLETE "READ_COMPLETE"
+
+#
 void _zframe_int(zframe_t *f, int *i) {
     byte *data = zframe_data(f);
     *i = *((int *) data);
@@ -222,6 +229,7 @@ int  get_int_frame(zhash_t *frames, const char *str)  {
       return val;     
 }
 
+
 zhash_t *receive_message_frames(zmsg_t *msg)  {
      char algorithm_name[100];
      char phase_name[100];
@@ -256,6 +264,20 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
 
          }
      }
+
+     if( strcmp(algorithm_name, "SODAW") ==0 ) {
+         if( strcmp(phase_name, WRITE_PUT) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+
+           zframe_t *payload_frame= zmsg_pop (msg);
+           zhash_insert(frames, "payload", (void *)payload_frame);
+         }
+     }
+
+
+
+
      return frames;
 
 }

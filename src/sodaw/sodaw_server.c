@@ -114,9 +114,8 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
     //create the tag t_w as a string 
     TAG tag_w; 
-    string_to_tag(tag_w_str, &tag_w);
     get_string_frame(tag_w_str, frames, "tag");
-    printf("=============> 3 %s\n", tag_w_str);
+    string_to_tag(tag_w_str, &tag_w);
 
     if( DEBUG_MODE ) printf("\t\t INSIDE WRITE PUT\n");
 
@@ -136,13 +135,10 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
     void *key, *newkey;    
     void *value;
     for(key= zlist_first(r_tr_keys);  key!= NULL; key=zlist_next(r_tr_keys) ) {
-         printf("==============================> 5 %d==\n", empty);
          value  = zhash_lookup(readerc, (const char *)key);
-         printf("===============================> 6\n");
          if(  compare_tags(tag_w, ((REGREADER *)value)->t_r) >= 0 ) {
-            send_reader_coded_element(worker, ((REGREADER*)value)->readerid, ((REGREADER *)value)->t_r, payload);
+          send_reader_coded_element(worker, ((REGREADER*)value)->readerid, ((REGREADER *)value)->t_r, payload);
 
-            printf("=====================================> 7\n");
             METADATA *h = MetaData_create(tag_w, sender, ID) ;
             newkey = MetaData_keystring(h);
 
@@ -150,13 +146,11 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
          } 
     }
 
-    printf("============================> 5\n");
     //read the local tag
     TAG tag;
     get_object_tag(hash_object_SODAW, object_name, &tag);
 
      // if tw > tag
-    printf("===================================> 6\n");
     if( compare_tags(tag_w, tag)==1 ) {
         if( DEBUG_MODE )printf("\t\tBEHIND\n");
          // get the hash for the object
@@ -187,13 +181,13 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         zhash_insert(temp_hash_hash,tag_w_str, data); 
 
         //count the data size now
-        free(data);
         status->metadata_memory +=  strlen(tag_w_str);
         status->data_memory += (float) size;
     }
 
+    printf("    tag %s\n",tag_w_str);
     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
-    printf("===========================================> 7\n");
+    printf("       tag %s\n",tag_w_str);
     return;
 }
 
