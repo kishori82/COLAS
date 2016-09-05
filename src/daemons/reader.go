@@ -22,7 +22,6 @@ func reader_daemon() {
 
 	var object_name string = "atomic_object"
 
-    
 	for {
 		select {
 		case active := <-active_chan:
@@ -50,7 +49,7 @@ func reader_daemon() {
 
 				start := time.Now()
 
-                fmt.Println("read operation\n")
+				fmt.Println("read operation\n")
 				//log.Println(data.run_id, "READ", string(data.name), data.write_counter)
 				if data.algorithm == "ABD" {
 
@@ -66,14 +65,14 @@ func reader_daemon() {
 
 				// call the ABD algorithm
 				if data.algorithm == "SODAW" {
-                   fmt.Println("INIT READ OP---->\n")
+					fmt.Println("INIT READ OP---->\n")
 					data_read_c = C.SODAW_read(
 						C.CString(object_name),
 						C.CString(data.name),
 						(C.uint)(data.write_counter),
 						C.CString(servers_str),
 						C.CString(data.port))
-                   data_read = C.GoString(data_read_c)
+					data_read = C.GoString(data_read_c)
 				}
 
 				elapsed := time.Since(start)
