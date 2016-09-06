@@ -1,60 +1,52 @@
 package daemons
 
 import (
-	"container/list"
+	utilities "../utilities/GO"
 	"fmt"
+	"github.com/gorilla/mux"
+	"io/ioutil"
+	"log"
 	"math"
+	"math/rand"
+	"net/http"
+	"os"
 	"strconv"
+	"strings"
 )
 
-type Tag struct {
-	z  int
-	id string
+type Params struct {
+	processType    int8
+	init_file_size float64
+
+	readers map[string]bool
+	servers map[string]bool
+	writers map[string]bool
+
+	inter_read_wait_distribution  []string
+	inter_write_wait_distribution []string
+
+	write_rate float64
+	read_rate  float64
+	file_size  float64
+	rand_seed  int64
+
+	active bool
+	port   string
+
+	read_counter, write_counter int64
+	name                        string
+
+	algorithm string
+	run_id    string
+	writeto   string
 }
 
-func PrintHeader(title string) {
-	length := len(title)
-	numSpaces := 22
-	leftHalf := numSpaces + int(math.Ceil(float64(length)/2))
-	rightHalf := numSpaces - int(math.Ceil(float64(length)/2))
-	fmt.Println("***********************************************")
-	fmt.Println("*                                             *")
-	fmt.Print("*")
-	fmt.Printf("%*s", int(leftHalf), title)
-	fmt.Printf("%*s", (int(rightHalf) + 1), " ")
-	fmt.Println("*")
-	fmt.Println("*                                             *")
-	fmt.Println("***********************************************")
-}
+var data Params
+var DELIM string = "_"
 
-/**
-* Print out a footer to the screen
- */
-func PrintFooter() {
-	fmt.Println("***********************************************")
-}
+var active_chan chan bool
+var reset_chan chan bool
 
-func Print_configuration(proc_type uint64, ip_addrs *list.List) {
-
-	if proc_type == 0 {
-		//fmt.Printf("Process Type: %d\n", proc_type)
-		fmt.Printf("Process Reader \n")
-	}
-
-	if proc_type == 1 {
-		fmt.Printf("Process Writer \n")
-	}
-	if proc_type == 2 {
-		fmt.Printf("Process Server \n")
-	}
-
-	fmt.Println("IP Addresses: ")
-	for e := ip_addrs.Front(); e != nil; e = e.Next() {
-		fmt.Printf("    %s\n", e.Value)
-	}
-}
-
-<<<<<<< HEAD
 func create_server_list_string() string {
 	var serverList string
 	i := 0
@@ -539,7 +531,6 @@ func SetWriteTo(w http.ResponseWriter, r *http.Request) {
 		send_command_to_processes(data.readers, "SetWriteTo", ip)
 		send_command_to_processes(data.servers, "SetWriteTo", ip)
 	}
-
 }
 
 // set file size
@@ -629,12 +620,12 @@ func InitializeParameters() {
 	//data.inter_read_wait_distribution = []string{"erlang", "1", "1"}
 	//data.inter_write_wait_distribution = []string{"erlang", "1", "1"}
 
-	data.inter_read_wait_distribution = []string{"const", "500"}
-	data.inter_write_wait_distribution = []string{"const", "500"}
+	data.inter_read_wait_distribution = []string{"const", "100"}
+	data.inter_write_wait_distribution = []string{"const", "100"}
 
 	data.write_rate = 0.6
 	data.read_rate = 0.6
-	data.file_size = 2000.04
+	data.file_size = 0.1
 	data.init_file_size = 0.4
 	data.rand_seed = 1
 	data.read_counter = 0
@@ -648,37 +639,13 @@ func InitializeParameters() {
 	data.writeto = "ram"
 	data.name = "default"
 
-	//	data.servers[string("172.17.0.2")] = true
-	//	data.servers[string("172.17.0.3")] = true
-	//	data.servers[string("172.17.0.4")] = true
 	data.active = false
 }
 
-func rand_wait_time_const(distrib []string) int64 {
-
-	k, err := strconv.ParseInt(distrib[1], 10, 64)
-	if err != nil {
-		return 100
-	}
-
-	return k
-}
-
-=======
->>>>>>> cd296ffdc54f5087a45c6bec82f0734e00669bf5
-func rand_wait_time() int64 {
-
-	var rand_dur int64
-	if data.processType == 0 {
-		rand_wait_time_const := func(distrib []string) int64 {
-			k, err := strconv.ParseInt(distrib[1], 10, 64)
-			if err != nil {
-				return 100
-			}
-			return k
-		}
-		rand_dur = rand_wait_time_const(data.inter_read_wait_distribution)
-	}
-
-	return rand_dur
-}
+/*
+	TODO:
+	* fmt.Fprintf(w, response) in the Get functions
+	* test if the docker compose works
+	* push to master github
+	* push to dockershub
+*/
