@@ -185,9 +185,8 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         status->data_memory += (float) size;
     }
 
-    printf("    tag %s\n",tag_w_str);
     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
-    printf("       tag %s\n",tag_w_str);
+    printf("        <--- sending  --- %s\n",tag_w_str);
     return;
 }
 
@@ -249,8 +248,8 @@ void algorithm_SODAW_READ_DISPERSE(char *ID, zmsg_t *msg, void *worker, char *cl
     _zframe_str(tag_frame, readerid_str) ;
 
     METADATA *h = MetaData_create(tag_w, serverid_str, readerid_str);
-    REGREADER *r_tr = RegReader_create(tag_w, client);
 
+    REGREADER *r_tr = RegReader_create(tag_w, client);
     char *r_tr_key = RegReader_keystring(r_tr);
      
 
@@ -301,35 +300,88 @@ void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,  void *worker) {
      printf("        READ_GET %d\n", opnum);
      send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
+     printf("        <--- sending  --- %s\n",tag_buf);
 }
 
-void algorithm_SODAW_READ_VALUE( zmsg_t *msg, void *worker, char *object_name) {
+
+
+
+void algorithm_SODAW_READ_VALUE( zframe_t *frames, void *worker) {
      char buf[100];
-     TAG tag;
-     get_object_tag(hash_object_SODAW, object_name, &tag); 
+     char sender[100];
+     char ID[100];
+     char object_name[100];
 
-     tag_to_string(tag, buf);
-     zframe_t *tag_frame= zframe_new(buf, strlen(buf));
-     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
-     zframe_destroy(&tag_frame);
 
-     zhash_t *temp_hash_hash = zhash_lookup(hash_object_SODAW, object_name);
+     TAG tag0;
+     init_tab(&tag0);
 
-     zlist_t *keys = zhash_keys(temp_hash_hash);
+     get_string_frame(sender, frames, "sender");
 
-     assert((int)zlist_size(keys)==1);
-        
-     void *key = zlist_first(keys);
-     
-     assert(key!=NULL);
-     void *item = zhash_lookup(temp_hash_hash,key);
+     get_string_frame(object_name, frames, "ID");
 
-     zframe_t *data_frame= zframe_new((char *)item, strlen(item));
-     zframe_send(&data_frame, worker, ZFRAME_REUSE);
-     
-     zframe_destroy(&data_frame);
+     METADATA *h = MetaData_create(tag, client, ID);
+     char *h_str = MetaData_keystring(h);
+
+     if( zhash_lookup(metadata, h_str)!=NULL )  {
+          zlist_t *Hr = metadata_with_reader(metadata, sender);
+          metadata_remove_keys(metadata, Hr);
+     } else {
+          TAG tag_r;
+          get_tag_frame(&tag_r, frames);
+          REGREADER *r_tr = RegReader_create(tag_r, sender);
+          char *r_tr_key = RegReader_keystring(r_tr);
+          zhash_insert(readerc, r_tr_key, (void *)r_tr);
+
+          TAG tag_loc;
+          get_string_frame(object_name, frames, "object");
+          get_object_tag(hash_object_SODAW, object_name, &tag_loc);
+          char *payload;
+          get_object_value(hash_object_SODAW, object_name, &payload);
+
+          if( compare_tags(tag_loc, tag_r)>=0 ) {
+               send_reader_coded_element(worker, tag_loc.readerid, tag_loc.t_r, payload);
+
+               METADATA *h = MetaData_create(tag_loc, status->serverid, ID) ;
+               char *newkey = MetaData_keystring(h);
+               zhash_insert((void *)metadata, (const char *)newkey, (void *)h);
+
+          }
+          // medatat READE_DISPWERSE
+          metadata_send(h);
+     }
+
+     destroy_frames(frames);
+}
+
+
+void metadata_send(METADATA *h) {
+
 
 }
+
+void create_metadata_sending_sockets() {
+    int num_servers = count_num_servers(status->servers_str);
+    char **servers = create_server_names(status->servers_str);
+
+    zctx_t *ctx  = zctx_new();
+    void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
+    zctx_set_linger(ctx, 0);
+    assert (sock_to_servers);
+
+    zsocket_set_identity(sock_to_servers,  status->server_id);
+ 
+    for(j=0; j < num_servers; j++) {
+        char *destination = create_destination(servers[j], port);
+        int rc = zsocket_connect(sock_to_servers, destination);
+        assert(rc==0);
+        free(destination);
+    }
+   
+    status->sock_to_servers = sock_to_servers;
+}
+
+
 
 void algorithm_SODAW(zhash_t *frames, void *worker, void *server_args) {
      char phasebuf[100];
@@ -366,21 +418,20 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *server_args) {
 
       if( strcmp(phasebuf, READ_GET)==0)  {
            printf("\tSODAW READ_GET\n");
-           printf("\tSODAW READ_GET from client %s\n",buf);
-
-        //   algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(msg, frames, worker, object_name);
+           algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(frames, worker);
       }
 
       if( strcmp(phasebuf, READ_VALUE)==0)  {
            printf("\t-----------------\n");
            printf("\tSODAW READ VALUE\n");
-        //   algorithm_SODAW_READ_COMPLETE(msg, worker, object_name);
+           algorithm_SODAW_READ_VALUE(frames, worker);
       }
 
 
       if( strcmp(phasebuf, READ_COMPLETE)==0)  {
            printf("\t-----------------\n");
            printf("\tSODAW READ VALUE\n");
+        //   algorithm_SODAW_READ_COMPLETE(msg, worker, object_name);
          //  algorithm_SODAW_READ_VALUE(msg, worker, object_name);
       }
 

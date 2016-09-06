@@ -73,7 +73,7 @@ func reader_daemon() {
 						(C.uint)(data.write_counter),
 						C.CString(servers_str),
 						C.CString(data.port))
-                   data_read = C.GoString(data_read_c)
+            data_read = C.GoString(data_read_c)
 				}
 
 				elapsed := time.Since(start)

@@ -308,7 +308,12 @@ zhash_t *destroy_frames(zhash_t *frames) {
      char *key;
      for(  key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
            zframe_t *frame = zhash_lookup(frames, key);         
-           if( frame!= NULL) zframe_destroy(&frame);
+           if( frame!= NULL) {
+              zframe_destroy(&frame);
+              printf(" ------------key %s\n",key);
+              zhash_delete(frames, key);
+              free(key); 
+           }
      }
 }
 

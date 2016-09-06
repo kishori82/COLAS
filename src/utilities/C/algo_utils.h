@@ -23,6 +23,7 @@ typedef struct _SERVER_STATUS {
 
 typedef struct _SERVER_ARGS {
     char *init_data;
+    char serverid[100];
     SERVER_STATUS *status;
 } SERVER_ARGS;
 

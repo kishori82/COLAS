@@ -82,10 +82,12 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
     while (true) {
         //  The DEALER socket gives us the reply envelope and message
    //     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
+
         int rc = zmq_poll(items, 1, -1);
         if( rc < 0 || s_interrupted ) {
              exit(0);
         }
+        
         zclock_sleep(5);
         if (items[0].revents & ZMQ_POLLIN) {
            zmsg_t *msg = zmsg_recv (worker);
@@ -125,6 +127,7 @@ int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *
 
    SERVER_ARGS *server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
    server_args->init_data = init_data;
+   strcpy(server_args->server_id, server_id);
 
    status = _status;
 
