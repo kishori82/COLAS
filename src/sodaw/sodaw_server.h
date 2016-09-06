@@ -28,6 +28,10 @@ char *create_a_key_from_metadata(METADATA *m) ;
 
 char *create_a_key_from_readerc(REGREADER *m);
 
+void  metadata_remove_keys(zhash_t *metadata, zlist_t *Hr) ;
 
+zlist_t *metadata_with_reader(zhash_t *metadata, char *sender) ;
+
+void metadata_disperse(char *object_namae, char *algorithm, METADATA *h);
 
 #endif

@@ -165,9 +165,6 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *server_args) {
      char phase_buf[100];
      char object_name[100];
 
-     char tag[10]; 
-     int  round;
-
      printf("algorithm ABD\n");
 
      get_string_frame(phase_buf, frames, "phase");

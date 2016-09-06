@@ -22,6 +22,7 @@
 extern int s_interrupted;
 
 SERVER_STATUS *status;
+SERVER_ARGS *server_args;
 
 #ifdef ASLIBRARY
 
@@ -49,7 +50,6 @@ void *server_task (void *server_args)
     zsocket_bind (backend, "inproc://backend");
 
     //  Launch pool of worker threads, precise number is not critical
-    int thread_nbr;
  //   for (thread_nbr = 0; thread_nbr < 5; thread_nbr++)
     zthread_fork (ctx, server_worker, server_args);
 
@@ -66,14 +66,9 @@ void *server_task (void *server_args)
 static void
 server_worker (void *server_args, zctx_t *ctx, void *pipe)
 {
-    int i, j;
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
     zsocket_connect(worker, "inproc://backend");
     char algorithm_name[100];
-    char senderbuf[100];
-    char object_name[100];
-    char tag[10]; 
-    int  round;
 
     
     printf("Initial value size %ld\n", strlen( ((SERVER_ARGS *)server_args)->init_data));
@@ -119,15 +114,14 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
 
 int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *_status)
 {
-   int i ; 
-
    ID=server_id;
 
    s_catch_signals();
 
-   SERVER_ARGS *server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
+   server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
    server_args->init_data = init_data;
-   strcpy(server_args->server_id, server_id);
+   server_args->port = port;
+   server_args->server_id= server_id;
 
    status = _status;
 

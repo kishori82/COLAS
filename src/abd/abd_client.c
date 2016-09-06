@@ -32,11 +32,8 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
 
     // send out the messages to all servers
 
-    char buf[400];
-    char algorithm[100];
     char phase[100];
     char tag_str[100];
-    char buf1[400];
     int round;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
@@ -114,7 +111,7 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
 
 // this fetches the max tag and value
 
-TAG get_max_tag_value_phase(
+void  get_max_tag_value_phase(
             char *obj_name, 
             unsigned int op_num, 
             zsock_t *sock_to_servers,  
@@ -129,13 +126,10 @@ TAG get_max_tag_value_phase(
     // send out the messages to all servers
 
     char buf[400];
-    char algorithm[64];
     char phase[64];
     char tag_str[64];
-    char buf1[400];
     char *value=NULL;
     int round;
-    int size;
 
     TAG *tag;
 
@@ -208,7 +202,6 @@ TAG get_max_tag_value_phase(
 
                 //value
                 zframe_t *value_frame = zmsg_pop(msg);
-                size = zframe_size(value_frame);    
                 if( value !=NULL) free(value);
                 value = (char *)malloc(  (zframe_size(value_frame) + 1)*sizeof(char) );
                 _zframe_str(value_frame, value);
@@ -263,12 +256,8 @@ TAG write_value_phase(
                    )
 {
     // send out the messages to all servers
-    char buf[400];
-    char algorithm[100];
     char phase[100];
     char tag_str[100];
-    char buf1[400];
-    char *value;
     
 
     int round;
@@ -306,10 +295,7 @@ TAG write_value_phase(
 
     unsigned int majority =  ceil((num_servers+1)/2);
      unsigned int responses =0;
-     int j =0;
-     zlist_t *tag_list = zlist_new();
      
-     TAG *tag;
      while (true) {
         //  Tick once per second, pulling in arriving messages
             

@@ -23,7 +23,11 @@ typedef struct _SERVER_STATUS {
 
 typedef struct _SERVER_ARGS {
     char *init_data;
-    char serverid[100];
+    char *server_id;
+    char *servers_str;
+    char *port;
+    void *sock_to_servers; 
+    int num_servers;
     SERVER_STATUS *status;
 } SERVER_ARGS;
 
@@ -84,6 +88,8 @@ void free_items_in_list( zlist_t *list) ;
 
 int  get_object_tag(zhash_t *hash, char * object_name, TAG *tag) ;
 
+char * get_object_value(zhash_t *hash, char * object_name, TAG tag) ;
+
 char **create_server_names(char *servers_str) ;
 
 unsigned int count_num_servers(char *servers_str) ;
@@ -95,11 +101,11 @@ int  get_string_frame(char *buf, zhash_t *frames,  const char *str);
 
 int  get_int_frame(zhash_t *frames, const char *str);
 
-zhash_t *destroy_frames(zhash_t *frames);
+void destroy_frames(zhash_t *frames);
 
 enum SEND_TYPE {SEND_MORE, SEND_FINAL};
 
-zhash_t *send_frames(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
+void send_frames(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
 
 #endif
 

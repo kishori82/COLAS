@@ -15,6 +15,7 @@
 char b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* decodeblock - decode 4 '6-bit' characters into 3 8-bit binary bytes */
+/*
 void decodeblockold(unsigned char in[], char *clrstr) {
   unsigned char out[4];
   out[0] = in[0] << 2 | in[1] >> 4;
@@ -23,6 +24,7 @@ void decodeblockold(unsigned char in[], char *clrstr) {
   out[3] = '\0';
   strncat(clrstr, out, sizeof(out));
 }
+*/
 
 void decodeblock(unsigned char in[], char *clrstr, int *pos) {
   unsigned char out[4];
@@ -65,6 +67,7 @@ void b64_decode(char *b64src, char *clrdst) {
 }
 
 /* encodeblock - encode 3 8-bit binary bytes as 4 '6-bit' characters */
+/*
 void encodeblockold( unsigned char in[], char b64str[], int len, int *pos ) {
     unsigned char out[5];
     out[0] = b64[ in[0] >> 2 ];
@@ -75,6 +78,7 @@ void encodeblockold( unsigned char in[], char b64str[], int len, int *pos ) {
     out[4] = '\0';
     strncat(b64str, out, sizeof(out));
 }
+*/
 
 
 /* encodeblock - encode 3 8-bit binary bytes as 4 '6-bit' characters */
