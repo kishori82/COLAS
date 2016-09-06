@@ -27,18 +27,6 @@ typedef struct _SERVER_ARGS {
     SERVER_STATUS *status;
 } SERVER_ARGS;
 
-
-void _zframe_int(zframe_t *f, int *i) ;
-
-
-void _zframe_str(zframe_t *f, char *buf) ;
-
-void _zframe_value(zframe_t *f, char *buf) ;
-
-char *create_destinations(char **servers, unsigned int num_servers, char *port, char type) ;
-
-char *create_destination(char *server, char *port) ;
-
 typedef struct  _TAG {
     int z;
     char id[100];
@@ -49,6 +37,20 @@ typedef struct  _TAG_VALUE {
     void *data;
     int size;
 }  TAG_VALUE;
+
+
+void _zframe_int(zframe_t *f, int *i) ;
+
+int  get_tag_frame(zhash_t *frames, TAG *tag);
+
+void _zframe_str(zframe_t *f, char *buf) ;
+
+void _zframe_value(zframe_t *f, char *buf) ;
+
+char *create_destinations(char **servers, unsigned int num_servers, char *port, char type) ;
+
+char *create_destination(char *server, char *port) ;
+
 
 void init_tag(TAG *tag) ;
 
