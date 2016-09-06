@@ -22,11 +22,10 @@ extern int s_interrupted;
 
 #define WRITE_GET "WRITE_GET"
 #define WRITE_PUT "WRITE_PUT"
+#define READ_COMPLETE "READ_COMPLETE"
 #define READ_GET "READ_GET"
 #define READ_VALUE "READ_VALUE"
-#define READ_COMPLETE "READ_COMPLETE"
 
-#
 
 // this fethers the max tag
 TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num, 
@@ -345,6 +344,42 @@ void SODAW_write_put_phase(
      }
 }
 
+// this is the write tag value phase of SODAW
+void SODAW_read_complete_phase(  
+                      char *obj_name,
+                      char *reader_id, 
+                      zsock_t *sock_to_servers,  
+                      char **servers, 
+                      unsigned int num_servers, 
+                      char *port, 
+                      TAG max_tag   // for read it is max and for write it is new
+                   )
+{
+    // send out the messages to all servers
+    char tag_str[100];
+
+    zframe_t *object_name_frame = zframe_new(obj_name, strlen(obj_name));
+    zframe_t *algorithm_frame = zframe_new("SODAW", strlen("SODAW"));
+    zframe_t *phase_frame = zframe_new(READ_COMPLETE, strlen(READ_COMPLETE));
+
+    tag_to_string(max_tag, tag_str); 
+    zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
+
+    int i; 
+    for(i=0; i < num_servers; i++) {
+       zframe_send(&object_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+       zframe_send(&algorithm_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+       zframe_send(&phase_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+       zframe_send(&tag_frame, sock_to_servers, ZFRAME_REUSE);
+    }
+
+    zframe_destroy(&object_name_frame);
+    zframe_destroy(&algorithm_frame);
+    zframe_destroy(&phase_frame);
+    zframe_destroy(&tag_frame);
+}
+
+
 
 // SODAW write
 bool SODAW_write(
@@ -440,7 +475,6 @@ char *SODAW_read(
                 char *obj_name,
                 char *reader_id, 
                 unsigned int op_num ,
-//                char *payload, 
                 char *servers_str, 
                 char *port
              )
@@ -516,6 +550,18 @@ char *SODAW_read(
             port, 
             read_tag 
         );
+
+
+   SODAW_read_complete_phase(
+            obj_name, 
+            reader_id,
+            sock_to_servers,  
+            servers, 
+            num_servers, 
+            port, 
+            read_tag 
+        );
+
 
 
     zsocket_destroy(ctx, sock_to_servers);

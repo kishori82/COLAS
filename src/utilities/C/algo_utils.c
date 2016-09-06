@@ -5,6 +5,7 @@
 #define READ_GET "READ_GET"
 #define READ_VALUE "READ_VALUE"
 #define READ_COMPLETE "READ_COMPLETE"
+#define READ_DISPERSE "READ_DISPERSE"
 
 #
 void _zframe_int(zframe_t *f, int *i) {
@@ -283,15 +284,26 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
 
      zframe_t *algorithm_frame= zmsg_pop (msg);
      zhash_insert(frames, "algorithm", (void *)algorithm_frame);
+     get_string_frame(algorithm_name, frames, "algorithm");
 
      zframe_t *phase_frame= zmsg_pop (msg);
      zhash_insert(frames, "phase", (void *)phase_frame);
+     get_string_frame(phase_name, frames, "phase");
+
+     if( strcmp(phase_name, READ_DISPERSE) ==0 ) {
+        return;
+     }
+
+     if( strcmp(phase_name, READ_COMPLETE) ==0 ) {
+        zframe_t *tag_frame= zmsg_pop (msg);
+        zhash_insert(frames, "tag", (void *)tag_frame);
+
+        return;
+     }
 
      zframe_t *opnum_frame= zmsg_pop (msg);
      zhash_insert(frames, "opnum", (void *)opnum_frame);
 
-     get_string_frame(algorithm_name, frames, "algorithm");
-     get_string_frame(phase_name, frames, "phase");
 
      if( strcmp(algorithm_name, "ABD") ==0 ) {
          if( strcmp(phase_name, WRITE_VALUE) ==0 ) {

@@ -28,6 +28,7 @@ typedef struct _SERVER_ARGS {
     char *port;
     void *sock_to_servers; 
     int num_servers;
+    int K;
     SERVER_STATUS *status;
 } SERVER_ARGS;
 

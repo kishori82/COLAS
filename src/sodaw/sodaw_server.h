@@ -30,8 +30,13 @@ char *create_a_key_from_readerc(REGREADER *m);
 
 void  metadata_remove_keys(zhash_t *metadata, zlist_t *Hr) ;
 
-zlist_t *metadata_with_reader(zhash_t *metadata, char *sender) ;
+void  regreader_remove_key(zhash_t *readerc, char *reader) ;
+
+zlist_t *metadata_with_reader(zhash_t *metadata, char *reader) ;
+
+zlist_t *metadata_with_tag_reader(zhash_t *metadata, TAG tag, char *reader) ;
 
 void metadata_disperse(char *object_namae, char *algorithm, METADATA *h);
 
+void create_metadata_sending_sockets() ;
 #endif

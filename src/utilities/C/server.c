@@ -118,12 +118,12 @@ int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *
 
    s_catch_signals();
 
+   status = _status;
+
    server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
    server_args->init_data = init_data;
    server_args->port = port;
    server_args->server_id= server_id;
-
-   status = _status;
 
    zthread_new(server_task, (void *)server_args);
    printf("Starting the thread id %s\n", server_id);
