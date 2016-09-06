@@ -124,14 +124,14 @@ func send_command_to_process(ipaddr string, route string, param string) string {
 	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
-	 	 //log.Fatal(err)
-	 	 fmt.Println(err)
+		//log.Fatal(err)
+		fmt.Println(err)
 	}
 	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-	//	log.Fatal(err)
-	 	 fmt.Println(err)
+		//	log.Fatal(err)
+		fmt.Println(err)
 	}
 	return string(contents)
 }
@@ -326,7 +326,7 @@ func SetServers(w http.ResponseWriter, r *http.Request) {
 		data.servers[ips[i]] = true
 	}
 
-  fmt.Println(" servers  ", data.processType);
+	fmt.Println(" servers  ", data.processType)
 	if data.processType == 3 {
 		var clients map[string]bool = data.servers
 		serverListStr := create_server_list_string()
@@ -462,7 +462,6 @@ func SetAlgorithm(w http.ResponseWriter, r *http.Request) {
 		send_command_to_processes(data.servers, "SetAlgorithm", data.algorithm)
 	}
 }
-
 
 //set randdom seed to a controller and then set random seed  each
 // writer and readers
@@ -670,12 +669,12 @@ func InitializeParameters() {
 	//data.inter_read_wait_distribution = []string{"erlang", "1", "1"}
 	//data.inter_write_wait_distribution = []string{"erlang", "1", "1"}
 
-	data.inter_read_wait_distribution = []string{"const", "100"}
-	data.inter_write_wait_distribution = []string{"const", "100"}
+	data.inter_read_wait_distribution = []string{"const", "500"}
+	data.inter_write_wait_distribution = []string{"const", "500"}
 
 	data.write_rate = 0.6
 	data.read_rate = 0.6
-	data.file_size = 5.04
+	data.file_size = 2000.04
 	data.init_file_size = 0.4
 	data.rand_seed = 1
 	data.read_counter = 0
@@ -687,11 +686,11 @@ func InitializeParameters() {
 	data.algorithm = "SODAW"
 	data.run_id = "DEFULT_RUN"
 	data.writeto = "ram"
-    data.name = "default"
+	data.name = "default"
 
-//	data.servers[string("172.17.0.2")] = true
-//	data.servers[string("172.17.0.3")] = true
-//	data.servers[string("172.17.0.4")] = true
+	//	data.servers[string("172.17.0.2")] = true
+	//	data.servers[string("172.17.0.3")] = true
+	//	data.servers[string("172.17.0.4")] = true
 	data.active = false
 }
 

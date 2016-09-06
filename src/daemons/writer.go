@@ -8,7 +8,7 @@ import (
 	"log"
 	//	"math/rand"
 	"time"
-	//	"unsafe"
+	"unsafe"
 )
 
 /*
@@ -44,11 +44,17 @@ func writer_deamon() {
 
 				rand_data := make([]byte, rand_data_file_size)
 				_ = utilities.Generate_random_data(rand_data, rand_data_file_size)
+
 				encoded := base64.StdEncoding.EncodeToString(rand_data)
 
+				_ = encoded
+				_ = object_name
+
 				rawdata := C.CString(encoded)
+
+				//	defer C.free(unsafe.Pointer(&rawdata))
 				servers_str := create_server_string_to_C()
-				//defer C.free(unsafe.Pointer(&rawdata))
+				defer C.free(unsafe.Pointer(&rawdata))
 				start := time.Now()
 				//log.Println(len( C.GoString(rawdata)), servers_str)
 				if data.algorithm == "ABD" {
@@ -72,8 +78,10 @@ func writer_deamon() {
 				log.Println(data.run_id, "WRITE", string(data.name), data.write_counter,
 					rand_wait/int64(time.Millisecond), elapsed, len(encoded))
 
+				C.free(unsafe.Pointer(rawdata))
+				rawdata = nil
+
 				data.write_counter += 1
-				//			C.free(unsafe.Pointer(&rawdata))
 			} else {
 				time.Sleep(5 * 1000 * time.Microsecond)
 			}

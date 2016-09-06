@@ -33,4 +33,8 @@ char *SODAW_read(char *obj_name,
 
 zhash_t *receive_message_frames_from_server_SODAW(zmsg_t *msg)  ;
 
+
+char *number_responses_at_least(zhash_t *received_data, unsigned int atleast);
+
+
 #endif
