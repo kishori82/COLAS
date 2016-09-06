@@ -229,6 +229,18 @@ int  get_int_frame(zhash_t *frames, const char *str)  {
       return val;     
 }
 
+int  get_tag_frame(zhash_t *frames, TAG *tag)  {
+      zframe_t *frame= zhash_lookup(frames, "tag");
+
+      if( frame==0) { return 0;}
+
+      _zframe_int(frame, &tag->z) ;
+      _zframe_str(frame, tag->id) ;
+
+      return 1;     
+}
+
+
 
 zhash_t *receive_message_frames(zmsg_t *msg)  {
      char algorithm_name[100];
@@ -274,8 +286,6 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
            zhash_insert(frames, "payload", (void *)payload_frame);
          }
      }
-
-
 
 
      return frames;
