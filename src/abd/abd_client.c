@@ -273,6 +273,7 @@ TAG write_value_phase(
 
     tag_to_string(max_tag, tag_str); 
     zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
+    printf("      \t writing tag : %s\n", tag_str);
 
     zframe_t *payload_frame = zframe_new(payload, size);
 
@@ -357,7 +358,7 @@ bool ABD_write(
 
     b64_decode(payload, myb64);
 
-    printf("Base64 Encoded string  : %s\n", payload);
+    printf("Base64 Encoded string len  : %d\n", strlen(payload));
     printf("Server string   : %s\n", servers_str);
     printf("Port to Use     : %s\n", port);
 
@@ -397,7 +398,7 @@ bool ABD_write(
 
    printf("     WRITE_VALUE (WRITER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
-                     num_servers, port, payload, size, max_tag);
+                     num_servers, port, payload, size, new_tag);
 
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);

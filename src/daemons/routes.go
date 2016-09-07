@@ -620,8 +620,8 @@ func InitializeParameters() {
 	//data.inter_read_wait_distribution = []string{"erlang", "1", "1"}
 	//data.inter_write_wait_distribution = []string{"erlang", "1", "1"}
 
-	data.inter_read_wait_distribution = []string{"const", "500"}
-	data.inter_write_wait_distribution = []string{"const", "500"}
+	data.inter_read_wait_distribution = []string{"const", "100"}
+	data.inter_write_wait_distribution = []string{"const", "100"}
 
 	data.write_rate = 0.6
 	data.read_rate = 0.6
