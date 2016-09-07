@@ -500,23 +500,17 @@ zhash_t *receive_message_frames_from_server_ABD(zmsg_t *msg)  {
      
 
      if( strcmp(algorithm_name, "ABD") ==0 ) {
+         zframe_t *tag_frame= zmsg_pop (msg);
+         zhash_insert(frames, "tag", (void *)tag_frame);
+         get_string_frame(buf, frames, "tag");
+
          if( strcmp(phase_name, GET_TAG) ==0 ) {
-           zframe_t *tag_frame= zmsg_pop (msg);
-           zhash_insert(frames, "tag", (void *)tag_frame);
-           get_string_frame(buf, frames, "tag");
          }
 
          if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
-           zframe_t *tag_frame= zmsg_pop (msg);
-           zhash_insert(frames, "tag", (void *)tag_frame);
-           get_string_frame(buf, frames, "tag");
          }
 
          if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
-           zframe_t *tag_frame= zmsg_pop (msg);
-           zhash_insert(frames, "tag", (void *)tag_frame);
-           get_string_frame(buf, frames, "tag");
-
            zframe_t *payload_frame= zmsg_pop (msg);
            zhash_insert(frames, "payload", (void *)payload_frame);
          }
