@@ -135,7 +135,7 @@ func stop(c *cli.Context) error {
 	_, _, _, controllers := getIPAddresses()
 	sendCommandToControllers(controllers, "StopReaders", "")
 	sendCommandToControllers(controllers, "StopWriters", "")
-	sendCommandToControllers(controllers, "StopServers", "")
+	//sendCommandToControllers(controllers, "StopServers", "")
 	return nil
 }
 
@@ -148,7 +148,7 @@ func start(c *cli.Context) error {
 	_, _, _, controllers := getIPAddresses()
 	sendCommandToControllers(controllers, "StartReaders", "")
 	sendCommandToControllers(controllers, "StartWriters", "")
-	sendCommandToControllers(controllers, "StartServers", "")
+//	sendCommandToControllers(controllers, "StartServers", "")
 	return nil
 }
 

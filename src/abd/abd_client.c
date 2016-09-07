@@ -141,6 +141,8 @@ void  get_max_tag_value_phase(
     zframe_t *phase_frame = zframe_new(GET_TAG_VALUE, 13);
     zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
 
+     //!! TODO: This is strange  
+    //this is for the round robin of the dealier
     for(i=0; i < num_servers; i++) {
        zframe_send(&obj_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        zframe_send(&algo, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
@@ -154,14 +156,12 @@ void  get_max_tag_value_phase(
     zframe_destroy(&phase_frame);
     zframe_destroy(&op_num_frame);
 
-//    zframe_destroy (&payloadf);
     unsigned int majority =  ceil(((float)num_servers+1)/2);
-//     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
      unsigned int responses =0;
      zlist_t *tag_list = zlist_new();
      
      while (true) {
-        //  Tick once per second, pulling in arriving messages
+            //  Tick once per second, pulling in arriving messages
             
            // zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
             printf("      \treceiving data\n");
@@ -170,7 +170,7 @@ void  get_max_tag_value_phase(
                 printf("Interrupted!\n");
                 exit(0);
             }
-           // zclock_sleep(300); 
+
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
 
