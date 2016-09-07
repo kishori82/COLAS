@@ -192,31 +192,54 @@ char *SODAW_read_value(
                 TAG tag;
                 get_tag_frame(frames, &tag);
 
+                printf("done\n"); return NULL; 
                 printf("phase and tag %s %s\n", phase, tag_str);
-                if( zhash_lookup(received_data, tag_str)!=NULL) {
-                    zhash_insert(received_data, tag_str,  zlist_new());
+                if( zhash_lookup(received_data, tag_str)==NULL) {
+                    zlist_t *a = zlist_new();
+                    zhash_insert(received_data, tag_str,  (void *)a);
                 }
 
 
                 if(compare_tags(tag, read_tag) >=0 && strcmp(phase, READ_VALUE)==0) {
                    printf("      \treceived data\n");
                    void *payload_frame = zhash_lookup(frames, "payload");
-                   zlist_append(zhash_lookup(received_data, tag_str), (void *)payload_frame);
+                   char str[3000];
+                   get_string_frame(str, frames, "payload");
 
-                   char *decodeableKey = number_responses_at_least(received_data, majority);
-                   if(decodeableKey!= NULL) break;
+                   printf("      \treceived data 1 %s %s\n", tag_str, str);
+
+                   zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, tag_str);
+/*
+                   printf("      \treceived data 1.1 %s   %d\n", tag_str, zhash_size(received_data));
+
+                   printf("      \treceived data majority  1.1 %d %d\n", majority, zlist_size(coded_elements));
+                   printf("      \treceived data majority  1.1 %d %d\n", majority, zlist_size(coded_elements));
+                   printf("      \treceived data majority  1.1 %d %d\n", majority, zlist_size(coded_elements));
+*/
+
+                  // zlist_append( (zlist_t *)coded_elements, payload_frame); 
+                   //if(coded_elements != NULL) zlist_append( (zlist_t *)coded_elements, payload_frame); 
+
+                   printf("      \treceived data 2 %s\n", majority);
+
+//                   char *decodeableKey = number_responses_at_least(received_data, majority);
+
+                   printf("      \treceived data 3\n");
+//                   if(decodeableKey!= NULL) break;
                 }
                 else{
                      printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
 
                 }
-                zmsg_destroy (&msg);
+//                destroy_frames(frames);
+ //               zmsg_destroy (&msg);
             }
      }
   // now we want to decode it
     // value to 
    //comute the max tag now and return 
 
+ 
     return value;
 }
 

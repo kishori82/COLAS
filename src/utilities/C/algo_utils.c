@@ -7,7 +7,6 @@
 #define READ_COMPLETE "READ_COMPLETE"
 #define READ_DISPERSE "READ_DISPERSE"
 
-#
 void _zframe_int(zframe_t *f, int *i) {
     byte *data = zframe_data(f);
     *i = *((int *) data);
@@ -37,7 +36,7 @@ void _zframe_value(zframe_t *f, char *buf) {
 
 unsigned int count_num_servers(char *servers_str) {
     int count = 0;
-    if( servers_str==NULL) return 0;
+    if(strlen(servers_str)==0) return 0;
     count++;
     char *p = servers_str;
     while(*p !='\0') {
@@ -259,13 +258,10 @@ int  get_int_frame(zhash_t *frames, const char *str)  {
 }
 
 int  get_tag_frame(zhash_t *frames, TAG *tag)  {
-      zframe_t *frame= zhash_lookup(frames, "tag");
-
-      if( frame==0) { return 0;}
-
-      _zframe_int(frame, &tag->z) ;
-      _zframe_str(frame, tag->id) ;
-
+      char tag_str[100];
+      get_string_frame(tag_str, frames, "tag");
+      printf("tag str ----- %s\n", tag_str);
+      string_to_tag(tag_str, tag);
       return 1;     
 }
 
@@ -290,22 +286,11 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
      zhash_insert(frames, "phase", (void *)phase_frame);
      get_string_frame(phase_name, frames, "phase");
 
-     if( strcmp(phase_name, READ_DISPERSE) ==0 ) {
-        return;
-     }
-
-     if( strcmp(phase_name, READ_COMPLETE) ==0 ) {
-        zframe_t *tag_frame= zmsg_pop (msg);
-        zhash_insert(frames, "tag", (void *)tag_frame);
-
-        return;
-     }
-
-     zframe_t *opnum_frame= zmsg_pop (msg);
-     zhash_insert(frames, "opnum", (void *)opnum_frame);
-
 
      if( strcmp(algorithm_name, "ABD") ==0 ) {
+         zframe_t *opnum_frame= zmsg_pop (msg);
+         zhash_insert(frames, "opnum", (void *)opnum_frame);
+
          if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
@@ -314,16 +299,56 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
            zhash_insert(frames, "payload", (void *)payload_frame);
 
          }
+         if( strcmp(phase_name, GET_TAG) ==0 ) {
+         }
+
+         if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
+         }
+
      }
 
      if( strcmp(algorithm_name, "SODAW") ==0 ) {
+
+         if( strcmp(phase_name, WRITE_GET) ==0 ) {
+           zframe_t *opnum_frame= zmsg_pop (msg);
+           zhash_insert(frames, "opnum", (void *)opnum_frame);
+         }
+
          if( strcmp(phase_name, WRITE_PUT) ==0 ) {
+           zframe_t *opnum_frame= zmsg_pop (msg);
+           zhash_insert(frames, "opnum", (void *)opnum_frame);
+
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
 
            zframe_t *payload_frame= zmsg_pop (msg);
            zhash_insert(frames, "payload", (void *)payload_frame);
          }
+
+         if( strcmp(phase_name, READ_VALUE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+         }
+
+         if( strcmp(phase_name, READ_DISPERSE) ==0 ) {
+            zframe_t *meta_tag_frame= zmsg_pop (msg);
+            zhash_insert(frames, "meta_tag", (void *)meta_tag_frame);
+
+            zframe_t *serverid_frame= zmsg_pop (msg);
+            zhash_insert(frames, "meta_serverid", (void *)serverid_frame);
+
+            zframe_t *meta_readerid_frame= zmsg_pop (msg);
+            zhash_insert(frames, "meta_readerid", (void *)meta_readerid_frame);
+         }
+
+         if( strcmp(phase_name, READ_COMPLETE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+         }
+
+
+
+
      }
 
 
@@ -335,14 +360,24 @@ void send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...
     char *key;
     va_list valist;
     int i =0;
+    char buf[10000];
 
     va_start(valist, n);
      
     for(i=0; i < n; i++ ) {
         key = va_arg(valist, char *); 
         zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);
-        if( i == n-1 && type==SEND_FINAL) 
+
+        if( frame == NULL) {
+           printf("empty ---------------------------------------------------------->%s\n",key);
+          continue;
+        }
+        get_string_frame(buf, frames, key);
+        printf("%s = %s\n", key, buf);
+        printf("sending ---------------------------------------------------------->%s\n",key);
+        if( i == n-1 && type==SEND_FINAL)  {
             zframe_send(&frame, worker, ZFRAME_REUSE);
+        }
         else
             zframe_send(&frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
     }
@@ -353,15 +388,15 @@ void send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...
 void destroy_frames(zhash_t *frames) {
      zlist_t *keys = zhash_keys(frames);
      char *key;
-     for(  key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
-           zframe_t *frame = zhash_lookup(frames, key);         
+     for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
+           zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);         
            if( frame!= NULL) {
-              zframe_destroy(&frame);
-              printf(" ------------key %s\n",key);
               zhash_delete(frames, key);
-              free(key); 
+
+              if( zframe_is(frame) ) zframe_destroy(&frame);
            }
      }
+     zlist_destroy(&keys);
 }
 
 
@@ -398,6 +433,7 @@ int create_object(zhash_t *object_hash, char *obj_name, char *init_data, SERVER_
         
        //add it to the main list 
        zhash_insert(object_hash, obj_name, (void *)hash_hash); 
+
        return 1;
     }
     return 0;

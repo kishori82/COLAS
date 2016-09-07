@@ -13,6 +13,7 @@
 
 int server_process(
                char *server_id, 
+               char *servers_str, 
                char *port,
                char *init_data,
                SERVER_STATUS *status
