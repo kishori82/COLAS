@@ -112,7 +112,7 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
    
 }
 
-int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *_status)
+int server_process(char *server_id, char *servers_str, char *port, char *init_data, SERVER_STATUS *_status)
 {
    ID=server_id;
 
@@ -122,6 +122,7 @@ int server_process(char *server_id, char *port, char *init_data, SERVER_STATUS *
 
    server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
    server_args->init_data = init_data;
+   server_args->servers_str = servers_str;
    server_args->port = port;
    server_args->server_id= server_id;
 

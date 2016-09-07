@@ -53,7 +53,6 @@ func server_daemon() {
 	status.cpu_load = 0
 	status.time_point = 0
 
-	go C.server_process(C.CString(data.name), C.CString(data.port), init_data, &status)
 	go server_logger(&status)
 
 	time.Sleep(time.Second)
@@ -62,8 +61,12 @@ func server_daemon() {
 		select {
 		case active := <-active_chan:
 			data.active = active
-		case active := <-reset_chan:
-			data.active = active
+			servers_str := create_server_string_to_C()
+		  _ = servers_str	
+
+	    go C.server_process(C.CString(data.name),  C.CString(servers_str), C.CString(data.port), init_data, &status)
+		case _= <-reset_chan:
+			data.active = false
 			data.write_counter = 0
 		default:
 			if data.active == true && len(data.servers) > 0 {
@@ -73,6 +76,10 @@ func server_daemon() {
 			}
 		}
 	}
+
+
+
+
 }
 
 func Server_process(init_file_size float64) {
