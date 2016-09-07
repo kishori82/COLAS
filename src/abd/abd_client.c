@@ -205,7 +205,7 @@ void  get_max_tag_value_phase(
                 if( value !=NULL) free(value);
                 value = (char *)malloc(  (zframe_size(value_frame) + 1)*sizeof(char) );
                 _zframe_str(value_frame, value);
-                printf("\t\tVALUE    : %s\n", value);
+               // printf("\t\tVALUE    : %s\n", value);
 
                 zframe_destroy(&object_frame);
                 zframe_destroy(&algorithm_frame);
@@ -463,7 +463,7 @@ char *ABD_read(
    get_max_tag_value_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port, &max_tag, &payload);
 
    printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
-   printf("\tdata read (%s)\n", payload);
+//   printf("\tsize of data read (%s)\n", strlen(payload));
 
    printf("     WRITE_VALUE (READER)\n");
    int size = strlen(payload);
