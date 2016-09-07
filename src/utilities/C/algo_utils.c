@@ -425,6 +425,7 @@ int create_object(zhash_t *object_hash, char *obj_name, char *init_data, SERVER_
         
        //add it to the main list 
        zhash_insert(object_hash, obj_name, (void *)hash_hash); 
+
        return 1;
     }
     return 0;

@@ -82,6 +82,8 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
         zhash_delete(temp_hash_hash, key);
         free(item);
 
+        printf("=====================data = %f network =%f\n", status->metadata_memory, status->data_memory);
+  
         if( DEBUG_MODE ) printf("\t\t# KEYS AFTER DEL %d\n", (int)zhash_size(temp_hash_hash));
 
         zhash_insert(temp_hash_hash,tag_str, data); 

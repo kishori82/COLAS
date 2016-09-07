@@ -44,16 +44,26 @@ void initialize_SODAW() {
 
 METADATA *MetaData_create(TAG tag, char  *serverid, char *readerid) {
      METADATA *h = (METADATA *)malloc(sizeof(METADATA));
-     h->t_r = tag;
-     h->readerid = (char *)malloc(strlen(readerid)*sizeof(char));
-     h->serverid = (char *)malloc(strlen(serverid)*sizeof(char));
+     h->t_r.z= tag.z;
+     strcpy(h->t_r.id, tag.id);
+
+     h->readerid = (char *)malloc( (strlen(readerid)+1)*sizeof(char));
+     strcpy(h->readerid, readerid);
+
+     h->serverid = (char *)malloc( (strlen(serverid)+1)*sizeof(char));
+     strcpy(h->serverid, serverid);
+
      return h;
 }
 
 REGREADER *RegReader_create(TAG tag, char *readerid) {
      REGREADER *h = (REGREADER *)malloc(sizeof(REGREADER));
-     h->t_r = tag;
-     h->readerid = (char *)malloc(strlen(readerid)*sizeof(char));
+
+     h->t_r.z= tag.z;
+     strcpy(h->t_r.id, tag.id);
+
+     h->readerid = (char *)malloc( (strlen(readerid)+1)*sizeof(char));
+     strcpy(h->readerid, readerid);
      return h;
 }
  char *MetaData_keystring(METADATA *m) {
@@ -63,9 +73,11 @@ REGREADER *RegReader_create(TAG tag, char *readerid) {
     size += strlen(buf);
     buf[size++]='_';
 
+    printf("readerid %s\n", m->readerid);
     strncpy(buf+size, m->readerid, strlen(m->readerid));
     size += strlen(m->readerid);
     buf[size++]='_';
+     
      
     strncpy(buf+size, m->serverid, strlen(m->serverid));
     size += strlen(m->serverid);
@@ -321,14 +333,21 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
 
      METADATA *h = MetaData_create(tag0, server_args->server_id, reader);
      char *h_str = MetaData_keystring(h);
+     
+     tag_to_string(tag0, buf);
+     printf("read value (%s %s %s  %s\n", h_str, buf, server_args->server_id, reader);
 
      if( zhash_lookup(metadata, h_str)!=NULL )  {
+          printf("read value  0 %s\n", h_str);
           zlist_t *Hr = metadata_with_reader(metadata, reader);
+          printf("read value  0.1\n");
           metadata_remove_keys(metadata, Hr);
+          printf("read value  0.2\n");
      } else {
           TAG tag_r;
           get_tag_frame(frames, &tag_r);
 
+          printf("read value  1\n");
           REGREADER *r_tr_pair = RegReader_create(tag_r, reader);
           char *r_tr_key = RegReader_keystring(r_tr_pair);
           zhash_insert(readerc, r_tr_key, (void *)r_tr_pair);
@@ -389,8 +408,11 @@ zlist_t *metadata_with_reader(zhash_t *metadata, char *reader) {
 
     void *key;    
     for(key= zlist_first(metadata_keys);  key!= NULL; key=zlist_next(metadata_keys) ) {
-         void *value  = zhash_lookup(readerc, (const char *)key);
-         if(  strcmp(reader, ((METADATA *)value)->readerid) == 0 ) {
+         printf("metadata %s\n",key);
+         REGREADER *value  = (REGREADER *)zhash_lookup(readerc, (const char *)key);
+          printf("comparing  metadata %s %s %s\n",key, reader, value->readerid );
+         if(  strcmp(reader, value->readerid) == 0 ) {
+            printf("appending metadata %s\n",key);
             zlist_append((void *)relevant_keys, key);
          } 
     }
