@@ -30,18 +30,13 @@ func reader_daemon() {
 			data.active = active
 			data.write_counter = 0
 		default:
-		  log.Println(data.algorithm, data.active, len(data.servers))
 			if data.active == true && len(data.servers) > 0 {
 
 				rand_wait := rand_wait_time()*int64(time.Millisecond) + int64(time.Millisecond)
-				log.Println("OPERATION\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
 
 				time.Sleep(time.Duration(rand_wait))
 
-				//fmt.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait)
-				//log.Println("OPERATION\tREAD", data.name, data.write_counter, "RAND TIME INT", rand_wait/int64(time.Millisecond))
 				servers_str := create_server_string_to_C()
-				//				log.Println("INFO\tUsing Servers\t" + servers_str)
 
 				// call the ABD algorithm
 				var data_read string
@@ -50,7 +45,6 @@ func reader_daemon() {
 				start := time.Now()
 				if data.algorithm == "ABD" {
 
-				log.Println("ABD\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
 
 					data_read_c = C.ABD_read(
 						C.CString(object_name),
@@ -59,28 +53,25 @@ func reader_daemon() {
 						C.CString(servers_str),
 						C.CString(data.port))
 
-			    log.Println("ABD 1\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
 					data_read = C.GoString(data_read_c)
-				  log.Println("ABD 2\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
 					//            C.free(unsafe.Pointer(&data_read_c))
 				}
 
 				// call the SODAW algorithm
-				log.Println("SODA\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
-				if data.algorithm == "SODAW" {
-				   log.Println("SODA\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
+				if data.algorithm == "SODAWX" {
 					data_read_c = C.SODAW_read(
 						C.CString(object_name),
 						C.CString(data.name),
 						(C.uint)(data.write_counter),
 						C.CString(servers_str),
 						C.CString(data.port))
+
             data_read = C.GoString(data_read_c)
 				}
 
-				log.Println("BEFORE LOGSODA\tSLEEP (millisecond)\t", rand_wait/int64(time.Millisecond))
 				elapsed := time.Since(start)
 				log.Println(data.run_id, "READ", string(data.name), data.write_counter, rand_wait/int64(time.Millisecond), elapsed, len(data_read))
+				time.Sleep(5 * 1000 * time.Microsecond)
 			  C.free(unsafe.Pointer(data_read_c))
 
 				data.write_counter += 1
@@ -104,5 +95,6 @@ func Reader_process(ip_addrs *list.List) {
 
 	log.Println("INFO\tStarting reader process\n")
 	log.Println("INFO\tTIME in Milliseconds\n")
+
 	reader_daemon()
 }

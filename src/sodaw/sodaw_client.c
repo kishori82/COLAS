@@ -220,7 +220,7 @@ char *SODAW_read_value(
                   // zlist_append( (zlist_t *)coded_elements, payload_frame); 
                    //if(coded_elements != NULL) zlist_append( (zlist_t *)coded_elements, payload_frame); 
 
-                   printf("      \treceived data 2 %s\n", majority);
+                   printf("      \treceived data 2 %d\n", majority);
 
 //                   char *decodeableKey = number_responses_at_least(received_data, majority);
 
