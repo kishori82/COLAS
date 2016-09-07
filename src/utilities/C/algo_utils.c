@@ -368,13 +368,9 @@ void send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...
         key = va_arg(valist, char *); 
         zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);
 
-        if( frame == NULL) {
-           printf("empty ---------------------------------------------------------->%s\n",key);
-          continue;
-        }
+        assert(zframe_is(frame));
         get_string_frame(buf, frames, key);
-        printf("%s = %s\n", key, buf);
-        printf("sending ---------------------------------------------------------->%s\n",key);
+        //printf("%s = %s\n", key, buf);
         if( i == n-1 && type==SEND_FINAL)  {
             zframe_send(&frame, worker, ZFRAME_REUSE);
         }
@@ -431,6 +427,7 @@ int create_object(zhash_t *object_hash, char *obj_name, char *init_data, SERVER_
        status->metadata_memory += (float) strlen(tag_str);
        status->data_memory += (float) strlen(init_data);
         
+       printf("Creating ---------object %s---------%f \n", obj_name, status->data_memory);
        //add it to the main list 
        zhash_insert(object_hash, obj_name, (void *)hash_hash); 
 

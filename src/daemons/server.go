@@ -21,7 +21,8 @@ func server_logger(status *C.SERVER_STATUS) {
 	cpu_use = utilities.CpuUsage()
 	for true {
 		if data.active == true {
-			log.Println("INFO", time.Now(), cpu_use, int(status.metadata_memory), int(status.data_memory), int(status.network_data))
+			log.Printf("INFO\t%.2f\t%d\t%d\t%d\n", 
+			         cpu_use, int(status.metadata_memory), int(status.data_memory), int(status.network_data))
 		}
 		time.Sleep(2 * 1000 * time.Millisecond)
 		cpu_use = utilities.CpuUsage()

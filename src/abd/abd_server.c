@@ -24,9 +24,9 @@ extern SERVER_STATUS *status;
 
 
 #ifdef ASLIBRARY
-zhash_t *hash_object_ABD;
+static zhash_t *hash_object_ABD;
 
-int initialized = 0;
+static int initialized = 0;
 
 void initialize_ABD() {
    initialized = 1;
@@ -48,6 +48,8 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
     get_string_frame(tag_str, frames, "tag");
     string_to_tag(tag_str, &tag);
      
+    get_string_frame(object_name, frames, "object");
+
     TAG local_tag;
     get_object_tag(hash_object_ABD, object_name, &local_tag);
 
@@ -63,14 +65,17 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
         memcpy(data, frame_data, size);
         data[size]='\0';
 
-
+        if( DEBUG_MODE)      printf("data %s\n", data);
+        assert(hash_object_ABD!=NULL);
         zhash_t *temp_hash_hash = zhash_lookup(hash_object_ABD, object_name);
 
-    //   if( DEBUG_MODE ) printf("\t\tIS NULL %p\n", temp_hash_hash);
+        assert(temp_hash_hash!=NULL);
+       if( DEBUG_MODE ) printf("\t\tIS NULL %p\n", temp_hash_hash);
  
         zlist_t *keys = zhash_keys (temp_hash_hash);
+        assert(keys!=NULL);
 
-     //  if( DEBUG_MODE ) printf("\t\t# KEYS  %d\n", (int)zlist_size(keys));
+       if( DEBUG_MODE ) printf("\t\t# KEYS  %d\n", (int)zlist_size(keys));
         assert(keys!=NULL);
 
         void *key = zlist_first(keys);
@@ -82,12 +87,11 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
         zhash_delete(temp_hash_hash, key);
         free(item);
 
-        printf("=====================data = %f network =%f\n", status->metadata_memory, status->data_memory);
   
         if( DEBUG_MODE ) printf("\t\t# KEYS AFTER DEL %d\n", (int)zhash_size(temp_hash_hash));
 
         zhash_insert(temp_hash_hash,tag_str, data); 
-        status->metadata_memory +=  strlen(tag_str);
+        status->metadata_memory +=  (float) strlen(tag_str);
         status->data_memory += (float)  size;
 
 
@@ -124,9 +128,8 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
 
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
      zhash_insert(frames, "tag", (void *)tag_frame);
-
      int opnum= get_int_frame(frames, "opnum");
-     printf("OPNUM ===================  %d\n", opnum);
+     printf("       \tOPNUM : %d\n", opnum);
 
      send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 }
@@ -182,7 +185,6 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *server_args) {
 
      printf("algorithm ABD tag %s\n",phase_buf);
       if( strcmp(phase_buf, GET_TAG)==0)  {
-           printf("\t-----------------\n");
            printf("\tGET_TAG\n");
            algorithm_ABD_GET_TAG(frames, worker);
       }

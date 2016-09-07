@@ -88,8 +88,9 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
            zmsg_t *msg = zmsg_recv (worker);
 
            // receive the frames
+           status->network_data += (float)zmsg_content_size(msg) ;
+
            zhash_t *frames = receive_message_frames(msg);
-           status->network_data += zmsg_content_size(msg) ;
 
            zframe_t *id =  zframe_new(ID, strlen(ID));
            zhash_insert(frames, "ID", id);
@@ -119,6 +120,10 @@ int server_process(char *server_id, char *servers_str, char *port, char *init_da
    s_catch_signals();
 
    status = _status;
+
+   status->network_data = 0;
+   status->data_memory = 0;
+   status->metadata_memory = 0;
 
    server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
    server_args->init_data = init_data;
