@@ -286,24 +286,6 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
      zhash_insert(frames, "phase", (void *)phase_frame);
      get_string_frame(phase_name, frames, "phase");
 
-     if( strcmp(phase_name, READ_DISPERSE) ==0 ) {
-        zframe_t *meta_tag_frame= zmsg_pop (msg);
-        zhash_insert(frames, "meta_tag", (void *)meta_tag_frame);
-
-        zframe_t *serverid_frame= zmsg_pop (msg);
-        zhash_insert(frames, "meta_serverid", (void *)serverid_frame);
-
-        zframe_t *meta_readerid_frame= zmsg_pop (msg);
-        zhash_insert(frames, "meta_readerid", (void *)meta_readerid_frame);
-        return frames;
-     }
-
-     if( strcmp(phase_name, READ_COMPLETE) ==0 ) {
-        zframe_t *tag_frame= zmsg_pop (msg);
-        zhash_insert(frames, "tag", (void *)tag_frame);
-        return frames;
-     }
-
 
      if( strcmp(algorithm_name, "ABD") ==0 ) {
          zframe_t *opnum_frame= zmsg_pop (msg);
@@ -317,6 +299,12 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
            zhash_insert(frames, "payload", (void *)payload_frame);
 
          }
+         if( strcmp(phase_name, GET_TAG) ==0 ) {
+         }
+
+         if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
+         }
+
      }
 
      if( strcmp(algorithm_name, "SODAW") ==0 ) {
@@ -341,6 +329,26 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
          }
+
+         if( strcmp(phase_name, READ_DISPERSE) ==0 ) {
+            zframe_t *meta_tag_frame= zmsg_pop (msg);
+            zhash_insert(frames, "meta_tag", (void *)meta_tag_frame);
+
+            zframe_t *serverid_frame= zmsg_pop (msg);
+            zhash_insert(frames, "meta_serverid", (void *)serverid_frame);
+
+            zframe_t *meta_readerid_frame= zmsg_pop (msg);
+            zhash_insert(frames, "meta_readerid", (void *)meta_readerid_frame);
+         }
+
+         if( strcmp(phase_name, READ_COMPLETE) ==0 ) {
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+         }
+
+
+
+
      }
 
 

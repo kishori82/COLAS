@@ -125,6 +125,9 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
      zhash_insert(frames, "tag", (void *)tag_frame);
 
+     int opnum= get_int_frame(frames, "opnum");
+     printf("OPNUM ===================  %d\n", opnum);
+
      send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 }
 
