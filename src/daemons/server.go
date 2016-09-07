@@ -58,6 +58,10 @@ func server_daemon() {
 
 	time.Sleep(time.Second)
 
+	servers_str := create_server_string_to_C()
+ 	C.server_process(C.CString(data.name),  C.CString(servers_str), C.CString(data.port), init_data, &status)
+
+/*`
 	for {
 		select {
 		case active := <-active_chan:
@@ -65,7 +69,7 @@ func server_daemon() {
 			servers_str := create_server_string_to_C()
 		  _ = servers_str	
 
-	    go C.server_process(C.CString(data.name),  C.CString(servers_str), C.CString(data.port), init_data, &status)
+ 	     go C.server_process(C.CString(data.name),  C.CString(servers_str), C.CString(data.port), init_data, &status)
 		case _= <-reset_chan:
 			data.active = false
 			data.write_counter = 0
@@ -77,7 +81,7 @@ func server_daemon() {
 			}
 		}
 	}
-
+*/
 
 
 

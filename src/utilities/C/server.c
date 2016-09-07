@@ -96,6 +96,7 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
            zhash_insert(frames, "ID", id);
 
            get_string_frame(algorithm_name, frames, "algorithm");
+
            if( strcmp(algorithm_name, "ABD")==0)  {
                 printf("\tABD\n");
                 algorithm_ABD(frames, worker, server_args);

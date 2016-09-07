@@ -243,8 +243,8 @@ char *get_object_value(zhash_t *hash, char * object_name, TAG tag) {
 
 
 int  get_string_frame(char *buf, zhash_t *frames, const char *str)  {
-      zframe_t *frame= zhash_lookup(frames, str);
-      if( frame==0) { buf[0]='\0'; return 0;}
+      zframe_t *frame= (zframe_t *)zhash_lookup(frames, str);
+      if( frame==NULL) { buf[0]='\0'; return 0;}
       _zframe_str(frame, buf) ;
       return 1;     
 }
@@ -260,7 +260,6 @@ int  get_int_frame(zhash_t *frames, const char *str)  {
 int  get_tag_frame(zhash_t *frames, TAG *tag)  {
       char tag_str[100];
       get_string_frame(tag_str, frames, "tag");
-      printf("tag str ----- %s\n", tag_str);
       string_to_tag(tag_str, tag);
       return 1;     
 }

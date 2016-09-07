@@ -145,6 +145,7 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
 
 
      zhash_t *temp_hash_hash = zhash_lookup(hash_object_ABD, object_name);
+     assert(temp_hash_hash!=NULL);
 
      zlist_t *keys = zhash_keys (temp_hash_hash);
 
