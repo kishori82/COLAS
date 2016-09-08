@@ -20,8 +20,9 @@ import "C"
 func reader_daemon() {
 	active_chan = make(chan bool, 2)
 
-  //data.active = true 
-	//data.servers["172.17.0.3"]=true
+  data.name = "reader-1"
+  data.active = true 
+	data.servers["172.17.0.3"]=true
 
 	var object_name string = "atomic_object"
 

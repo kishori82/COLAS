@@ -136,6 +136,8 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
                 get_string_frame(tag_str, frames, "tag");
                   
                 if(round==op_num && strcmp(phase, GET_TAG)==0) {
+                     if(DEBUG_MODE) print_out_hash_in_order(frames, names);
+
                      responses++;
                      // add tag to list                
                      tag = (TAG *)malloc(sizeof(TAG));
@@ -150,6 +152,7 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
                 }
 
                 zmsg_destroy (&msg);
+                zlist_purge(names);
            }
      }
    //comute the max tag now and return 
@@ -372,7 +375,7 @@ bool ABD_write(
        free(destination);
     }
 
-   printf("\tMAX_TAG (WRITER)\n");
+   printf("\tGET_TAG (WRITER)\n");
 
    TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 

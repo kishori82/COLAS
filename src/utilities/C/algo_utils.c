@@ -451,17 +451,21 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
      zframe_t *object_name_frame= zmsg_pop (msg);
      zhash_insert(frames, "object", (void *)object_name_frame);
      get_string_frame(object_name, frames, "object");
+     if( names!= NULL) zlist_append(names, "object");
  
      zframe_t *algorithm_frame= zmsg_pop (msg);
      zhash_insert(frames, "algorithm", (void *)algorithm_frame);
      get_string_frame(algorithm_name, frames, "algorithm");
+     if( names!= NULL) zlist_append(names, "algorithm");
 
      zframe_t *phase_frame= zmsg_pop (msg);
      zhash_insert(frames, "phase", (void *)phase_frame);
      get_string_frame(phase_name, frames, "phase");
+     if( names!= NULL) zlist_append(names, "phase");
 
      zframe_t *opnum_frame= zmsg_pop (msg);
      zhash_insert(frames, "opnum", (void *)opnum_frame);
+     if( names!= NULL) zlist_append(names, "opnum");
 
      if( strcmp(algorithm_name, "ABD") ==0 ) {
 
@@ -469,6 +473,7 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
            get_string_frame(buf, frames, "tag");
+           if( names!= NULL) zlist_append(names, "tag");
 
          }
 
@@ -477,6 +482,7 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
            get_string_frame(buf, frames, "tag");
+           if( names!= NULL) zlist_append(names, "tag");
          }
 
          if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
@@ -484,9 +490,11 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
            get_string_frame(buf, frames, "tag");
+           if( names!= NULL) zlist_append(names, "tag");
 
            zframe_t *payload_frame= zmsg_pop (msg);
            zhash_insert(frames, "payload", (void *)payload_frame);
+           if( names!= NULL) zlist_append(names, "payload");
          }
      }
 
