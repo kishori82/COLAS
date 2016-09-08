@@ -512,12 +512,13 @@ void send_frames_at_server(zhash_t *frames, void *worker,  enum SEND_TYPE type, 
 
     va_start(valist, n);
      
+    zlist_t *names = zlist_new();
     for(i=0; i < n; i++ ) {
         key = va_arg(valist, char *); 
         zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);
 
         assert(zframe_is(frame));
-
+        zlist_append(names, key);
 /*
         if( strcmp(key, "opnum")==0) {
             temp_int=get_uint_frame(frames, key);
@@ -540,8 +541,8 @@ void send_frames_at_server(zhash_t *frames, void *worker,  enum SEND_TYPE type, 
         else
             zframe_send(&frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
     }
-    if(DEBUG_MODE) print_out_hash(frames);
-
+    if(DEBUG_MODE) print_out_hash_in_order(frames, names);
+    zlist_purge(names);
     va_end(valist);
 }
 
