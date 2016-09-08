@@ -132,9 +132,26 @@ func stop(c *cli.Context) error {
 	if !isSystemRunning() {
 		return nil
 	}
-	_, _, _, controllers := getIPAddresses()
-	sendCommandToControllers(controllers, "StopReaders", "")
-	sendCommandToControllers(controllers, "StopWriters", "")
+	//readers, writers, _, controllers := getIPAddresses()
+	readers, writers, _, _ := getIPAddresses()
+
+	for _, ipaddr := range readers {
+		fmt.Println("reader", ipaddr, "StopProcess")
+		ipaddrs := make([]string, 1)
+		ipaddrs[0] = ipaddr
+		sendCommandToControllers(ipaddrs, "StopProcess", "")
+
+	}
+	for _, ipaddr := range writers {
+		fmt.Println("writer", ipaddr, "StopProcess")
+		ipaddrs := make([]string, 1)
+		ipaddrs[0] = ipaddr
+		sendCommandToControllers(ipaddrs, "StopProcess", "")
+
+	}
+
+	//sendCommandToControllers(controllers, "StopReaders", "")
+	//sendCommandToControllers(controllers, "StopWriters", "")
 	//sendCommandToControllers(controllers, "StopServers", "")
 	return nil
 }
@@ -148,10 +165,9 @@ func start(c *cli.Context) error {
 	_, _, _, controllers := getIPAddresses()
 	sendCommandToControllers(controllers, "StartReaders", "")
 	sendCommandToControllers(controllers, "StartWriters", "")
-//	sendCommandToControllers(controllers, "StartServers", "")
+	//	sendCommandToControllers(controllers, "StartServers", "")
 	return nil
 }
-
 
 //set the read rate
 func setReadRateDistribution(c *cli.Context) error {
@@ -315,7 +331,6 @@ func getlogs(c *cli.Context) error {
 		f.Close()
 	}
 
-
 	return nil
 }
 
@@ -423,7 +438,7 @@ func getLogFile(ip string) (logs string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-    defer resp.Body.Close()
+	defer resp.Body.Close()
 
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -441,7 +456,7 @@ func getName(ip string) (name string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-    defer resp.Body.Close()
+	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
@@ -468,7 +483,7 @@ func sendCommandToControllers(controllers []string, route string, queryStr strin
 	if err != nil {
 		log.Fatal(err)
 	}
-    defer resp.Body.Close()
+	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 
 	defer resp.Body.Close()

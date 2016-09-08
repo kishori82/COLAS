@@ -185,6 +185,7 @@ func StopProcess(w http.ResponseWriter, r *http.Request) {
 	active_chan <- false
 	fmt.Println("StopProcess called")
 	log.Println("INFO\tProcess Stopped")
+	fmt.Fprintf(w, "Stopped")
 }
 
 func StartProcess(w http.ResponseWriter, r *http.Request) {

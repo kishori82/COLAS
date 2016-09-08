@@ -79,7 +79,6 @@ func writer_deamon() {
 					rand_wait/int64(time.Millisecond), elapsed, len(encoded))
 
 				C.free(unsafe.Pointer(rawdata))
-				rawdata = nil
 
 				data.write_counter += 1
 			} else {

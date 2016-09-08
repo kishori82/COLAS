@@ -45,7 +45,6 @@ func reader_daemon() {
 				start := time.Now()
 				if data.algorithm == "ABD" {
 
-
 					data_read_c = C.ABD_read(
 						C.CString(object_name),
 						C.CString(data.name),
@@ -66,13 +65,13 @@ func reader_daemon() {
 						C.CString(servers_str),
 						C.CString(data.port))
 
-            data_read = C.GoString(data_read_c)
+					data_read = C.GoString(data_read_c)
 				}
 
 				elapsed := time.Since(start)
 				log.Println(data.run_id, "READ", string(data.name), data.write_counter, rand_wait/int64(time.Millisecond), elapsed, len(data_read))
 				time.Sleep(5 * 1000 * time.Microsecond)
-			  C.free(unsafe.Pointer(data_read_c))
+				C.free(unsafe.Pointer(data_read_c))
 
 				data.write_counter += 1
 			} else {
