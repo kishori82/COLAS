@@ -18,7 +18,7 @@
 
 #include "../../abd/abd_server.h"
 
-#define DEBUG_MODE 0
+#define DEBUG_MODE 1
 extern int s_interrupted;
 
 SERVER_STATUS *status;
@@ -64,14 +64,15 @@ void *server_task (void *server_args)
 
 
 static void
-server_worker (void *server_args, zctx_t *ctx, void *pipe)
+server_worker (void *_server_args, zctx_t *ctx, void *pipe)
 {
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
     zsocket_connect(worker, "inproc://backend");
     char algorithm_name[100];
 
+    SERVER_ARGS *server_args = (SERVER_ARGS *)_server_args;
     
-    printf("Initial value size %ld\n", strlen( ((SERVER_ARGS *)server_args)->init_data));
+    printf("Initial value size %ld\n", strlen(server_args->init_data));
 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
@@ -90,21 +91,20 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
 
            zhash_t *frames = receive_message_frames_at_server(msg);
 
-           zframe_t *id =  zframe_new(ID, strlen(ID));
-           zhash_insert(frames, "ID", id);
-
            get_string_frame(algorithm_name, frames, "algorithm");
 
            if( strcmp(algorithm_name, "ABD")==0)  {
-                printf("\tABD\n");
-                algorithm_ABD(frames, worker, server_args);
-                printf("\tABD DONE\n");
+                printf("ABD RESPONDING %s\n", server_args->server_id);
+                if(DEBUG_MODE) { printf("\treceiving...\n");  print_out_hash(frames); }
+                algorithm_ABD(frames, worker, server_args->server_id);
+                printf("ABD RESPONSE COMPLETE\n\n");
            }
    
            if( strcmp(algorithm_name, "SODAW")==0)  {
-                printf("\tSODAW at server %s\n", ID);
+                printf("\tSODAW RESPONDING %s\n",server_args->server_id);
+                if(DEBUG_MODE)  print_out_hash(frames);
                 algorithm_SODAW(frames, worker, server_args);
-                printf("\tSODAW DONE\n");
+                printf("\tSODAW RESPONSE COMPLETE\n");
            }
 
            destroy_frames(frames);

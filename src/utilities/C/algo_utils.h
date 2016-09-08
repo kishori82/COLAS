@@ -108,7 +108,10 @@ void destroy_frames(zhash_t *frames);
 
 enum SEND_TYPE {SEND_MORE, SEND_FINAL};
 
-void send_frames(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
+void send_frames_at_server(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
+
+void print_out_hash(zhash_t* frames);
+
 
 zhash_t *receive_message_frames_at_client(zmsg_t *msg) ;
 #endif

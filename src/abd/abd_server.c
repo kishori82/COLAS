@@ -112,7 +112,7 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
     get_string_frame(tag_str, frames, "phase"); 
     printf("\tsending ...\n");
 
-    send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
+    send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
     return;
 }
@@ -128,18 +128,13 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
 
-     printf("\t\tobject : %s\n,", object_name);
-
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
      zhash_insert(frames, "tag", (void *)tag_frame);
      unsigned int opnum= get_uint_frame(frames, "opnum");
      assert(opnum>=0);
-     printf("\t\topnum  : %d\n,", opnum);
 
      printf("\t\tsending...\n,");
-
-     
-     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
+     send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 }
 
 void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
@@ -148,7 +143,6 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      printf("\tGET_TAG_VALUE\n");
 
      get_string_frame(object_name, frames, "object");
-     printf("\t\tobject : %s\n,", object_name);
      TAG tag;
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
@@ -174,7 +168,7 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      zhash_insert(frames, "payload", (void *)data_frame);
 
      printf("\tsending ...\n");
-     send_frames(frames, worker, SEND_FINAL, 7,  "sender", "object",  "algorithm", "phase", "opnum", "tag", "payload" );
+     send_frames_at_server(frames, worker, SEND_FINAL, 7,  "sender", "object",  "algorithm", "phase", "opnum", "tag", "payload" );
 
 }
 
@@ -186,14 +180,12 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *server_args) {
      char phase_buf[100];
      char object_name[100];
 
-     printf("algorithm ABD\n");
 
      get_string_frame(phase_buf, frames, "phase");
      get_string_frame(object_name, frames, "object");
 
      if( has_object(hash_object_ABD, object_name)==0) {
          create_object(hash_object_ABD, object_name, ((SERVER_ARGS *)server_args)->init_data, status);
-         printf("\t\tCreated object %s\n",object_name);
     }
 
       if( strcmp(phase_buf, GET_TAG)==0)  {
