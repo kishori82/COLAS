@@ -40,7 +40,7 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
     char phase[64];
     char tag_str[64];
     char buf1[400];
-    int round;
+    unsigned int round;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
@@ -48,7 +48,7 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algo = zframe_new("SODAW", strlen("SODAW"));
     zframe_t *phase_frame = zframe_new(WRITE_GET, strlen(WRITE_GET));
-    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
+    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(unsigned int));
 
     for(i=0; i < num_servers; i++) {
        zframe_send(&obj_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
@@ -137,7 +137,7 @@ char *SODAW_read_value(
     char tag_str[100];
     char buf1[400];
     char *value=NULL;
-    int round;
+    unsigned int round;
     int size;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
@@ -154,6 +154,7 @@ char *SODAW_read_value(
     for(i=0; i < num_servers; i++) {
        zframe_send(&obj_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        zframe_send(&algo, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+//KMK
        zframe_send(&phase_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        zframe_send(&tag_frame, sock_to_servers, ZFRAME_REUSE);
        printf("     \tsending to server %d\n",i);
@@ -290,7 +291,7 @@ void SODAW_write_put_phase(
     //ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), reed_solomon) ;
 //    destroy_encoded_data(encoded_data_info);
 
-    int round;
+    unsigned int round;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
@@ -298,7 +299,7 @@ void SODAW_write_put_phase(
     zframe_t *object_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algorithm_frame = zframe_new("SODAW", strlen("SODAW"));
     zframe_t *phase_frame = zframe_new(WRITE_PUT, strlen(WRITE_PUT));
-    zframe_t *opnum_frame = zframe_new((const void *)&op_num, sizeof(int));
+    zframe_t *opnum_frame = zframe_new((const void *)&op_num, sizeof(unsigned int));
 
     tag_to_string(max_tag, tag_str); 
     zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
@@ -605,33 +606,18 @@ zhash_t *receive_message_frames_from_server_SODAW(zmsg_t *msg)  {
      zframe_t *object_name_frame= zmsg_pop (msg);
      zhash_insert(frames, "object", (void *)object_name_frame);
      get_string_frame(buf, frames, "object");
-     printf("object  %s\n", buf); 
+     printf("\tobject  %s\n", buf); 
 
      zframe_t *algorithm_frame= zmsg_pop (msg);
      zhash_insert(frames, "algorithm", (void *)algorithm_frame);
      get_string_frame(algorithm_name, frames, "algorithm");
-     printf("object  %s\n", algorithm_name); 
+     printf("\talgorithm  %s\n", algorithm_name); 
 
      zframe_t *phase_frame= zmsg_pop (msg);
      zhash_insert(frames, "phase", (void *)phase_frame);
      get_string_frame(phase_name, frames, "phase");
-     printf("phase naum %s\n", phase_name);
+     printf("\tphase naum %s\n", phase_name);
      
-     if( strcmp(algorithm_name, "ABD") ==0 ) {
-
-         if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
-           zframe_t *opnum_frame= zmsg_pop (msg);
-           zhash_insert(frames, "opnum", (void *)opnum_frame);
- 
-           zframe_t *tag_frame= zmsg_pop (msg);
-           zhash_insert(frames, "tag", (void *)tag_frame);
-           get_string_frame(buf, frames, "tag");
-
-           zframe_t *payload_frame= zmsg_pop (msg);
-           zhash_insert(frames, "payload", (void *)payload_frame);
-         }
-     }
-
      if( strcmp(algorithm_name, "SODAW") ==0 ) {
          if( strcmp(phase_name, WRITE_GET) ==0 ) {
            zframe_t *opnum_frame= zmsg_pop (msg);

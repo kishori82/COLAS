@@ -23,6 +23,7 @@ extern int s_interrupted;
 #define GET_TAG "GET_TAG"
 #define GET_TAG_VALUE "GET_TAG_VALUE"
 
+#define DEBUG_MODE 1
 
 // this fethers the max tag
 TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
@@ -34,7 +35,7 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
 
     char phase[100];
     char tag_str[100];
-    int round;
+    unsigned int round;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
@@ -42,14 +43,13 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algo = zframe_new("ABD", 3);
     zframe_t *phase_frame = zframe_new(GET_TAG, 7);
-    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
+    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(unsigned int));
 
     for(i=0; i < num_servers; i++) {
        zframe_send(&obj_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        zframe_send(&algo, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        zframe_send(&phase_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        zframe_send(&op_num_frame, sock_to_servers, ZFRAME_REUSE);
-       printf("     \tsending to server %d\n",i);
     }
 
     zframe_destroy(&obj_name_frame);
@@ -68,12 +68,13 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
         //  Tick once per second, pulling in arriving messages
             
            // zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
-            printf("      \treceiving data\n");
+            printf("\t\twaiting for data\n");
             int rc = zmq_poll(items, 1, -1);
             if(rc < 0 ||  s_interrupted ) {
                 printf("Interrupted!\n");
                 exit(0);
             }
+            printf("\t\treceived data\n");
            // zclock_sleep(300); 
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
@@ -129,7 +130,7 @@ void  get_max_tag_value_phase(
     char phase[64];
     char tag_str[64];
     char *value=NULL;
-    int round;
+    unsigned int round;
 
     TAG *tag;
 
@@ -139,7 +140,7 @@ void  get_max_tag_value_phase(
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algo = zframe_new("ABD", 3);
     zframe_t *phase_frame = zframe_new(GET_TAG_VALUE, 13);
-    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
+    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(unsigned int));
 
      //!! TODO: This is strange  
     //this is for the round robin of the dealier
@@ -260,7 +261,7 @@ TAG write_value_phase(
     char tag_str[100];
     
 
-    int round;
+    unsigned int round;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
@@ -268,7 +269,7 @@ TAG write_value_phase(
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algo = zframe_new("ABD", strlen("ABD"));
     zframe_t *phase_frame = zframe_new(WRITE_VALUE, strlen(WRITE_VALUE));
-    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(int));
+    zframe_t *op_num_frame = zframe_new((const void *)&op_num, sizeof(unsigned int));
 
 
     tag_to_string(max_tag, tag_str); 
@@ -348,18 +349,19 @@ bool ABD_write(
 {
     s_catch_signals();
     int j;
-    printf("Obj name       : %s\n",obj_name);
-    printf("Writer name    : %s\n",writer_id);
-    printf("Operation num  : %d\n",op_num);
-    printf("Size           : %d\n", size);
-    printf("Size of        : %u\n", (unsigned int)strlen(payload));
+   printf("WRITE %d\n", op_num);
+    printf("\tObj name       : %s\n",obj_name);
+    printf("\tWriter name    : %s\n",writer_id);
+    printf("\tOperation num  : %d\n",op_num);
+    printf("\tSize           : %d\n", size);
+    printf("\tSize of        : %u\n", (unsigned int)strlen(payload));
 
     char *myb64 = (char *)malloc(strlen(payload));
 
     b64_decode(payload, myb64);
 
-    printf("Base64 Encoded string len  : %d\n", strlen(payload));
-    printf("Server string   : %s\n", servers_str);
+    printf("\tBase64 Encoded string len  : %d\n", strlen(payload));
+    printf("\tServer string   : %s\n", servers_str);
     printf("Port to Use     : %s\n", port);
 
     int num_servers = count_num_servers(servers_str);
@@ -387,8 +389,7 @@ bool ABD_write(
        free(destination);
     }
 
-   printf("WRITE %d\n", op_num);
-   printf("     MAX_TAG (WRITER)\n");
+   printf("\t\tMAX_TAG (WRITER)\n");
 
    TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 
@@ -396,7 +397,7 @@ bool ABD_write(
     new_tag.z = max_tag.z + 1;
     strcpy(new_tag.id, writer_id);
 
-   printf("     WRITE_VALUE (WRITER)\n");
+   printf("\t\tWRITE_VALUE (WRITER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
                      num_servers, port, payload, size, new_tag);
 
@@ -480,13 +481,17 @@ char *ABD_read(
 
 zhash_t *receive_message_frames_from_server_ABD(zmsg_t *msg)  {
      char algorithm_name[100];
+     char object_name[100];
      char phase_name[100];
      char buf[100];
      zhash_t *frames = zhash_new();
 
      zframe_t *object_name_frame= zmsg_pop (msg);
      zhash_insert(frames, "object", (void *)object_name_frame);
+     get_string_frame(object_name, frames, "object");
+     if( DEBUG_MODE )  printf("      object : %s\n",object_name);
 
+ 
      zframe_t *algorithm_frame= zmsg_pop (msg);
      zhash_insert(frames, "algorithm", (void *)algorithm_frame);
 
