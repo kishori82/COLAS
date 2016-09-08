@@ -20,18 +20,18 @@ all: libabd.so
 
 #asyncsrv: asyncsrv.o
 
-abd_client: abd_client.c  $(UT_OBJS) $(DEPS)
-	$(CC) -DASLIBRARY -DASMAIN -o $@ $<  algo_utils.o base64.o  $(CFLAGS)
+abd_client: abd_client.c  $(UT_OBJS) $(DEPS)  
+	$(CC) -DASLIBRARY -DASMAIN -o $@   algo_utils.o base64.o $<  $(CFLAGS)
 
 abd_server: abd_server.c $(UT_OBJS) $(DEPS)
-	$(CC) -DASLIBRARY -DASMAIN -o $@ $? algo_utils.o base64.o  $(CFLAGS)
+	$(CC) -DASLIBRARY -DASMAIN -o $@  algo_utils.o base64.o $? $(CFLAGS)
 
 static: abd_client.c abd_server.c
 	$(CC) -static -c  -o abd_client.o  abd_client.c  -DASLIBRARY #$(CFLAGS)
 	$(CC) -static -c  -o abd_server.o  abd_server.c  -DASLIBRARY #$(CFLAGS)
 	ar -cvq libabd.a  abd_server.o abd_client.o
 
-libabd.so: abd_client.o abd_server.o  $(UT_OBJS) 
+libabd.so: $(UT_OBJS) abd_client.o abd_server.o
 	$(CC) -shared -fPIC -o $@  $?  $(CFLAGS)
 
 clean:

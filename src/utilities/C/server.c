@@ -75,8 +75,6 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
-        //  The DEALER socket gives us the reply envelope and message
-   //     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
 
         int rc = zmq_poll(items, 1, -1);
         if( rc < 0 || s_interrupted ) {
@@ -90,7 +88,7 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
            // receive the frames
            status->network_data += (float)zmsg_content_size(msg) ;
 
-           zhash_t *frames = receive_message_frames(msg);
+           zhash_t *frames = receive_message_frames_at_server(msg);
 
            zframe_t *id =  zframe_new(ID, strlen(ID));
            zhash_insert(frames, "ID", id);
@@ -108,6 +106,7 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
                 algorithm_SODAW(frames, worker, server_args);
                 printf("\tSODAW DONE\n");
            }
+
            destroy_frames(frames);
         }
     }

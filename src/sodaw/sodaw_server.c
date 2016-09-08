@@ -408,11 +408,11 @@ zlist_t *metadata_with_reader(zhash_t *metadata, char *reader) {
 
     void *key;    
     for(key= zlist_first(metadata_keys);  key!= NULL; key=zlist_next(metadata_keys) ) {
-         printf("metadata %s\n",key);
+         printf("metadata %s\n",(char *)key);
          REGREADER *value  = (REGREADER *)zhash_lookup(readerc, (const char *)key);
-          printf("comparing  metadata %s %s %s\n",key, reader, value->readerid );
+          printf("comparing  metadata %s %s %s\n",(char *)key, reader, value->readerid );
          if(  strcmp(reader, value->readerid) == 0 ) {
-            printf("appending metadata %s\n",key);
+            printf("appending metadata %s\n",(char *)key);
             zlist_append((void *)relevant_keys, key);
          } 
     }
