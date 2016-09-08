@@ -363,16 +363,16 @@ bool ABD_write(
 
     printf("\tBase64 Encoded string len  : %d\n", strlen(payload));
     printf("\tServer string   : %s\n", servers_str);
-    printf("Port to Use     : %s\n", port);
+    printf("\tPort to Use     : %s\n", port);
 
     int num_servers = count_num_servers(servers_str);
 
-    printf("Num of Servers  : %d\n",num_servers);
+    printf("\tNum of Servers  : %d\n",num_servers);
 
 //    printf("Decoded string  : %s\n", myb64);
     char **servers = create_server_names(servers_str);
     for(j=0; j < num_servers; j++) {
-        printf("\tServer : %s\n", servers[j]);
+        printf("\t\tServer : %s\n", servers[j]);
     }
     printf("\n");
     free(myb64);
@@ -390,7 +390,7 @@ bool ABD_write(
        free(destination);
     }
 
-   printf("\t\tMAX_TAG (WRITER)\n");
+   printf("\tMAX_TAG (WRITER)\n");
 
    TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 
@@ -398,7 +398,7 @@ bool ABD_write(
     new_tag.z = max_tag.z + 1;
     strcpy(new_tag.id, writer_id);
 
-   printf("\t\tWRITE_VALUE (WRITER)\n");
+   printf("\tWRITE_VALUE (WRITER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
                      num_servers, port, payload, size, new_tag);
 
