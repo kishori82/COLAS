@@ -12,6 +12,12 @@ void _zframe_int(zframe_t *f, int *i) {
     *i = *((int *) data);
 }
 
+void _zframe_uint(zframe_t *f, unsigned  int *i) {
+    byte *data = zframe_data(f);
+    *i = *((unsigned int *) data);
+}
+
+
 
 void _zframe_str(zframe_t *f, char *buf) {
     byte *data = zframe_data(f);
@@ -257,6 +263,14 @@ int  get_int_frame(zhash_t *frames, const char *str)  {
       return val;     
 }
 
+unsigned int  get_uint_frame(zhash_t *frames, const char *str)  {
+      zframe_t *frame= zhash_lookup(frames, str);
+      unsigned int val;
+      if( frame==0) { return 0;}
+      _zframe_uint(frame, &val) ;
+      return val;     
+}
+
 int  get_tag_frame(zhash_t *frames, TAG *tag)  {
       char tag_str[100];
       get_string_frame(tag_str, frames, "tag");
@@ -344,22 +358,16 @@ zhash_t *receive_message_frames(zmsg_t *msg)  {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
          }
-
-
-
-
      }
-
-
      return frames;
-
 }
 
 void send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...) {
     char *key;
     va_list valist;
     int i =0;
-    char buf[10000];
+    char buf[10000000];
+    unsigned int temp_int;
 
     va_start(valist, n);
      
@@ -368,8 +376,21 @@ void send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...
         zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);
 
         assert(zframe_is(frame));
-        get_string_frame(buf, frames, key);
-        //printf("%s = %s\n", key, buf);
+
+        if( strcmp(key, "opnum")==0) {
+            temp_int=get_uint_frame(frames, key);
+            printf("\t\t%s : %d\n", key, temp_int);
+            assert(temp_int >=0);
+        }
+        if( strcmp(key, "payload")==0) {
+           get_string_frame(buf, frames, key);
+           printf("\t\t%s : %d\n", key, strlen(buf));
+        }
+        else {
+           get_string_frame(buf, frames, key);
+            printf("\t\t%s : %s\n", key, buf);
+        }
+
         if( i == n-1 && type==SEND_FINAL)  {
             zframe_send(&frame, worker, ZFRAME_REUSE);
         }

@@ -41,6 +41,7 @@ void initialize_ABD() {
 void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
     char tag_str[100];
     char object_name[100];
+    printf("\tWRITE_VALUE\n");
 
 
     if( DEBUG_MODE ) printf("\t\t INSIDE WRITE VALUE\n");
@@ -70,7 +71,7 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
         zhash_t *temp_hash_hash = zhash_lookup(hash_object_ABD, object_name);
 
         assert(temp_hash_hash!=NULL);
-       if( DEBUG_MODE ) printf("\t\tIS NULL %p\n", temp_hash_hash);
+        if( DEBUG_MODE ) printf("\t\tIS NULL %p\n", temp_hash_hash);
  
         zlist_t *keys = zhash_keys (temp_hash_hash);
         assert(keys!=NULL);
@@ -120,6 +121,7 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
 void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
      char object_name[100];
      char tag_buf[100];
+     printf("\tGET_TAG\n");
 
      get_string_frame(object_name, frames, "object");
      TAG tag;
@@ -129,7 +131,7 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
      zhash_insert(frames, "tag", (void *)tag_frame);
      int opnum= get_int_frame(frames, "opnum");
-     printf("       \tOPNUM : %d\n", opnum);
+     assert(opnum>=0);
 
      send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 }
@@ -137,6 +139,7 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
 void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      char tag_buf[100];
      char object_name[100];
+     printf("\tGET_TAG\n");
 
      get_string_frame(object_name, frames, "object");
      TAG tag;
@@ -184,20 +187,15 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *server_args) {
          printf("\t\tCreated object %s\n",object_name);
     }
 
-     printf("algorithm ABD tag %s\n",phase_buf);
       if( strcmp(phase_buf, GET_TAG)==0)  {
-           printf("\tGET_TAG\n");
            algorithm_ABD_GET_TAG(frames, worker);
       }
    
       if( strcmp(phase_buf, WRITE_VALUE)==0)  {
-            printf("\tWRITE_VALUE\n");
             algorithm_ABD_WRITE_VALUE(frames, worker);
       }
 
       if( strcmp(phase_buf, GET_TAG_VALUE)==0)  {
-           printf("\t-----------------\n");
-           printf("\tGET_TAG\n");
            algorithm_ABD_GET_TAG_VALUE(frames, worker);
       }
 

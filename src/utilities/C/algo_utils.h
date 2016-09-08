@@ -46,6 +46,8 @@ typedef struct  _TAG_VALUE {
 
 void _zframe_int(zframe_t *f, int *i) ;
 
+void _zframe_uint(zframe_t *f, unsigned int *i) ;
+
 int  get_tag_frame(zhash_t *frames, TAG *tag);
 
 void _zframe_str(zframe_t *f, char *buf) ;

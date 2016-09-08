@@ -23,6 +23,7 @@ extern int s_interrupted;
 #define GET_TAG "GET_TAG"
 #define GET_TAG_VALUE "GET_TAG_VALUE"
 
+#define DEBUG_MODE 1
 
 // this fethers the max tag
 TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
@@ -68,12 +69,13 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
         //  Tick once per second, pulling in arriving messages
             
            // zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
-            printf("      \treceiving data\n");
+            printf("      \twaiting for data\n");
             int rc = zmq_poll(items, 1, -1);
             if(rc < 0 ||  s_interrupted ) {
                 printf("Interrupted!\n");
                 exit(0);
             }
+            printf("      \treceived data\n");
            // zclock_sleep(300); 
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
@@ -480,13 +482,17 @@ char *ABD_read(
 
 zhash_t *receive_message_frames_from_server_ABD(zmsg_t *msg)  {
      char algorithm_name[100];
+     char object_name[100];
      char phase_name[100];
      char buf[100];
      zhash_t *frames = zhash_new();
 
      zframe_t *object_name_frame= zmsg_pop (msg);
      zhash_insert(frames, "object", (void *)object_name_frame);
+     get_string_frame(object_name, frames, "object");
+     if( DEBUG_MODE )  printf("      object : %s\n",object_name);
 
+ 
      zframe_t *algorithm_frame= zmsg_pop (msg);
      zhash_insert(frames, "algorithm", (void *)algorithm_frame);
 
