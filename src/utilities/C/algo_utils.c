@@ -366,7 +366,7 @@ void send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...
     char *key;
     va_list valist;
     int i =0;
-    char buf[10000000];
+    char buf[100000];
     unsigned int temp_int;
 
     va_start(valist, n);
@@ -379,16 +379,16 @@ void send_frames(zhash_t *frames, void *worker,  enum SEND_TYPE type, int n, ...
 
         if( strcmp(key, "opnum")==0) {
             temp_int=get_uint_frame(frames, key);
-            printf("\t\t%s : %d\n", key, temp_int);
+            printf("\t\t\t%s : %d\n", key, temp_int);
             assert(temp_int >=0);
         }
-        if( strcmp(key, "payload")==0) {
+        else if( strcmp(key, "payload")==0) {
            get_string_frame(buf, frames, key);
-           printf("\t\t%s : %d\n", key, strlen(buf));
+           printf("\t\t\t%s : %d\n", key, strlen(buf));
         }
         else {
            get_string_frame(buf, frames, key);
-            printf("\t\t%s : %s\n", key, buf);
+            printf("\t\t\t%s : %s\n", key, buf);
         }
 
         if( i == n-1 && type==SEND_FINAL)  {

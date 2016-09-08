@@ -110,7 +110,7 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
     }
 
     get_string_frame(tag_str, frames, "phase"); 
-    printf("sending phase %s\n", tag_str);
+    printf("\tsending ...\n");
 
     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
@@ -128,24 +128,32 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
 
+     printf("\t\tobject : %s\n,", object_name);
+
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
      zhash_insert(frames, "tag", (void *)tag_frame);
-     int opnum= get_int_frame(frames, "opnum");
+     unsigned int opnum= get_uint_frame(frames, "opnum");
      assert(opnum>=0);
+     printf("\t\topnum  : %d\n,", opnum);
 
+     printf("\t\tsending...\n,");
+
+     
      send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 }
 
 void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      char tag_buf[100];
      char object_name[100];
-     printf("\tGET_TAG\n");
+     printf("\tGET_TAG_VALUE\n");
 
      get_string_frame(object_name, frames, "object");
+     printf("\t\tobject : %s\n,", object_name);
      TAG tag;
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
 
+     //printf("\t\tobject : %s\n,", object_name);
 
      zhash_t *temp_hash_hash = zhash_lookup(hash_object_ABD, object_name);
      assert(temp_hash_hash!=NULL);
@@ -165,6 +173,7 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      zframe_t *data_frame= zframe_new((char *)item, strlen(item));
      zhash_insert(frames, "payload", (void *)data_frame);
 
+     printf("\tsending ...\n");
      send_frames(frames, worker, SEND_FINAL, 7,  "sender", "object",  "algorithm", "phase", "opnum", "tag", "payload" );
 
 }
