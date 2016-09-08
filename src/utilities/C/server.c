@@ -89,16 +89,22 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
            // receive the frames
            status->network_data += (float)zmsg_content_size(msg) ;
 
-           zhash_t *frames = receive_message_frames_at_server(msg);
+           zlist_t *frames_list = zlist_new(); 
+           zhash_t *frames = receive_message_frames_at_server(msg, frames_list);
 
            get_string_frame(algorithm_name, frames, "algorithm");
 
            if( strcmp(algorithm_name, "ABD")==0)  {
                 printf("ABD RESPONDING %s\n", server_args->server_id);
-                if(DEBUG_MODE) { printf("\treceiving...\n");  print_out_hash(frames); }
-                algorithm_ABD(frames, worker, server_args->server_id);
+                if(DEBUG_MODE) { 
+                   printf("\treceiving... %s\n", server_args->server_id);  
+                   print_out_hash_in_order(frames, frames_list); 
+                }
+                 
+                algorithm_ABD(frames, worker, server_args);
                 printf("ABD RESPONSE COMPLETE\n\n");
            }
+  
    
            if( strcmp(algorithm_name, "SODAW")==0)  {
                 printf("\tSODAW RESPONDING %s\n",server_args->server_id);
@@ -107,6 +113,7 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
                 printf("\tSODAW RESPONSE COMPLETE\n");
            }
 
+           zlist_purge(frames_list);
            destroy_frames(frames);
         }
     }
@@ -127,6 +134,7 @@ int server_process(char *server_id, char *servers_str, char *port, char *init_da
 
    server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
    server_args->init_data = init_data;
+   printf("INIT data %d\n", strlen(server_args->init_data));
    server_args->servers_str = servers_str;
    server_args->port = port;
    server_args->server_id= server_id;

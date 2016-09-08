@@ -98,7 +98,6 @@ char **create_server_names(char *servers_str) ;
 unsigned int count_num_servers(char *servers_str) ;
 
 
-zhash_t *receive_message_frames_at_server(zmsg_t *msg) ;
 
 int  get_string_frame(char *buf, zhash_t *frames,  const char *str);
 
@@ -112,7 +111,10 @@ void send_frames_at_server(zhash_t *frames, void *worker, enum SEND_TYPE type, i
 
 void print_out_hash(zhash_t* frames);
 
+void print_out_hash_in_order(zhash_t* frames, zlist_t *names);
 
-zhash_t *receive_message_frames_at_client(zmsg_t *msg) ;
+zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names) ;
+
+zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names) ;
 #endif
 

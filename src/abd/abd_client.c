@@ -128,7 +128,8 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
 
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
-                zhash_t* frames = receive_message_frames_at_client(msg);
+                zlist_t *names = zlist_new();
+                zhash_t* frames = receive_message_frames_at_client(msg, names);
 
                 get_string_frame(phase, frames, "phase");
                 round = get_int_frame(frames, "opnum");
@@ -207,7 +208,8 @@ void  get_max_tag_value_phase(
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
 
-                zhash_t* frames = receive_message_frames_at_client(msg);
+                zlist_t *names = zlist_new();
+                zhash_t* frames = receive_message_frames_at_client(msg, names);
 
                 //value
                 zframe_t *value_frame = (zframe_t *)zhash_lookup(frames, "payload");
@@ -292,7 +294,8 @@ TAG write_value_phase(
 
             if (items [0].revents & ZMQ_POLLIN) {
                zmsg_t *msg = zmsg_recv (sock_to_servers);
-               zhash_t* frames = receive_message_frames_at_client(msg);
+               zlist_t *names = zlist_new();
+               zhash_t* frames = receive_message_frames_at_client(msg, names);
 
                get_string_frame(phase, frames, "phase");
                round = get_int_frame(frames, "opnum");

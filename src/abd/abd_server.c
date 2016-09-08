@@ -34,7 +34,6 @@ void initialize_ABD() {
    assert(hash_object_ABD);
    assert(zhash_size (hash_object_ABD) == 0);
    assert(zhash_first (hash_object_ABD) == NULL);
-
 }
 
 
@@ -147,8 +146,6 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
 
-     //printf("\t\tobject : %s\n,", object_name);
-
      zhash_t *temp_hash_hash = zhash_lookup(hash_object_ABD, object_name);
      assert(temp_hash_hash!=NULL);
 
@@ -172,7 +169,7 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
 
 }
 
-void algorithm_ABD(zhash_t *frames, void *worker, void *server_args) {
+void algorithm_ABD(zhash_t *frames, void *worker, void *_server_args) {
 
      if(initialized==0) initialize_ABD();
 
@@ -185,8 +182,10 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *server_args) {
      get_string_frame(object_name, frames, "object");
 
      if( has_object(hash_object_ABD, object_name)==0) {
-         create_object(hash_object_ABD, object_name, ((SERVER_ARGS *)server_args)->init_data, status);
-    }
+         SERVER_ARGS *server_args = (SERVER_ARGS *)_server_args;
+         printf("%s  %d %p\n", object_name, strlen(server_args->init_data), status);
+         create_object(hash_object_ABD, object_name, server_args->init_data, status);
+     }
 
       if( strcmp(phase_buf, GET_TAG)==0)  {
            algorithm_ABD_GET_TAG(frames, worker);
