@@ -25,6 +25,41 @@ extern int s_interrupted;
 
 #define DEBUG_MODE 1
 
+void send_multicast_servers(void *sock_to_servers, int num_servers, int n, ...) {
+    va_list valist;
+    int i =0, j;
+    void *value;
+
+    va_start(valist, n);
+     
+    void **values = (void *)malloc(n*sizeof(void *));
+    zframe_t **frames = (zframe_t *)malloc(n*sizeof(zframe_t *));
+    assert(values!=NULL);
+    assert(frames!=NULL);
+
+    for(i=0; i < n; i++ ) {
+        values[i] = va_arg(valist, void *); 
+        frames[i]= zframe_new(value, strlen((char *)value));
+    }
+    va_end(valist);
+
+    // it to all servers in a round robin fashion
+    for(i=0; i < num_servers-1; i++) {
+       for(j=0; j < n-1; j++) {
+          zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+        }
+        zframe_send( &frames[n-1], sock_to_servers, ZFRAME_REUSE);
+    }
+
+    if( values!=NULL) free(values); 
+
+    for(i=0; i < n; i++ ) {
+       zframe_destroy(frames+i);
+    }
+    if( frames!=NULL) free(frames);
+
+}
+
 // this fethers the max tag
 TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
                       zsock_t *sock_to_servers,  char **servers, 
@@ -40,6 +75,15 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
     int i; 
+
+		char *algorithm = "ABD";
+    char *types[] = {"char", "char", "char", "uint"};
+
+    send_multicast_servers(sock_to_servers, num_servers, 4, obj_name, algorithm, phase, op_num) ;
+
+
+
+/*
     zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algo = zframe_new("ABD", 3);
     zframe_t *phase_frame = zframe_new(GET_TAG, 7);
@@ -56,6 +100,7 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
     zframe_destroy(&algo);
     zframe_destroy(&phase_frame);
     zframe_destroy(&op_num_frame);
+*/
 
 //    zframe_destroy (&payloadf);
     unsigned int majority =  ceil(((float)num_servers+1)/2);

@@ -203,7 +203,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         status->data_memory += (float) size;
     }
 
-    send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
+    send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
     printf("        <--- sending  --- %s\n",tag_w_str);
     return;
 }
@@ -309,7 +309,7 @@ void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,  void *worker) {
 
      int opnum = get_int_frame(frames, "opnum");
      printf("        READ_GET %d\n", opnum);
-     send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
+     send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
      printf("        <--- sending  --- %s\n",tag_buf);
 }
@@ -376,7 +376,8 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
                zframe_t *payload_frame = zframe_new(payload, strlen(payload));
                zhash_insert((void *)frames, "payload", (void *)payload_frame);
 
-               send_frames(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "tag", "payload");
+               send_frames_at_server(frames, worker, SEND_FINAL, 6, 
+                       "sender", "object",  "algorithm", "phase", "tag", "payload");
                METADATA *h = MetaData_create(tag_loc, server_args->server_id, reader) ;
                char *newkey = MetaData_keystring(h);
                zhash_insert((void *)metadata, (const char *)newkey, (void *)h);

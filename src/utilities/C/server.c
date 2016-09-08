@@ -18,7 +18,7 @@
 
 #include "../../abd/abd_server.h"
 
-#define DEBUG_MODE 0
+#define DEBUG_MODE 1
 extern int s_interrupted;
 
 SERVER_STATUS *status;
@@ -75,8 +75,6 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
-        //  The DEALER socket gives us the reply envelope and message
-   //     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
 
         int rc = zmq_poll(items, 1, -1);
         if( rc < 0 || s_interrupted ) {
@@ -90,24 +88,25 @@ server_worker (void *server_args, zctx_t *ctx, void *pipe)
            // receive the frames
            status->network_data += (float)zmsg_content_size(msg) ;
 
-           zhash_t *frames = receive_message_frames(msg);
-
-           zframe_t *id =  zframe_new(ID, strlen(ID));
-           zhash_insert(frames, "ID", id);
+          
+           zhash_t *frames = receive_message_frames_at_server(msg);
 
            get_string_frame(algorithm_name, frames, "algorithm");
 
            if( strcmp(algorithm_name, "ABD")==0)  {
-                printf("\tABD\n");
+                printf("ABD RESPONDING %s\n", ID);
+                if(DEBUG_MODE) { printf("\treceiving...\n");  print_out_hash(frames); }
                 algorithm_ABD(frames, worker, server_args);
-                printf("\tABD DONE\n");
+                printf("ABD RESPONSE COMPLETE\n\n");
            }
    
            if( strcmp(algorithm_name, "SODAW")==0)  {
-                printf("\tSODAW at server %s\n", ID);
+                printf("\tSODAW RESPONDING %s\n",ID);
+                if(DEBUG_MODE)  print_out_hash(frames);
                 algorithm_SODAW(frames, worker, server_args);
-                printf("\tSODAW DONE\n");
+                printf("\tSODAW RESPONSE COMPLETE\n");
            }
+
            destroy_frames(frames);
         }
     }

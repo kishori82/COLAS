@@ -98,7 +98,7 @@ char **create_server_names(char *servers_str) ;
 unsigned int count_num_servers(char *servers_str) ;
 
 
-zhash_t *receive_message_frames(zmsg_t *msg) ;
+zhash_t *receive_message_frames_at_server(zmsg_t *msg) ;
 
 int  get_string_frame(char *buf, zhash_t *frames,  const char *str);
 
@@ -108,7 +108,10 @@ void destroy_frames(zhash_t *frames);
 
 enum SEND_TYPE {SEND_MORE, SEND_FINAL};
 
-void send_frames(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
+void send_frames_at_server(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
+
+void print_out_hash(zhash_t* frames);
+
 
 #endif
 
