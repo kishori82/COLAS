@@ -120,9 +120,27 @@ func status(c *cli.Context) error {
 	readers, writers, servers, controllers := getIPAddresses()
 
 	fmt.Println("Number readers : ", len(readers))
+	for _, value := range readers {
+		fmt.Println("    ", value)
+	}
+
 	fmt.Println("Number writers : ", len(writers))
+
+	for _, value := range writers {
+		fmt.Println("    ", value)
+	}
+
 	fmt.Println("Number servers : ", len(servers))
+
+	for _, value := range servers {
+		fmt.Println("    ", value)
+	}
+
 	fmt.Println("Number controller : ", len(controllers))
+
+	for _, value := range controllers {
+		fmt.Println("    ", value)
+	}
 	return nil
 }
 
