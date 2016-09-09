@@ -667,6 +667,11 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *i
        strcpy(value, init_data);
        value[strlen(init_data)]= '\0';
 
+
+
+       ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), full_vector);
+
+
        zframe_t *value_frame = zframe_new((void *)value, strlen(value));
        zhash_insert(hash_hash, tag_str, (void *)value_frame); 
 

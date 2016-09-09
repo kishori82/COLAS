@@ -206,7 +206,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         free(item);
 
         //insert the new tag and coded value
-
 //        char *data =  (char *)malloc(size + 1);
  //       _zframe_str(payload, data);  // put in the storable format
         printf("data size only -----------------------> %d\n", size);
