@@ -128,32 +128,11 @@ char *SODAW_read_value(
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
-    int i; 
-    zframe_t *obj_name_frame = zframe_new(obj_name, strlen(obj_name));
-    zframe_t *algo = zframe_new("SODAW", strlen("SODAW"));
-    zframe_t *phase_frame = zframe_new(READ_VALUE, strlen(READ_VALUE));
-
+    char *types[] = {"object", "algorithm", "phase", "tag"};
     tag_to_string(read_tag, tag_str); 
-    zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
+    send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "SODAW", READ_VALUE, &op_num) ;
 
-    printf("      \tReading the tag %s\n", tag_str);
-    for(i=0; i < num_servers; i++) {
-       zframe_send(&obj_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-       zframe_send(&algo, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-//KMK
-       zframe_send(&phase_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-       zframe_send(&tag_frame, sock_to_servers, ZFRAME_REUSE);
-       printf("     \tsending to server %d\n",i);
-    }
-
-    zframe_destroy(&obj_name_frame);
-    zframe_destroy(&algo);
-    zframe_destroy(&phase_frame);
-    zframe_destroy(&tag_frame);
-
-//    zframe_destroy (&payloadf);
     unsigned int majority =  ceil(((float)num_servers+1)/2);
-//     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
      unsigned int responses =0;
      zlist_t *tag_list = zlist_new();
      
@@ -162,17 +141,18 @@ char *SODAW_read_value(
         //  Tick once per second, pulling in arriving messages
             
            // zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
-            printf("      \treceiving data\n");
+            printf("\t\twaiting for data..\n");
             int rc = zmq_poll(items, 1, -1);
             if(rc < 0 ||  s_interrupted ) {
                 printf("Interrupted!\n");
                 exit(0);
             }
-           // zclock_sleep(300); 
+            printf("\t\treceived data\n");
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
 
-                zhash_t* frames = receive_message_frames_from_server_SODAW(msg);
+                zlist_t *names = zlist_new();
+                zhash_t* frames = receive_message_frames_at_client(msg, names);
   
                 get_string_frame(phase, frames, "phase");
                 get_string_frame(tag_str, frames, "tag");
@@ -188,7 +168,8 @@ char *SODAW_read_value(
 
 
                 if(compare_tags(tag, read_tag) >=0 && strcmp(phase, READ_VALUE)==0) {
-                   printf("      \treceived data\n");
+                   if(DEBUG_MODE) print_out_hash_in_order(frames, names);
+
                    void *payload_frame = zhash_lookup(frames, "payload");
                    char str[3000];
                    get_string_frame(str, frames, "payload");
@@ -218,8 +199,9 @@ char *SODAW_read_value(
                      printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
 
                 }
-//                destroy_frames(frames);
- //               zmsg_destroy (&msg);
+                zmsg_destroy (&msg);
+                zlist_purge(names);
+                destroy_frames(frames);
             }
      }
   // now we want to decode it
@@ -355,6 +337,12 @@ void SODAW_read_complete_phase(
     // send out the messages to all servers
     char tag_str[100];
 
+    char *types[] = {"object", "algorithm", "phase", "tag"};
+    tag_to_string(max_tag, tag_str); 
+    send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "SODAW", READ_COMPLETE, tag_str) ;
+
+
+/*
     zframe_t *object_name_frame = zframe_new(obj_name, strlen(obj_name));
     zframe_t *algorithm_frame = zframe_new("SODAW", strlen("SODAW"));
     zframe_t *phase_frame = zframe_new(READ_COMPLETE, strlen(READ_COMPLETE));
@@ -374,6 +362,7 @@ void SODAW_read_complete_phase(
     zframe_destroy(&algorithm_frame);
     zframe_destroy(&phase_frame);
     zframe_destroy(&tag_frame);
+*/
 }
 
 
@@ -398,21 +387,21 @@ bool SODAW_write(
     char **servers = create_server_names(servers_str);
 
 #ifndef DEBUG_MODE
-    printf("\tObj name       : %s\n",obj_name);
-    printf("\tWriter name    : %s\n",writer_id);
-    printf("\tOperation num  : %d\n",op_num);
-    printf("\tSize           : %d\n", size);
-    printf("\tSize of        : %u\n", (unsigned int)strlen(payload));
+    printf("\t\tObj name       : %s\n",obj_name);
+    printf("\t\tWriter name    : %s\n",writer_id);
+    printf("\t\tOperation num  : %d\n",op_num);
+    printf("\t\tSize           : %d\n", size);
+    printf("\t\tSize of        : %u\n", (unsigned int)strlen(payload));
 
-    printf("\tEncoded string : %s\n", payload);
-    printf("\tServer string  : %s\n", servers_str);
-    printf("\tPort           : %s\n", port);
+    printf("\t\tEncoded string : %s\n", strlen(payload));
+    printf("\t\tServer string  : %s\n", servers_str);
+    printf("\t\tPort           : %s\n", port);
 
-    printf("\tNum of Servers  : %d\n",num_servers);
+    printf("\t\tNum of Servers  : %d\n",num_servers);
 
 //    printf("Decoded string  : %s\n", myb64);
     for(j=0; j < num_servers; j++) {
-        printf("\tServer : %s\n", servers[j]);
+        printf("\t\tServer : %s\n", servers[j]);
     }
     printf("\n");
 #endif
@@ -481,23 +470,23 @@ char *SODAW_read(
     int num_servers = count_num_servers(servers_str);
 
     char **servers = create_server_names(servers_str);
-#ifdef DEBUG_MODE
-    printf("Obj name       : %s\n",obj_name);
-    printf("Writer name    : %s\n",reader_id);
-    printf("Operation num  : %d\n",op_num);
+#ifndef DEBUG_MODE
+    printf("\t\tObj name       : %s\n",obj_name);
+    printf("\t\tWriter name    : %s\n",reader_id);
+    printf("\t\tOperation num  : %d\n",op_num);
 
    /* char *myb64 = (char *)malloc(strlen(payload));
     b64_decode(payload, myb64);
     printf("Encoded string  : %s\n", payload);
     free(myb64);
 */
-    printf("Server string   : %s\n", servers_str);
-    printf("Port to Use     : %s\n", port);
-    printf("Num of Servers  : %d\n",num_servers);
+    printf("\t\tServer string   : %s\n", servers_str);
+    printf("\t\tPort to Use     : %s\n", port);
+    printf("\t\tNum of Servers  : %d\n",num_servers);
 
 //    printf("Decoded string  : %s\n", myb64);
     for(j=0; j < num_servers; j++) {
-        printf("\tServer : %s\n", servers[j]);
+        printf("\t\t\tServer : %s\n", servers[j]);
     }
     printf("\n");
 #endif
@@ -529,7 +518,7 @@ char *SODAW_read(
                       port
                   );
 
-   printf("\tmax tag (%d,%s)\n\n", read_tag.z, read_tag.id);
+    printf("\t\tmax tag (%d,%s)\n\n", read_tag.z, read_tag.id);
 
 
     printf("\tREAD_VALUE (READER)\n");
@@ -546,6 +535,7 @@ char *SODAW_read(
         );
 
 
+    printf("\tREAD_COMPLETE (READER)\n");
    SODAW_read_complete_phase(
             obj_name, 
             reader_id,
