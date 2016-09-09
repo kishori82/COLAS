@@ -25,72 +25,6 @@ extern int s_interrupted;
 
 #define DEBUG_MODE 1
 
-void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[],  int n, ...) {
-    va_list valist;
-    int i =0, j;
-
-    va_start(valist, n);
-     
-    void **values = (void *)malloc(n*sizeof(void *));
-    zframe_t **frames = (zframe_t *)malloc(n*sizeof(zframe_t *));
-    assert(values!=NULL);
-    assert(frames!=NULL);
-
-    for(i=0; i < n; i++ ) {
-
-        if( strcmp(names[i], "opnum")==0)   {
-           values[i] = (void *)va_arg(valist, unsigned  int *); 
-        }
-        else
-           values[i] = va_arg(valist, void *); 
-
-        if( strcmp(names[i], "opnum")==0) {
-            frames[i]= zframe_new((const void *)values[i], sizeof(unsigned int));
-        }
-        else {
-            frames[i]= zframe_new(values[i], strlen((char *)values[i]));
-        }
-    }
-    va_end(valist);
-
-    // it to all servers in a round robin fashion
-    printf("\n");
-
-    for(i=0; i < num_servers; i++) {
-
-       for(j=0; j < n-1; j++) {
-          if(DEBUG_MODE) {
-            if( strcmp(names[j], "opnum")==0)  
-               printf("\tFRAME%d :%s  %d\n", j, names[j], *((unsigned int *)values[j]) );
-            else if( strcmp(names[j], "payload")==0)  
-               printf("\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
-            else
-               printf("\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
-             
-            zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-        }
-       }
-
-        if( strcmp(names[j], "opnum")==0)  
-            printf("\tFRAME%d :%s  %d\n", j, names[j],   *((unsigned int *)values[j]) );
-        else if( strcmp(names[j], "payload")==0)  
-               printf("\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
-        else
-            printf("\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
-
-        zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE);
-
-    }
-
-    if( values!=NULL) free(values); 
-
-    for(i=0; i < n; i++ ) {
-       zframe_destroy(frames+i);
-    }
-    if( frames!=NULL) free(frames);
-
-}
-
 // this fethers the max tag
 TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
                       zsock_t *sock_to_servers,  char **servers, 
@@ -136,6 +70,8 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
                 get_string_frame(tag_str, frames, "tag");
                   
                 if(round==op_num && strcmp(phase, GET_TAG)==0) {
+                     if(DEBUG_MODE) print_out_hash_in_order(frames, names);
+
                      responses++;
                      // add tag to list                
                      tag = (TAG *)malloc(sizeof(TAG));
@@ -150,6 +86,7 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
                 }
 
                 zmsg_destroy (&msg);
+                zlist_purge(names);
            }
      }
    //comute the max tag now and return 
@@ -372,7 +309,7 @@ bool ABD_write(
        free(destination);
     }
 
-   printf("\tMAX_TAG (WRITER)\n");
+   printf("\tGET_TAG (WRITER)\n");
 
    TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 

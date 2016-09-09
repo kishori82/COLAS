@@ -358,7 +358,6 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
      get_string_frame(phase_name, frames, "phase");
      if(names!=NULL) zlist_append(names, "phase");
 
-
      if( strcmp(algorithm_name, "ABD") ==0 ) {
 
          if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
@@ -445,30 +444,33 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
      char algorithm_name[100];
      char object_name[100];
      char phase_name[100];
-     char buf[100];
      zhash_t *frames = zhash_new();
 
      zframe_t *object_name_frame= zmsg_pop (msg);
      zhash_insert(frames, "object", (void *)object_name_frame);
      get_string_frame(object_name, frames, "object");
+     if( names!= NULL) zlist_append(names, "object");
  
      zframe_t *algorithm_frame= zmsg_pop (msg);
      zhash_insert(frames, "algorithm", (void *)algorithm_frame);
      get_string_frame(algorithm_name, frames, "algorithm");
+     if( names!= NULL) zlist_append(names, "algorithm");
 
      zframe_t *phase_frame= zmsg_pop (msg);
      zhash_insert(frames, "phase", (void *)phase_frame);
      get_string_frame(phase_name, frames, "phase");
-
-     zframe_t *opnum_frame= zmsg_pop (msg);
-     zhash_insert(frames, "opnum", (void *)opnum_frame);
+     if( names!= NULL) zlist_append(names, "phase");
 
      if( strcmp(algorithm_name, "ABD") ==0 ) {
+
+         zframe_t *opnum_frame= zmsg_pop (msg);
+         zhash_insert(frames, "opnum", (void *)opnum_frame);
+         if( names!= NULL) zlist_append(names, "opnum");
 
          if( strcmp(phase_name, GET_TAG) ==0 ) {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
-           get_string_frame(buf, frames, "tag");
+           if( names!= NULL) zlist_append(names, "tag");
 
          }
 
@@ -476,20 +478,53 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
 
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
-           get_string_frame(buf, frames, "tag");
+           if( names!= NULL) zlist_append(names, "tag");
          }
 
          if( strcmp(phase_name, GET_TAG_VALUE) ==0 ) {
-
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
-           get_string_frame(buf, frames, "tag");
+           if( names!= NULL) zlist_append(names, "tag");
 
            zframe_t *payload_frame= zmsg_pop (msg);
            zhash_insert(frames, "payload", (void *)payload_frame);
+           if( names!= NULL) zlist_append(names, "payload");
          }
      }
 
+     if( strcmp(algorithm_name, "SODAW") ==0 ) {
+         if( strcmp(phase_name, WRITE_GET) ==0 ) {
+           zframe_t *opnum_frame= zmsg_pop (msg);
+           zhash_insert(frames, "opnum", (void *)opnum_frame);
+           if( names!= NULL) zlist_append(names, "opnum");
+
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           if( names!= NULL) zlist_append(names, "tag");
+         }
+
+         if( strcmp(phase_name, WRITE_PUT) ==0 ) {
+           zframe_t *opnum_frame= zmsg_pop (msg);
+           zhash_insert(frames, "opnum", (void *)opnum_frame);
+           if( names!= NULL) zlist_append(names, "opnum");
+
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           if( names!= NULL) zlist_append(names, "tag");
+         }
+
+         if( strcmp(phase_name, READ_VALUE) ==0 ) {
+
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           if( names!= NULL) zlist_append(names, "tag");
+
+           zframe_t *payload_frame= zmsg_pop (msg);
+           zhash_insert(frames, "payload", (void *)payload_frame);
+           if( names!= NULL) zlist_append(names, "payload");
+         }
+     }
+ 
      return frames;
 }
 

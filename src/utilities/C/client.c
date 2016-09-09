@@ -13,6 +13,8 @@
 #include "client.h"
 
 
+#define DEBUG_MODE  1
+
 int s_interrupted;
 
 void s_signal_handler(int signal_value)
@@ -31,6 +33,127 @@ void s_catch_signals ()
     sigemptyset (&action.sa_mask);
     sigaction (SIGINT, &action, NULL);
     sigaction (SIGTERM, &action, NULL);
+}
+
+void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[],  int n, ...) {
+    va_list valist;
+    int i =0, j;
+
+    va_start(valist, n);
+     
+    void **values = (void *)malloc(n*sizeof(void *));
+    zframe_t **frames = (zframe_t *)malloc(n*sizeof(zframe_t *));
+    assert(values!=NULL);
+    assert(frames!=NULL);
+
+    for(i=0; i < n; i++ ) {
+
+        if( strcmp(names[i], "opnum")==0)   {
+           values[i] = (void *)va_arg(valist, unsigned  int *); 
+        }
+        else
+           values[i] = va_arg(valist, void *); 
+
+        if( strcmp(names[i], "opnum")==0) {
+            frames[i]= zframe_new((const void *)values[i], sizeof(unsigned int));
+        }
+        else {
+            frames[i]= zframe_new(values[i], strlen((char *)values[i]));
+        }
+    }
+    va_end(valist);
+
+    // it to all servers in a round robin fashion
+    printf("\n");
+
+    for(i=0; i < num_servers; i++) {
+
+       for(j=0; j < n-1; j++) {
+          if(DEBUG_MODE) {
+            if( strcmp(names[j], "opnum")==0)  
+               printf("\t\tFRAME%d :%s  %d\n", j, names[j], *((unsigned int *)values[j]) );
+            else if( strcmp(names[j], "payload")==0)  
+               printf("\t\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
+            else
+               printf("\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
+             
+            zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+        }
+       }
+
+        if( strcmp(names[j], "opnum")==0)  
+            printf("\t\tFRAME%d :%s  %d\n", j, names[j],   *((unsigned int *)values[j]) );
+        else if( strcmp(names[j], "payload")==0)  
+               printf("\t\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
+        else
+            printf("\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
+
+        zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE);
+
+    }
+
+    if( values!=NULL) free(values); 
+
+    for(i=0; i < n; i++ ) {
+       zframe_destroy(frames+i);
+    }
+    if( frames!=NULL) free(frames);
+}
+
+void send_multisend_servers(void *sock_to_servers, int num_servers,  char **messages, int msg_size, 
+        char *names[],  int n, ...) {
+    va_list valist;
+    int i =0, j;
+
+    va_start(valist, n);
+     
+    void **values = (void *)malloc(n*sizeof(void *));
+    zframe_t **frames = (zframe_t *)malloc( (n+1)*sizeof(zframe_t *));
+    assert(values!=NULL);
+    assert(frames!=NULL);
+
+    for(i=0; i < n; i++ ) {
+        if( strcmp(names[i], "opnum")==0)   {
+           values[i] = (void *)va_arg(valist, unsigned  int *); 
+        }
+        else
+           values[i] = va_arg(valist, void *); 
+
+        if( strcmp(names[i], "opnum")==0) {
+            frames[i]= zframe_new((const void *)values[i], sizeof(unsigned int));
+        }
+        else {
+            frames[i]= zframe_new(values[i], strlen((char *)values[i]));
+        }
+    }
+
+    va_end(valist);
+
+    // it to all servers in a round robin fashion
+    for(i=0; i < num_servers; i++) {
+       for(j=0; j < n; j++) {
+          if(DEBUG_MODE) {
+            if( strcmp(names[j], "opnum")==0)  {
+              if(DEBUG_MODE) { printf("\t\tFRAME%d :%s  %d\n", j, names[j], *((unsigned int *)values[j]) ); }
+            } else {
+              if(DEBUG_MODE) { printf("\t\tFRAME%d :%s  %s\n", j, names[j],  (char *)values[j]); }
+              //if(DEBUG_MODE) { printf("\t\t----FRAME%d :%s\n", j, names[j]); }
+            }
+          }
+         zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+       }
+        // a different coded element for each different server
+       frames[n]= zframe_new(messages[i], msg_size);
+       if(DEBUG_MODE) printf("\t\tFRAME%d :%s  %d\n", n, "payload",  msg_size );
+       zframe_send( &frames[n], sock_to_servers, ZFRAME_REUSE);
+    }
+
+    if( values!=NULL) free(values); 
+
+    for(i=0; i < n+1; i++ ) {
+       zframe_destroy(frames+i);
+    }
+    if( frames!=NULL) free(frames);
 }
 
 

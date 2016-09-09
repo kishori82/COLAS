@@ -24,6 +24,10 @@ func writer_deamon() {
 
 	var object_name string = "atomic_object"
 
+  data.name = "writer-1"
+  data.active = true 
+	data.servers["172.17.0.3"]=true
+
 	for {
 		select {
 		case active := <-active_chan:
