@@ -183,7 +183,7 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *_server_args) {
 
      if( has_object(hash_object_ABD, object_name)==0) {
          SERVER_ARGS *server_args = (SERVER_ARGS *)_server_args;
-         printf("%s  %d %p\n", object_name, strlen(server_args->init_data), status);
+    //     printf("%s  %d %p\n", object_name, strlen(server_args->init_data), status);
          create_object(hash_object_ABD, object_name, server_args->init_data, status);
      }
 

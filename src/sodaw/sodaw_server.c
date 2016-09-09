@@ -134,7 +134,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
     get_string_frame(tag_w_str, frames, "tag");
     string_to_tag(tag_w_str, &tag_w);
 
-    if( DEBUG_MODE ) printf("\t\t INSIDE WRITE PUT\n");
+    if( DEBUG_MODE ) printf("\tWRITE PUT\n");
 
      // read the new coded element  from the message
     // this is the coded element cs
@@ -169,7 +169,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
      // if tw > tag
     if( compare_tags(tag_w, tag)==1 ) {
-        if( DEBUG_MODE )printf("\t\tBEHIND\n");
          // get the hash for the object
         zhash_t *temp_hash_hash = zhash_lookup(hash_object_SODAW, object_name);
 
@@ -203,8 +202,8 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         status->data_memory += (float) size;
     }
 
+     printf("\t\tsending\n");
     send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
-    printf("        <--- sending  --- %s\n",tag_w_str);
     return;
 }
 
@@ -297,8 +296,8 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
 void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,  void *worker) {
      char object_name[100];
      char tag_buf[100];
- 
 
+     printf("\tWRITE_GET\n");
      get_string_frame(object_name, frames, "object");
      TAG tag;
      get_object_tag(hash_object_SODAW, object_name, &tag);
@@ -308,10 +307,10 @@ void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,  void *worker) {
      zhash_insert(frames, "tag", (void *)tag_frame);
 
      int opnum = get_int_frame(frames, "opnum");
-     printf("        READ_GET %d\n", opnum);
+     printf("\t\tsending\n");
+     
      send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
 
-     printf("        <--- sending  --- %s\n",tag_buf);
 }
 
 
@@ -480,11 +479,7 @@ void create_metadata_sending_sockets() {
     int num_servers = count_num_servers(server_args->servers_str);
 
     server_args->num_servers = num_servers;
-
     char **servers = create_server_names(server_args->servers_str);
-
-
-    printf("number server %d server %s\n", num_servers, server_args->servers_str);
 
     zctx_t *ctx  = zctx_new();
     void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
@@ -513,56 +508,43 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *server_args) {
      char object_name[100];
      int  round;
 
-
      if(initialized==0) initialize_SODAW();
 
      get_string_frame(phasebuf, frames, "phase");
      get_string_frame(object_name, frames, "object");
      get_string_frame(buf, frames, "sender");
-     printf("algorithm SODAW\n");
 
-    printf("object = %s, phase %s\n", object_name, phasebuf);
 
      if( has_object(hash_object_SODAW, object_name)==0) {
          create_object(hash_object_SODAW, object_name, ((SERVER_ARGS *)server_args)->init_data, status);
-         printf("\t\tCreated object %s\n",object_name);
+        // printf("\t\tCreated object %s\n",object_name);
      }
 
       if( strcmp(phasebuf, WRITE_GET)==0)  {
-           printf("\t-----------------\n");
-           printf("\tSODAW WRITE_GET from client %s\n", buf);
+         //  printf("\tSODAW WRITE_GET from client %s\n", buf);
            algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(frames,  worker);
       }
 
       if( strcmp(phasebuf, WRITE_PUT)==0)  {
-           printf("\t-----------------\n");
-           printf("\t SODAW WRITE PUT\n");
+           //printf("\t SODAW WRITE PUT\n");
            algorithm_SODAW_WRITE_PUT(frames, worker);
       }
 
       if( strcmp(phasebuf, READ_GET)==0)  {
-           printf("\tSODAW READ_GET\n");
+           //printf("\tSODAW READ_GET\n");
            algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(frames, worker);
       }
 
       if( strcmp(phasebuf, READ_VALUE)==0)  {
-           printf("\t-----------------\n");
-           printf("\tSODAW READ VALUE\n");
            algorithm_SODAW_READ_VALUE(frames, worker);
-           printf("\tSODAW READ VALUE DONE\n");
-           
       }
 
 
       if( strcmp(phasebuf, READ_COMPLETE)==0)  {
-           printf("\t-----------------\n");
-           printf("\tSODAW READ COMPLETE\n");
            algorithm_SODAW_READ_COMPLETE(frames, worker);
       }
 
       if( strcmp(phasebuf, READ_DISPERSE)==0)  {
-           printf("\t-----------------\n");
-           printf("\tSODAW READ DISPERSE\n");
            algorithm_SODAW_READ_DISPERSE(frames, worker);
       }
    

@@ -97,7 +97,7 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
            if( strcmp(algorithm_name, "ABD")==0)  {
                 printf("ABD RESPONDING %s\n", server_args->server_id);
                 if(DEBUG_MODE) { 
-                   printf("\treceiving... %s\n", server_args->server_id);  
+                   printf("\t\treceiving... %s\n", server_args->server_id);  
                    print_out_hash_in_order(frames, frames_list); 
                 }
                  
@@ -107,10 +107,15 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
   
    
            if( strcmp(algorithm_name, "SODAW")==0)  {
-                printf("\tSODAW RESPONDING %s\n",server_args->server_id);
-                if(DEBUG_MODE)  print_out_hash(frames);
+
+                printf("SODAW RESPONDING %s\n",server_args->server_id);
+                if(DEBUG_MODE) {
+                   printf("\t\treceiving... %s\n", server_args->server_id);  
+                   print_out_hash_in_order(frames, frames_list);
+                }
+
                 algorithm_SODAW(frames, worker, server_args);
-                printf("\tSODAW RESPONSE COMPLETE\n");
+                printf("SODAW RESPONSE COMPLETE\n");
            }
 
            zlist_purge(frames_list);
