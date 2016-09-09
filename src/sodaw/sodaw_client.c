@@ -87,7 +87,7 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
                    //if(responses >= num_servers) break;
                 }
                 else{
-                     printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
+                     printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
 
                 }
                 zmsg_destroy (&msg);
@@ -159,11 +159,9 @@ char *SODAW_read_value(
                 TAG tag;
                 get_tag_frame(frames, &tag);
 
-                printf("done\n"); return NULL; 
-                printf("phase and tag %s %s\n", phase, tag_str);
                 if( zhash_lookup(received_data, tag_str)==NULL) {
-                    zlist_t *a = zlist_new();
-                    zhash_insert(received_data, tag_str,  (void *)a);
+                    zlist_t *data_list = zlist_new();
+                    zhash_insert(received_data, tag_str,  (void *)data_list);
                 }
 
 
@@ -174,29 +172,17 @@ char *SODAW_read_value(
                    char str[3000];
                    get_string_frame(str, frames, "payload");
 
-                   printf("      \treceived data 1 %s %s\n", tag_str, str);
-
                    zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, tag_str);
-/*
-                   printf("      \treceived data 1.1 %s   %d\n", tag_str, zhash_size(received_data));
+                   assert(coded_elements!=NULL);
 
-                   printf("      \treceived data majority  1.1 %d %d\n", majority, zlist_size(coded_elements));
-                   printf("      \treceived data majority  1.1 %d %d\n", majority, zlist_size(coded_elements));
-                   printf("      \treceived data majority  1.1 %d %d\n", majority, zlist_size(coded_elements));
-*/
+                   zlist_append(coded_elements, payload_frame); 
 
-                  // zlist_append( (zlist_t *)coded_elements, payload_frame); 
-                   //if(coded_elements != NULL) zlist_append( (zlist_t *)coded_elements, payload_frame); 
+                   char *decodeableKey = number_responses_at_least(received_data, majority);
 
-                   printf("      \treceived data 2 %d\n", majority);
-
-//                   char *decodeableKey = number_responses_at_least(received_data, majority);
-
-                   printf("      \treceived data 3\n");
-//                   if(decodeableKey!= NULL) break;
+                   if(decodeableKey!= NULL) break;
                 }
-                else{
-                     printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
+                else {
+                     printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
 
                 }
                 zmsg_destroy (&msg);
@@ -314,7 +300,7 @@ void SODAW_write_put_phase(
                    //if(responses >= num_servers) break;
                 }
                 else{
-                     printf("   OLD MESSAGES : %s  %d\n", phase, op_num);
+                     printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
                 }
                 zmsg_destroy (&msg);
                 destroy_frames(frames);
