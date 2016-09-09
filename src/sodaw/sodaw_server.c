@@ -201,9 +201,8 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         status->metadata_memory +=  strlen(tag_w_str);
         status->data_memory += (float) size;
     }
-
      printf("\t\tsending\n");
-    send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
+     send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
     return;
 }
 
@@ -538,7 +537,6 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *server_args) {
       if( strcmp(phasebuf, READ_VALUE)==0)  {
            algorithm_SODAW_READ_VALUE(frames, worker);
       }
-
 
       if( strcmp(phasebuf, READ_COMPLETE)==0)  {
            algorithm_SODAW_READ_COMPLETE(frames, worker);
