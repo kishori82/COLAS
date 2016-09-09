@@ -16,21 +16,6 @@
 #define GET_TAG "GET_TAG"
 #define GET_TAG_VALUE "GET_TAG_VALUE"
 
-typedef struct _SERVER_STATUS {
-    float network_data, metadata_memory, data_memory, cpu_load;
-    int time_point;
-} SERVER_STATUS;
-
-typedef struct _SERVER_ARGS {
-    char *init_data;
-    char *server_id;
-    char *servers_str;
-    char *port;
-    void *sock_to_servers; 
-    int num_servers;
-    int K;
-    SERVER_STATUS *status;
-} SERVER_ARGS;
 
 typedef struct  _TAG {
     int z;
@@ -73,7 +58,6 @@ void init_tag(TAG *tag) ;
 
 int has_object(zhash_t *object_hash,  char *obj_name) ;
 
-int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *init_data, SERVER_STATUS *status) ;
 
 int print_object_hash(zhash_t *object_hash) ;
 
