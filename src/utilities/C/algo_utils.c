@@ -300,7 +300,7 @@ void print_out_hash(zhash_t *frames) {
           }
           else if( strcmp(key, "payload")==0) {
              get_string_frame(buf, frames, key);
-             printf("\t\t\t%s : %d\n", key, strlen(buf));
+             printf("\t\t\t%s : %d\n", key, zframe_size(zhash_lookup(frames, key)));
           }
           else {
               get_string_frame(buf, frames, key);
@@ -323,7 +323,7 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
           }
           else if( strcmp(key, "payload")==0) {
              get_string_frame(buf, frames, key);
-             printf("\t\t\t%s : %d\n", key, strlen(buf));
+             printf("\t\t\t%s : %d\n", key, zframe_size(zhash_lookup(frames, key)));
           }
           else {
               get_string_frame(buf, frames, key);
