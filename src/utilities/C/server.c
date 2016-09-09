@@ -115,7 +115,7 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
                 }
 
                 algorithm_SODAW(frames, worker, server_args);
-                printf("SODAW RESPONSE COMPLETE\n");
+                printf("SODAW RESPONSE COMPLETE\n\n");
            }
 
            zlist_purge(frames_list);
