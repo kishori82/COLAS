@@ -627,6 +627,10 @@ int create_object(zhash_t *object_hash, char *obj_name, char *init_data, SERVER_
 
        return 1;
     }
+
+
+
+
     return 0;
 }
 

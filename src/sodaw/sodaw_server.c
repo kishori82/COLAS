@@ -83,7 +83,6 @@ REGREADER *RegReader_create(TAG tag, char *readerid) {
 
     char *newkey = (char *)malloc(size*sizeof(char));
     strcpy(newkey, buf);
-    printf("==================%s==============\n", buf);    
 
     return newkey;
 }
@@ -211,7 +210,7 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
     char readerid[100];
     char ID[100];
 
-     printf("\tREAD_COMPLETE\n");
+    printf("\tREAD_COMPLETE\n");
     TAG tag_r; 
     get_string_frame(tag_r_str, frames, "tag");
     string_to_tag(tag_r_str, &tag_r);
@@ -250,7 +249,7 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
     char object_name[100];
     char ID[100];
 
-     printf("\tREAD_DISPERSE\n");
+    printf("\tREAD_DISPERSE\n");
     get_string_frame(object_name, frames, "object");
     TAG tag; 
     get_string_frame(tag_str, frames, "meta_tag");
@@ -263,7 +262,7 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
     char *h_str_key = MetaData_keystring(h);
     zhash_insert(metadata, h_str_key, h);
 
-    printf("READ_DISPERSE %s %s %s\n", serverid, readerid, object_name);
+   // printf("READ_DISPERSE %s %s %s\n", serverid, readerid, object_name);
     zlist_t *r_tr_keys = zhash_keys(readerc);
 
     void *key; 
@@ -333,19 +332,15 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
      char *h_str = MetaData_keystring(h);
      
      tag_to_string(tag0, buf);
-     printf("read value (%s,  %s,  %s,  %s)\n", h_str, buf, server_args->server_id, reader);
+    // printf("read value (%s,  %s,  %s,  %s)\n", h_str, buf, server_args->server_id, reader);
 
      if( zhash_lookup(metadata, h_str)!=NULL )  {
-          printf("read value  0 %s\n", h_str);
           zlist_t *Hr = metadata_with_reader(metadata, reader);
-          printf("read value  0.1\n");
           metadata_remove_keys(metadata, Hr);
-          printf("read value  0.2\n");
      } else {
           TAG tag_r;
           get_tag_frame(frames, &tag_r);
 
-          printf("read value  1\n");
           REGREADER *r_tr_pair = RegReader_create(tag_r, reader);
           char *r_tr_key = RegReader_keystring(r_tr_pair);
           zhash_insert(readerc, r_tr_key, (void *)r_tr_pair);
@@ -358,11 +353,11 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
           tag_to_string(tag_loc, tag_loc_str);
           tag_to_string(tag_r, tag_inc_str);
 
-          printf(" Local tag =  %s incoming tag = %s\n", tag_loc_str, tag_inc_str);
+          //printf(" Local tag =  %s incoming tag = %s\n", tag_loc_str, tag_inc_str);
           if( compare_tags(tag_loc, tag_r)>=0 ) {
 
                tag_to_string(tag_loc, tag_loc_str);
-                printf(" Local tag =  %s incoming tag = %s\n", tag_loc_str, tag_inc_str);
+           //     printf(" Local tag =  %s incoming tag = %s\n", tag_loc_str, tag_inc_str);
                zframe_t *tag_loc_frame = zframe_new(tag_loc_str, strlen(tag_loc_str));
 
                zframe_t *item = (zframe_t *)zhash_lookup(frames, "tag");
@@ -410,9 +405,9 @@ zlist_t *metadata_with_reader(zhash_t *metadata, char *reader) {
          printf("metadata %s\n",(char *)key);
 
          METADATA *meta  = (METADATA *)zhash_lookup(metadata, (const char *)key);
-          printf("comparing  metadata %s %s %s\n",(char *)key, reader, meta->readerid );
+       //   printf("comparing  metadata %s %s %s\n",(char *)key, reader, meta->readerid );
          if(  strcmp(reader, meta->readerid) == 0 ) {
-            printf("appending metadata %s\n",(char *)key);
+        //    printf("appending metadata %s\n",(char *)key);
             zlist_append((void *)relevant_keys, key);
          } 
     }
