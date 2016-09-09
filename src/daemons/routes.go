@@ -634,8 +634,8 @@ func InitializeParameters() {
 	data.active = false
 	data.port = "8081"
 
-	data.algorithm = "ABD"
-	//	data.algorithm = "SODAW"
+	//data.algorithm = "ABD"
+	data.algorithm = "SODAW"
 	data.run_id = "DEFULT_RUN"
 	data.writeto = "ram"
 	data.name = "default"

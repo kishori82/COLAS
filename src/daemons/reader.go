@@ -23,6 +23,7 @@ func reader_daemon() {
   data.name = "reader-1"
   data.active = true 
 	data.servers["172.17.0.3"]=true
+	data.algorithm= "SODAW"
 
 	var object_name string = "atomic_object"
 
@@ -62,7 +63,7 @@ func reader_daemon() {
 				}
 
 				// call the SODAW algorithm
-				if data.algorithm == "SODAWX" {
+				if data.algorithm == "SODAW" {
 					data_read_c = C.SODAW_read(
 						C.CString(object_name),
 						C.CString(data.name),

@@ -181,29 +181,36 @@ ENCODED_DATA encode(uint32_t N, uint32_t max_symbols,
 
 
 #ifdef DEBUG_MODE
-   std::cout << "======================================\n";
-   std::cout << "num_blocks                           " << data_info.num_blocks << std::endl;
-   std::cout << "#bytes per block                     " << data_info.K*data_info.symbol_size << std::endl;
-   std::cout << "#symbols per block (K)               " << data_info.K << std::endl;
-   std::cout << "#encoded stripes (N)                 " << data_info.N << std::endl;
-   std::cout << "#symbols per stripe                  " << data_info.num_blocks << std::endl;
+   if(algo==full_vector)
+   std::cout << "\t\t===========  RLNC ===========================\n";
+   else
+   std::cout << "\t\t========== REED-SOLOMON ======================\n";
+
+   std::cout << "\t\tnum_blocks                           " << data_info.num_blocks << std::endl;
+   std::cout << "\t\t#bytes per block                     " << data_info.K*data_info.symbol_size << std::endl;
+   std::cout << "\t\t#symbols per block (K)               " << data_info.K << std::endl;
+   std::cout << "\t\t#encoded stripes (N)                 " << data_info.N << std::endl;
+   std::cout << "\t\t#symbols per stripe                  " << data_info.num_blocks << std::endl;
    std::cout << std::endl;
-   std::cout << "symbol size                          " << data_info.symbol_size << std::endl;
-   std::cout << "coded symbol size                    " << data_info.encoded_symbol_size << std::endl;
+   std::cout << "\t\tsymbol size                          " << data_info.symbol_size << std::endl;
+   std::cout << "\t\tcoded symbol size                    " << data_info.encoded_symbol_size << std::endl;
    std::cout << std::endl;
-   std::cout << "Total bytes in of uncoded symbols    " << 
+   std::cout << "\t\tTotal bytes in of uncoded symbols    " << 
          data_info.K*data_info.symbol_size*data_info.num_blocks << std::endl;
-   std::cout << "Total bytes in of coded symbols      " << 
+   std::cout << "\t\tTotal bytes in of coded symbols      " << 
          data_info.N*data_info.encoded_symbol_size*data_info.num_blocks << std::endl;
 
    std::cout << std::endl;
-   std::cout << "Total Number of uncoded symbols      " << data_info.num_blocks*data_info.K << std::endl;
-   std::cout << "Total Number of coded symbols        " << data_info.num_blocks*data_info.N << std::endl;
+   std::cout << "\t\tTotal Number of uncoded symbols      " << data_info.num_blocks*data_info.K << std::endl;
+   std::cout << "\t\tTotal Number of coded symbols        " << data_info.num_blocks*data_info.N << std::endl;
    std::cout << std::endl;
-   std::cout << "Raw data size                        " << data_info.actual_data_size << std::endl;
-   std::cout << "Total data size                      " << data_info.total_data_size << std::endl;
-   std::cout << "Padded data size                     " << data_info.padded_data_size << std::endl;
-   std::cout << "======================================\n";
+   std::cout << "\t\tRaw data size                        " << data_info.actual_data_size << std::endl;
+   std::cout << "\t\tTotal data size                      " << data_info.total_data_size << std::endl;
+   std::cout << "\t\tPadded data size                     " << data_info.padded_data_size << std::endl;
+   if(algo==full_vector)
+   std::cout << "\t\t===========  RLNC ===========================\n";
+   else
+   std::cout << "\t\t========== REED-SOLOMON ======================\n";
 #endif
   
    delete [] striped_data;
