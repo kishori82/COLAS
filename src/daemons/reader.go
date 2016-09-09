@@ -20,10 +20,10 @@ import "C"
 func reader_daemon() {
 	active_chan = make(chan bool, 2)
 
-  data.name = "reader-1"
-  data.active = true 
-	data.servers["172.17.0.3"]=true
-	data.algorithm= "SODAW"
+	data.name = "reader-1"
+	data.active = true
+	data.servers["172.17.0.2"] = true
+	data.algorithm = "SODAW"
 
 	var object_name string = "atomic_object"
 
@@ -35,7 +35,7 @@ func reader_daemon() {
 			data.active = active
 			data.write_counter = 0
 		default:
-		  fmt.Println(data.active, data.servers)
+			fmt.Println(data.active, data.servers)
 			if data.active == true && len(data.servers) > 0 {
 
 				rand_wait := rand_wait_time()*int64(time.Millisecond) + int64(time.Millisecond)

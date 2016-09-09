@@ -130,7 +130,7 @@ char *SODAW_read_value(
 
     char *types[] = {"object", "algorithm", "phase", "tag"};
     tag_to_string(read_tag, tag_str); 
-    send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "SODAW", READ_VALUE, &op_num) ;
+    send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "SODAW", READ_VALUE,  tag_str) ;
 
     unsigned int majority =  ceil(((float)num_servers+1)/2);
      unsigned int responses =0;
