@@ -73,7 +73,9 @@ void init_tag(TAG *tag) ;
 
 int has_object(zhash_t *object_hash,  char *obj_name) ;
 
-int create_object(zhash_t *object_hash, char *obj_name, char *init_data, SERVER_STATUS *status) ;
+int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *init_data, SERVER_STATUS *status) ;
+
+int print_object_hash(zhash_t *object_hash) ;
 
 int compare_tag_ptrs(TAG *a, TAG *b) ;
 
@@ -92,6 +94,8 @@ void free_items_in_list( zlist_t *list) ;
 int  get_object_tag(zhash_t *hash, char * object_name, TAG *tag) ;
 
 char * get_object_value(zhash_t *hash, char * object_name, TAG tag) ;
+
+zframe_t * get_object_frame(zhash_t *hash, char * object_name, TAG tag) ;
 
 char **create_server_names(char *servers_str) ;
 

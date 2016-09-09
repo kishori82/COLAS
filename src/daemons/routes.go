@@ -642,11 +642,13 @@ func InitializeParameters() {
 
 	data.active = false
 
+/*
 	data.active = true
 	data.algorithm = "SODAW"
 	data.servers["172.17.0.2"] = true
 	data.servers["172.17.0.3"] = true
 	data.servers["172.17.0.4"] = true
+	*/
 }
 
 /*
