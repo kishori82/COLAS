@@ -627,62 +627,6 @@ int has_object(zhash_t *object_hash,  char *obj_name) {
 }
 
 
-<<<<<<< HEAD
-int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *init_data, SERVER_STATUS *status) {
-    void *item =NULL;
-    char tag_str[BUFSIZE];
-    TAG tag;
-
-    item = zhash_lookup(object_hash, obj_name);
-    if( item!= NULL) return 0;
-
-    
-    if( strcmp(algorithm, "ABD")==0) {
-       zhash_t *hash_hash = zhash_new();
-
-       init_tag(&tag);
-       tag_to_string(tag, tag_str);
-
-       char *value =(void *)malloc(strlen(init_data)+1);
-       strcpy(value, init_data);
-       value[strlen(init_data)]= '\0';
-       zhash_insert(hash_hash, tag_str, (void *)value); 
-
-       status->metadata_memory += (float) strlen(tag_str);
-       status->data_memory += (float) strlen(init_data);
-        
-       printf("\tCreated %s (size %d) \n", obj_name, status->data_memory);
-       //add it to the main list 
-       zhash_insert(object_hash, obj_name, (void *)hash_hash); 
-
-       return 1;
-    }
-
-    if( strcmp(algorithm, "SODAW")==0) {
-       zhash_t *hash_hash = zhash_new();
-
-       init_tag(&tag);
-       tag_to_string(tag, tag_str);
-
-       char *value =(void *)malloc(strlen(init_data)+1);
-       strcpy(value, init_data);
-       value[strlen(init_data)]= '\0';
-
-       zframe_t *value_frame = zframe_new((void *)value, strlen(value));
-       zhash_insert(hash_hash, tag_str, (void *)value_frame); 
-
-       free(value);
-
-       status->metadata_memory += (float) strlen(tag_str);
-       status->data_memory += (float) strlen(init_data);
-        
-       printf("\tCreated %s (size %d) \n", obj_name, status->data_memory);
-       //add it to the main list 
-       zhash_insert(object_hash, obj_name, (void *)hash_hash); 
-
-       return 1;
-    }
-
 int print_object_hash(zhash_t *object_hash) {
 
      printf("printing the object hash....\n");
