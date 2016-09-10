@@ -216,7 +216,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
         printf("insertng data size ---------------> %d %s %d\n", size, tag_w_str, zframe_size(new_payload_frame));
 
-        zhash_insert(temp_hash_hash,tag_w_str, (void *)new_payload_frame); 
 
     printf("hello 3.08\n");
         //count the data size now

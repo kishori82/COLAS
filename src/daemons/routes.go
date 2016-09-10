@@ -639,6 +639,15 @@ func InitializeParameters() {
 	data.run_id = "DEFULT_RUN"
 	data.writeto = "ram"
 	data.name = "default"
+	if processType=0 {
+	    data.name = "reader_0"
+  }
+	if processType=1 {
+	    data.name = "writer_0"
+  }
+	if processType=2 {
+	    data.name = "server_0"
+  }
 
 	data.active = false
 

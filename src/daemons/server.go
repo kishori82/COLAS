@@ -47,6 +47,7 @@ func server_daemon() {
 
 	//	C.HelloKodo()
 	var status C.SERVER_STATUS
+	var server_args C.SERVER_ARGS;
 
 	status.network_data = 0
 	status.metadata_memory = 0
@@ -54,11 +55,23 @@ func server_daemon() {
 	status.cpu_load = 0
 	status.time_point = 0
 
+
+	server_args.init_data = C.CString(encoded)
+	server_args.server_id = C.CString(data.name)
+	server_args.servers_str = C.CString(servers_str)
+	server_args.port = C.CString(data.port)
+	server_args.symbol_size = C.int(data.symbol_size)
+	server_args.coding_algorithm = C.uint8(data.coding_algorithm)
+	server_args.N= C.uint8(data.servers)
+	server_args.K= C.uint8(data.K)
+
+
 	go server_logger(&status)
 
 	time.Sleep(time.Second)
 
 	servers_str := create_server_string_to_C()
+	
  	C.server_process(C.CString(data.name),  C.CString(servers_str), C.CString(data.port), init_data, &status)
 
 /*`

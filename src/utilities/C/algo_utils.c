@@ -627,6 +627,7 @@ int has_object(zhash_t *object_hash,  char *obj_name) {
 }
 
 
+<<<<<<< HEAD
 int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *init_data, SERVER_STATUS *status) {
     void *item =NULL;
     char tag_str[BUFSIZE];
@@ -681,9 +682,6 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *i
 
        return 1;
     }
-
-    return 0;
-}
 
 int print_object_hash(zhash_t *object_hash) {
 
