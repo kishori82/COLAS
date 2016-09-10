@@ -58,7 +58,6 @@ void init_tag(TAG *tag) ;
 
 int has_object(zhash_t *object_hash,  char *obj_name) ;
 
-
 int print_object_hash(zhash_t *object_hash) ;
 
 int compare_tag_ptrs(TAG *a, TAG *b) ;
