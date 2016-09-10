@@ -24,9 +24,10 @@ func reader_daemon() {
 
 	for {
 		select {
-		case active := <-active_chan:   //start
+		case active := <-active_chan: //start
 			data.active = active
-            ReinitializeParameters()
+			ReinitializeParameters()
+			LogParameters()
 		case active := <-reset_chan:
 			data.active = active
 			data.write_counter = 0
@@ -91,7 +92,7 @@ func Reader_process(ip_addrs *list.List) {
 	fmt.Println("INFO\tStarting reader\n")
 
 	InitializeParameters()
-    LogParameters()
+	LogParameters()
 
 	go HTTP_Server()
 
