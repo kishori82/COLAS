@@ -92,7 +92,6 @@ func Reader_process(ip_addrs *list.List) {
 	fmt.Println("INFO\tStarting reader\n")
 
 	InitializeParameters()
-	LogParameters()
 
 	go HTTP_Server()
 

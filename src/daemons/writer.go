@@ -98,7 +98,6 @@ func Writer_process(ip_addrs *list.List) {
 	data.processType = 1
 	//Initialize the parameters
 	InitializeParameters()
-	LogParameters()
 
 	// Keep running the server for now
 	go HTTP_Server()

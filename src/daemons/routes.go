@@ -673,13 +673,14 @@ func LogParameters() {
 		if data.coding_algorithm == 0 {
 			log.Printf("INFO\tCODING_ALGORITHM\tRLNC\n")
 		}
-		if data.coding_algorithm == 0 {
+		if data.coding_algorithm == 1 {
 			log.Printf("INFO\tCODING_ALGORITHM\tREED_SOLOMON\n")
 		}
 	}
+
 	log.Printf("INFO\tN\t%d\n", data.N)
 	log.Printf("INFO\tK\t%d\n", data.K)
-	log.Printf("INFO\tFILE_SIZE\t%d KB\n", data.file_size)
+	log.Printf("INFO\tFILE_SIZE\t%f KB\n", data.file_size)
 	log.Printf("INFO\tRAND_SEED\t%d\n", data.rand_seed)
 
 	if len(data.inter_read_wait_distribution) == 2 {
@@ -702,23 +703,17 @@ func LogParameters() {
 			data.inter_write_wait_distribution[2])
 	}
 
-	log.Printf("INFO\tSERVERS")
-	for _, value := range data.servers {
-		log.Printf("\t%s", value)
+	for key, _ := range data.servers {
+		log.Printf("INFO\tSERVER\t%s\n", key)
 	}
-	log.Printf("\n")
 
-	log.Printf("INFO\tREADERS")
-	for _, value := range data.readers {
-		log.Printf("\t%s", value)
+	for key, _ := range data.readers {
+		log.Printf("INFO\tREADER\t%s\n", key)
 	}
-	log.Printf("\n")
 
-	log.Printf("INFO\tWRITERS")
-	for _, value := range data.writers {
-		log.Printf("\t%s", value)
+	for key, _ := range data.writers {
+		log.Printf("INFO\tWRITER\t%s\n", key)
 	}
-	log.Printf("\n")
 }
 
 /*
