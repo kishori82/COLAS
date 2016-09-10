@@ -35,7 +35,6 @@ SERVER_ARGS *server_args;
 
 static void server_worker (void *args, zctx_t *ctx, void *pipe);
 
-char *ID;
 
 void *server_task (void *server_args)
 {
@@ -125,28 +124,17 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
    
 }
 
-int server_process(char *server_id, char *servers_str, char *port, char *init_data, SERVER_STATUS *_status)
+//int server_process(char *server_id, char *servers_str, char *port, char *init_data, SERVER_STATUS *_status)
+int server_process(SERVER_ARGS *_server_args, SERVER_STATUS *_status)
 {
-   ID=server_id;
 
    s_catch_signals();
 
+   server_args = _server_args;
    status = _status;
 
-   status->network_data = 0;
-   status->data_memory = 0;
-   status->metadata_memory = 0;
-
-   server_args = (SERVER_ARGS *)malloc(sizeof(SERVER_ARGS));
-   server_args->init_data = init_data;
-   printf("INIT data %d\n", strlen(server_args->init_data));
-   server_args->servers_str = servers_str;
-   server_args->port = port;
-   server_args->server_id= server_id;
-
    zthread_new(server_task, (void *)server_args);
-   printf("Starting the thread id %s\n", server_id);
-   printf("Starting server  name : %s\n", ID);
+   printf("Starting the thread id %s\n", server_args->server_id);
 
    while(true) {
       zclock_sleep(60*600*1000); 

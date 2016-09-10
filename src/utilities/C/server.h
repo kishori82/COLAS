@@ -29,18 +29,21 @@ typedef struct _SERVER_ARGS {
     int num_servers;
     int symbol_size;
     unsigned int coding_algorithm; // 0 if full-vector and 1 is reed-solomon
-    int K;
-    int N;
+    unsigned int K;
+    unsigned int N;
     SERVER_STATUS *status;
 } SERVER_ARGS;
 
 
 
 int server_process(
+               SERVER_ARGS *server_args, 
+/*
                char *server_id, 
                char *servers_str, 
                char *port,
                char *init_data,
+*/
                SERVER_STATUS *status
              );
 

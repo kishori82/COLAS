@@ -24,12 +24,11 @@ func writer_deamon() {
 
 	var object_name string = "atomic_object"
 
-	data.name = "writer-1"
-
 	for {
 		select {
 		case active := <-active_chan:
 			data.active = active
+            ReinitializeParameters()
 		case active := <-reset_chan:
 			data.active = active
 			data.write_counter = 0
@@ -98,6 +97,7 @@ func Writer_process(ip_addrs *list.List) {
 	data.processType = 1
 	//Initialize the parameters
 	InitializeParameters()
+    LogParameters()
 
 	// Keep running the server for now
 	go HTTP_Server()

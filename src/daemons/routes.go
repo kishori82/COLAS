@@ -25,10 +25,8 @@ type Params struct {
 	inter_read_wait_distribution  []string
 	inter_write_wait_distribution []string
 
-	write_rate float64
-	read_rate  float64
-	file_size  float64
-	rand_seed  int64
+	file_size float64
+	rand_seed int64
 
 	active bool
 	port   string
@@ -39,6 +37,11 @@ type Params struct {
 	algorithm string
 	run_id    string
 	writeto   string
+
+	K                uint64
+	N                uint64
+	coding_algorithm uint32
+	symbol_size      int
 }
 
 var data Params
@@ -514,11 +517,6 @@ func SetWriteRateDistribution(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetReadRate(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Params")
-	fmt.Fprintf(w, "%g\n", data.read_rate)
-}
-
 // set write to option disk or mem
 func SetWriteTo(w http.ResponseWriter, r *http.Request) {
 	log.Println("Set Write To")
@@ -583,10 +581,6 @@ func GetParams(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "\t%s", data.inter_write_wait_distribution[i])
 	}
 	fmt.Fprintf(w, "\n")
-
-	/*  fmt.Fprintf(w, "Read Rate\t%g\n", data.file_size)
-	    fmt.Fprintf(w, "%d %g %g %g\n", data.rand_seed, data.file_size, data.read_rate, data.write_rate)
-	*/
 }
 
 // KillSelf will end this server
@@ -624,8 +618,8 @@ func InitializeParameters() {
 	data.inter_read_wait_distribution = []string{"const", "100"}
 	data.inter_write_wait_distribution = []string{"const", "100"}
 
-	data.write_rate = 0.6
-	data.read_rate = 0.6
+	//	data.write_rate = 0.6
+	//	data.read_rate = 0.6
 	data.file_size = 0.1
 	data.init_file_size = 0.4
 	data.rand_seed = 1
@@ -634,30 +628,97 @@ func InitializeParameters() {
 	data.active = false
 	data.port = "8081"
 
+	data.N = 1
+	data.K = uint64(math.Ceil((float64(data.N) + 1) / 2.0))
+
+	data.coding_algorithm = 0
+	data.symbol_size = 1024
 	//data.algorithm = "ABD"
 	data.algorithm = "SODAW"
 	data.run_id = "DEFULT_RUN"
 	data.writeto = "ram"
 	data.name = "default"
-	if processType=0 {
-	    data.name = "reader_0"
-  }
-	if processType=1 {
-	    data.name = "writer_0"
-  }
-	if processType=2 {
-	    data.name = "server_0"
-  }
+	if data.processType == 0 {
+		data.name = "reader_0"
+	}
+	if data.processType == 1 {
+		data.name = "writer_0"
+	}
+	if data.processType == 2 {
+		data.name = "server_0"
+	}
 
 	data.active = false
 
-/*
-	data.active = true
-	data.algorithm = "SODAW"
-	data.servers["172.17.0.2"] = true
-	data.servers["172.17.0.3"] = true
-	data.servers["172.17.0.4"] = true
+	/*
+		data.active = true
+		data.algorithm = "SODAW"
+		data.servers["172.17.0.2"] = true
+		data.servers["172.17.0.3"] = true
+		data.servers["172.17.0.4"] = true
 	*/
+}
+
+func ReinitializeParameters() {
+	data.N = uint64(len(data.servers))
+	data.K = uint64(math.Ceil((float64(data.N) + 1) / 2.0))
+}
+
+func LogParameters() {
+	log.Printf("INFO\tRUN_NAME\t%s\n", data.run_id)
+	log.Printf("INFO\tPROCESS_NAME\t%s\n", data.name)
+	log.Printf("INFO\tALGORITHM\t%s\n", data.algorithm)
+
+	if data.algorithm == "SODAW" {
+		if data.coding_algorithm == 0 {
+			log.Printf("INFO\tCODING_ALGORITHM\tRLNC\n")
+		}
+		if data.coding_algorithm == 0 {
+			log.Printf("INFO\tCODING_ALGORITHM\tREED_SOLOMON\n")
+		}
+	}
+	log.Printf("INFO\tN\t%d\n", data.N)
+	log.Printf("INFO\tK\t%d\n", data.K)
+	log.Printf("INFO\tFILE_SIZE\t%d KB\n", data.file_size)
+	log.Printf("INFO\tRAND_SEED\t%d\n", data.rand_seed)
+
+	if len(data.inter_read_wait_distribution) == 2 {
+		log.Printf("INFO\tINTER_READ_WAIT_DISTRIB\t%s\t%s\n",
+			data.inter_read_wait_distribution[0], data.inter_read_wait_distribution[1])
+	}
+	if len(data.inter_read_wait_distribution) == 3 {
+		log.Printf("INFO\tINTER_READ_WAIT_DISTRIB\t%s\t%s\t%s\n",
+			data.inter_read_wait_distribution[0], data.inter_read_wait_distribution[1],
+			data.inter_read_wait_distribution[2])
+	}
+
+	if len(data.inter_write_wait_distribution) == 2 {
+		log.Printf("INFO\tINTER_WRITE_WAIT_DISTRIB\t%s\t%s\n",
+			data.inter_write_wait_distribution[0], data.inter_write_wait_distribution[1])
+	}
+	if len(data.inter_write_wait_distribution) == 3 {
+		log.Printf("INFO\tINTER_WRITE_WAIT_DISTRIB\t%s\t%s\t%s\n",
+			data.inter_write_wait_distribution[0], data.inter_write_wait_distribution[1],
+			data.inter_write_wait_distribution[2])
+	}
+
+	log.Printf("INFO\tSERVERS")
+	for _, value := range data.servers {
+		log.Printf("\t%s", value)
+	}
+	log.Printf("\n")
+
+	log.Printf("INFO\tREADERS")
+	for _, value := range data.readers {
+		log.Printf("\t%s", value)
+	}
+	log.Printf("\n")
+
+	log.Printf("INFO\tWRITERS")
+	for _, value := range data.writers {
+		log.Printf("\t%s", value)
+	}
+	log.Printf("\n")
 }
 
 /*

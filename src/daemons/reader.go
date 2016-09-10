@@ -22,12 +22,11 @@ func reader_daemon() {
 
 	var object_name string = "atomic_object"
 
-	data.name = "reader_1"
-
 	for {
 		select {
-		case active := <-active_chan:
+		case active := <-active_chan:   //start
 			data.active = active
+            ReinitializeParameters()
 		case active := <-reset_chan:
 			data.active = active
 			data.write_counter = 0
@@ -92,6 +91,7 @@ func Reader_process(ip_addrs *list.List) {
 	fmt.Println("INFO\tStarting reader\n")
 
 	InitializeParameters()
+    LogParameters()
 
 	go HTTP_Server()
 

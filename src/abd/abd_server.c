@@ -21,7 +21,7 @@
 extern int s_interrupted;
 
 extern SERVER_STATUS *status;
-
+extern SERVER_STATUS *server_args;
 
 #ifdef ASLIBRARY
 static zhash_t *hash_object_ABD;

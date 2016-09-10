@@ -13,6 +13,7 @@ func Controller_process() {
 	data.processType = 3
 
 	InitializeParameters()
+    LogParameters()
 
 	HTTP_Server()
 
