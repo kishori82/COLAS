@@ -113,25 +113,40 @@ char * RegReader_keystring(REGREADER *m) {
     return newkey;
 }
 
-static void send_reader_coded_element(void *worker, char *reader, TAG tagw, zframe_t *cs) {
+static void send_reader_coded_element(void *worker, char *reader, 
+                                      char *object_name, 
+                                      char *algorithm, char *phase,  
+                                      TAG tagw, zframe_t *cs) {
     char tag_w_buff[100];
 
     if(DEBUG_MODE) printf("\t\treaderid : %s\n", reader);
     zframe_t *reader_frame = zframe_new(reader, strlen(reader));
     zframe_send(&reader_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
+    if(DEBUG_MODE) printf("\t\tobject : %s\n", object_name);
+    zframe_t *object_frame = zframe_new(object_name, strlen(object_name));
+    zframe_send(&object_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+
+    if(DEBUG_MODE) printf("\t\talgorithm : %s\n", algorithm);
+    zframe_t *algorithm_frame = zframe_new(algorithm, strlen(algorithm));
+    zframe_send(&algorithm_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+
+    if(DEBUG_MODE) printf("\t\tphase : %s\n", phase);
+    zframe_t *phase_frame = zframe_new(phase, strlen(phase));
+    zframe_send(&phase_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+  
     tag_to_string(tagw, tag_w_buff) ;
 
     zframe_t *tag_frame = zframe_new(tag_w_buff, strlen(tag_w_buff));
 
     if(DEBUG_MODE) printf("\t\ttag : %s\n", tag_w_buff);
 
-    if(DEBUG_MODE) printf("\t\tcoded elem : %s\n", zframe_size(cs));
+    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
 
     zframe_t *cs_frame = zframe_dup(cs);
-    if(DEBUG_MODE) printf("\t\tcoded elem : %s\n", zframe_size(cs));
+    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
     zframe_send(&cs_frame, worker, ZFRAME_REUSE);
 
     zframe_destroy(&reader_frame);
@@ -156,7 +171,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
      // read the new coded element  from the message
     // this is the coded element cs
-    void *payload = zhash_lookup(frames, "payload"); 
+    zframe_t *payload = (zframe_t *)zhash_lookup(frames, "payload"); 
     int size = zframe_size(payload);
     
     get_string_frame(sender, frames, "sender");
@@ -176,7 +191,15 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
          // char dest_reader  = get_reader_from_reader_op(dest_reader, value->readerid);
          if(  compare_tags(tag_w, value->t_r) >= 0 ) {
             printf("\t\tsending coded element\n");
-            send_reader_coded_element(worker, value->reader_id, value->t_r, payload);
+/*/
+            send_reader_coded_element(worker, value->reader_id, 
+                                      object_name, algorithm, "READ-VALUE",  
+                                      value->t_r, payload
+                                     );
+*/
+
+            send_frames_at_server(frames, worker, SEND_FINAL, 6, 
+                       "sender", "object",  "algorithm", "phase", "tag", "payload");
 
             METADATA *h = MetaData_create(tag_w, ID,  sender) ;
             newkey = MetaData_keystring(h);
