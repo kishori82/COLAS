@@ -15,7 +15,7 @@ import (
 #cgo CFLAGS: -I../abd  -I../sodaw -I../utilities/C
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw  -lzmq -lczmq
 #include <abd_client.h>
-#include <sodaw_client.h>
+#include <sodaw_writer.h>
 */
 import "C"
 

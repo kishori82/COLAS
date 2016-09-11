@@ -111,7 +111,7 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  char **mess
     void **values = (void *)malloc(n*sizeof(void *));
     assert(values!=NULL);
 
-    zframe_t **frames = (zframe_t *)malloc( (n+1)*sizeof(zframe_t *));
+    zframe_t **frames = (zframe_t **)malloc( (n+1)*sizeof(zframe_t *));
     assert(frames!=NULL);
 
    

@@ -13,7 +13,7 @@ import (
 #cgo CFLAGS: -I../abd -I../sodaw -I../utilities/C
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw
 #include <abd_client.h>
-#include <sodaw_client.h>
+#include <sodaw_reader.h>
 */
 import "C"
 
