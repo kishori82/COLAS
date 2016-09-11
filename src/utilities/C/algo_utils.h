@@ -82,6 +82,7 @@ zframe_t * get_object_frame(zhash_t *hash, char * object_name, TAG tag) ;
 
 char **create_server_names(char *servers_str) ;
 
+void  destroy_server_names(char **servers, int num_servers) ;
 unsigned int count_num_servers(char *servers_str) ;
 
 

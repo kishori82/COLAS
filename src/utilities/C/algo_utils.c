@@ -80,6 +80,15 @@ char **create_server_names(char *servers_str) {
     return servers;
 }
 
+void  destroy_server_names(char **servers, int num_servers) {
+   int i =0; 
+   for(i=0; i < num_servers; i++) {
+      free(servers[i]);
+   }
+   free(servers);
+
+}
+
 char *create_destinations(char **servers, unsigned int num_servers, char *port, char type) {
       int i,size = 0;
        

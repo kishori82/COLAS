@@ -99,7 +99,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
     if( values!=NULL) free(values); 
 
     for(i=0; i < n; i++ ) {
-       zframe_destroy(frames+i);
+       zframe_destroy(&frames[i]);
     }
     if( frames!=NULL) free(frames);
 }

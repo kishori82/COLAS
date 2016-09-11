@@ -84,7 +84,6 @@ TAG *SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
                    zlist_append(tag_list, (void *)tag);
 
                    if(responses >= majority) { 
-                      printf("received majority %d\n", majority);
                       break;
                    }
                    //if(responses >= num_servers) break;
@@ -99,13 +98,9 @@ TAG *SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
             }
      }
    //comute the max tag now and return 
-     printf("max_tag computation %d\n", majority);
      TAG *max_tag = get_max_tag(tag_list);
      free_items_in_list(tag_list);
      zlist_destroy(&tag_list);
-
-     printf("done max_tag computation %d   (%d,  %s)\n", majority, max_tag->z, max_tag->id);
-     printf("now \n");
 
      return  max_tag;
 }
@@ -409,16 +404,11 @@ bool SODAW_write(
                       port
                   );
 
-   printf("\tWRITE_PUT 1(WRITER)\n");
 
    TAG new_tag;
-
-   printf("\tWRITE_PUT 2(WRITER)\n");
    new_tag.z = max_tag->z + 1;
-   printf("\tWRITE_PUT 3(WRITER)\n");
    strcpy(new_tag.id, writer_id);
    free(max_tag);
-
    printf("\tWRITE_PUT (WRITER)\n");
    SODAW_write_put_phase(
                           obj_name, 
@@ -435,7 +425,7 @@ bool SODAW_write(
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
 
-
+    destroy_server_names(servers, num_servers);
     return true;
 }
 
@@ -451,8 +441,8 @@ char *SODAW_read(
     s_catch_signals();
     int j;
     int num_servers = count_num_servers(servers_str);
-
     char **servers = create_server_names(servers_str);
+
 #ifndef DEBUG_MODE
     printf("\t\tObj name       : %s\n",obj_name);
     printf("\t\tWriter name    : %s\n",reader_id);
@@ -530,10 +520,11 @@ char *SODAW_read(
         );
 
 
-
+    free(read_tag);
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
 
+    destroy_server_names(servers, num_servers);
 
     return payload;
 }

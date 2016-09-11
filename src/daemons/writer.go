@@ -35,8 +35,6 @@ func writer_deamon() {
 			data.write_counter = 0
 		default:
 			if data.active == true && len(data.servers) > 0 {
-				//rand_wait := int64(1000 * rand.ExpFloat64() / data.write_rate)
-				//start := time.Now()
 
 				rand_wait := rand_wait_time()*int64(time.Millisecond) + int64(time.Millisecond)
 				time.Sleep(time.Duration(rand_wait))
