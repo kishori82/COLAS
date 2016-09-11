@@ -136,12 +136,17 @@ static void send_reader_coded_element(void *worker, char *reader,
     zframe_send(&phase_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
   
     tag_to_string(tagw, tag_w_buff) ;
+
     zframe_t *tag_frame = zframe_new(tag_w_buff, strlen(tag_w_buff));
+
     if(DEBUG_MODE) printf("\t\ttag : %s\n", tag_w_buff);
+    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
+
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
+
     zframe_t *cs_frame = zframe_dup(cs);
-    if(DEBUG_MODE) printf("\t\tcoded elem : %s\n", zframe_size(cs));
+    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
     zframe_send(&cs_frame, worker, ZFRAME_REUSE);
 
     zframe_destroy(&reader_frame);
@@ -166,7 +171,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
      // read the new coded element  from the message
     // this is the coded element cs
-    void *payload = zhash_lookup(frames, "payload"); 
+    zframe_t *payload = (zframe_t *)zhash_lookup(frames, "payload"); 
     int size = zframe_size(payload);
     
     get_string_frame(sender, frames, "sender");
