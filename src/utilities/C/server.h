@@ -14,6 +14,9 @@
 #define PAYLOADBUF_SIZE 100000
 #define BUFSIZE 100
 
+enum INSERT_DATA_POLICY{
+   force, yield
+};
 
 typedef struct _SERVER_STATUS {
     float network_data, metadata_memory, data_memory, cpu_load;
@@ -47,7 +50,7 @@ int server_process(
                SERVER_STATUS *status
              );
 
-
+int store_payload(zhash_t *object_hash, char *obj_name, TAG tag, zframe_t *payload, enum INSERT_DATA_POLICY policy) ;
 int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *init_data, SERVER_STATUS *status) ;
 
 #endif

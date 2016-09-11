@@ -217,11 +217,13 @@ int  get_object_tag(zhash_t *hash, char * object_name, TAG *tag) {
     }
 
     zhash_t *temp_hash = (zhash_t *)item;
+    assert(temp_hash!=NULL);
 
-    zhash_first(temp_hash);
+    assert(zhash_first(temp_hash)!=NULL);
+
     strcpy(tag_str, zhash_cursor(temp_hash)); 
-
     string_to_tag(tag_str, tag);
+
     return 1;
 }
 
@@ -254,23 +256,16 @@ char *get_object_value(zhash_t *hash, char * object_name, TAG tag) {
 }
 
 zframe_t *get_object_frame(zhash_t *hash, char * object_name, TAG tag) {
-    char tag_str[64];
+    char tag_str[100];
     
     tag_to_string(tag, tag_str);
+    zhash_t *single_object_hash = (zhash_t *)zhash_lookup(hash, object_name);
+    assert(single_object_hash!=NULL);
 
-    void *item = zhash_lookup(hash, object_name);
+    zframe_t *stored_value = (zframe_t *)zhash_lookup(single_object_hash, tag_str);
 
-    if( item==NULL) {
-        return 0;
-    }
-
-    zhash_t *temp_hash = (zhash_t *)item;
-
-    zhash_first(temp_hash);
-    strcpy(tag_str, zhash_cursor(temp_hash)); 
-
-
-    zframe_t *stored_value = zhash_lookup(temp_hash, tag_str);
+    assert(stored_value!=NULL);
+    zframe_is(stored_value);
 
     return stored_value;
 }
@@ -395,8 +390,8 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            zframe_t *payload_frame= zmsg_pop (msg);
            zhash_insert(frames, "payload", (void *)payload_frame);
            if(names!=NULL) zlist_append(names, "payload");
-
          }
+
          if( strcmp(phase_name, GET_TAG) ==0 ) {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, "opnum", (void *)opnum_frame);
@@ -435,6 +430,10 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
          }
 
          if( strcmp(phase_name, READ_VALUE) ==0 ) {
+           zframe_t *opnum_frame= zmsg_pop (msg);
+           zhash_insert(frames, "opnum", (void *)opnum_frame);
+           if(names!=NULL) zlist_append(names, "opnum");
+
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
            if(names!=NULL) zlist_append(names, "tag");
@@ -629,17 +628,22 @@ int has_object(zhash_t *object_hash,  char *obj_name) {
 
 int print_object_hash(zhash_t *object_hash) {
 
-     printf("printing the object hash....\n");
+     printf("\tprinting the object hash....\n");
      zlist_t *keys = zhash_keys(object_hash);
      char *key;
      printf("\t ========================================\n");
      for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
            printf("\t Object : %s\n", key);
            zhash_t *single_object_hash = (zframe_t *)zhash_lookup(object_hash, key);         
+           assert(single_object_hash!=NULL);
 
            char *key1;
            zlist_t *keys1 = zhash_keys(single_object_hash);
+          
+           assert(keys1!=NULL);
+
            for( key1 = (char *)zlist_first(keys1);  key1 != NULL; key1 = (char *)zlist_next(keys1)) {
+            zhash_lookup(single_object_hash, key1);
               printf("\t\t Tag: %s :   %d\n", key1, zframe_size((zframe_t *)zhash_lookup(single_object_hash, key1)));
            }
            zlist_purge(keys1);
