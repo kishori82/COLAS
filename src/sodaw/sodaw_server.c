@@ -140,8 +140,8 @@ static void send_reader_coded_element(void *worker, char *reader,
     zframe_t *tag_frame = zframe_new(tag_w_buff, strlen(tag_w_buff));
 
     if(DEBUG_MODE) printf("\t\ttag : %s\n", tag_w_buff);
-    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
 
+    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
 

@@ -518,7 +518,6 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
      }
 
      if( strcmp(algorithm_name, "SODAW") ==0 ) {
-
          if( strcmp(phase_name, WRITE_GET) ==0 ) {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, "opnum", (void *)opnum_frame);
