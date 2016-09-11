@@ -183,15 +183,15 @@ void tag_to_string(TAG tag, char *buf) {
 }
 
 
-TAG get_max_tag( zlist_t *tag_list) {
+TAG *get_max_tag( zlist_t *tag_list) {
     TAG *tag;
-    TAG max_tag;
+    TAG *max_tag = (TAG *)malloc(sizeof(TAG));
 
-    max_tag.z = -1;  // the z in the algorith starts from 0
+    max_tag->z = -1;  // the z in the algorith starts from 0
     while( (tag = (TAG *)zlist_next(tag_list))!=NULL) {
-         if(compare_tag_ptrs(tag, &max_tag)==1) { 
-            max_tag.z = tag->z;
-            strcpy(max_tag.id, tag->id);
+         if(compare_tag_ptrs(tag, max_tag)==1) { 
+            max_tag->z = tag->z;
+            strcpy(max_tag->id, tag->id);
           }
     }
     return max_tag;
@@ -412,6 +412,10 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, "opnum", (void *)opnum_frame);
            if(names!=NULL) zlist_append(names, "opnum");
+
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, "tag", (void *)tag_frame);
+           if(names!=NULL) zlist_append(names, "tag");
          }
 
          if( strcmp(phase_name, WRITE_PUT) ==0 ) {
@@ -485,7 +489,6 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
      if( names!= NULL) zlist_append(names, "phase");
 
      if( strcmp(algorithm_name, "ABD") ==0 ) {
-
          zframe_t *opnum_frame= zmsg_pop (msg);
          zhash_insert(frames, "opnum", (void *)opnum_frame);
          if( names!= NULL) zlist_append(names, "opnum");
@@ -494,7 +497,6 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
            if( names!= NULL) zlist_append(names, "tag");
-
          }
 
          if( strcmp(phase_name, WRITE_VALUE) ==0 ) {
@@ -516,6 +518,7 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
      }
 
      if( strcmp(algorithm_name, "SODAW") ==0 ) {
+
          if( strcmp(phase_name, WRITE_GET) ==0 ) {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, "opnum", (void *)opnum_frame);
@@ -547,7 +550,6 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
            if( names!= NULL) zlist_append(names, "payload");
          }
      }
- 
      return frames;
 }
 

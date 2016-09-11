@@ -201,10 +201,7 @@ func SetWriteRateDistribution(w http.ResponseWriter, r *http.Request) {
 	ip := vars["param"]
 	ips := strings.Split(ip, DELIM)
 
-	if len(ips) != 3 {
-		fmt.Printf("%s\n", ip)
-		fmt.Printf("Expected 1 parameters, found %d\n", len(ips))
-	}
+	fmt.Printf("%s\n", ip)
 	name := ips[0]
 
 	log.Println("INFO\tSet Inter Write Wait Time  Distribution--\t" + ip)

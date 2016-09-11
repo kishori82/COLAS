@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -g
 
 UTILS=../utilities/C
 

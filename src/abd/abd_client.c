@@ -26,7 +26,7 @@ extern int s_interrupted;
 #define DEBUG_MODE 1
 
 // this fethers the max tag
-TAG get_max_tag_phase(char *obj_name, unsigned int op_num, 
+TAG *get_max_tag_phase(char *obj_name, unsigned int op_num, 
                       zsock_t *sock_to_servers,  char **servers, 
                           unsigned int num_servers, char *port)
 {
@@ -90,7 +90,7 @@ TAG get_max_tag_phase(char *obj_name, unsigned int op_num,
            }
      }
    //comute the max tag now and return 
-     TAG max_tag = get_max_tag(tag_list);
+     TAG *max_tag = get_max_tag(tag_list);
 
      free_items_in_list(tag_list);
      zlist_destroy(&tag_list);
@@ -106,7 +106,7 @@ void  get_max_tag_value_phase(
             char **servers, 
             unsigned int num_servers, 
             char *port, 
-            TAG *max_tag, 
+            TAG **max_tag, 
             char **max_value
         )
 {
@@ -178,7 +178,7 @@ void  get_max_tag_value_phase(
             }
      }
    //comute the max tag now and return 
-     *max_tag = get_max_tag(tag_list);
+      max_tag = get_max_tag(tag_list);
 
      free_items_in_list(tag_list);
      zlist_destroy(&tag_list);
@@ -311,11 +311,12 @@ bool ABD_write(
 
    printf("\tGET_TAG (WRITER)\n");
 
-   TAG max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
+   TAG *max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 
     TAG new_tag;
-    new_tag.z = max_tag.z + 1;
+    new_tag.z = max_tag->z + 1;
     strcpy(new_tag.id, writer_id);
+    free(max_tag);
 
    printf("\tWRITE_VALUE (WRITER)\n");
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
@@ -380,16 +381,16 @@ char *ABD_read(
    printf("     MAX_TAG_VALUE (READER)\n");
 
    char *payload;
-   TAG max_tag;
+   TAG *max_tag;
    get_max_tag_value_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port, &max_tag, &payload);
 
-   printf("\tmax tag (%d,%s)\n\n", max_tag.z, max_tag.id);
+   printf("\tmax tag (%d,%s)\n\n", max_tag->z, max_tag->id);
 //   printf("\tsize of data read (%s)\n", strlen(payload));
 
    printf("     WRITE_VALUE (READER)\n");
    int size = strlen(payload);
    write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers,
-                     num_servers, port, payload, size, max_tag);
+                     num_servers, port, payload, size, *max_tag);
 
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);

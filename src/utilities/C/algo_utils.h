@@ -70,7 +70,7 @@ void string_to_tag(char *str, TAG *tag) ;
 // converts a tag to a string
 void tag_to_string(TAG tag, char *buf) ;
 
-TAG get_max_tag( zlist_t *tag_list) ;
+TAG *get_max_tag(zlist_t *tag_list) ;
      
 void free_items_in_list( zlist_t *list) ;
 

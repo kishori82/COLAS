@@ -45,7 +45,6 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
     zframe_t **frames = (zframe_t *)malloc(n*sizeof(zframe_t *));
     assert(values!=NULL);
     assert(frames!=NULL);
-
     for(i=0; i < n; i++ ) {
 
         if( strcmp(names[i], "opnum")==0)   {
@@ -55,6 +54,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
            values[i] = va_arg(valist, void *); 
 
         if( strcmp(names[i], "opnum")==0) {
+             
             frames[i]= zframe_new((const void *)values[i], sizeof(unsigned int));
         }
         else {
@@ -93,7 +93,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
       if(DEBUG_MODE)  printf("\n");
    }
 
-     printf("\n");
+    printf("\n");
     if(DEBUG_MODE)  printf("\n");
 
     if( values!=NULL) free(values); 
@@ -108,15 +108,16 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  char **mess
         char *names[],  int n, ...) {
     va_list valist;
     int i =0, j;
-
-    va_start(valist, n);
-     
     void **values = (void *)malloc(n*sizeof(void *));
-    zframe_t **frames = (zframe_t *)malloc( (n+1)*sizeof(zframe_t *));
     assert(values!=NULL);
+
+    zframe_t **frames = (zframe_t *)malloc( (n+1)*sizeof(zframe_t *));
     assert(frames!=NULL);
 
+   
+    va_start(valist, n);
     for(i=0; i < n; i++ ) {
+
         if( strcmp(names[i], "opnum")==0)   {
            values[i] = (void *)va_arg(valist, unsigned  int *); 
         }
@@ -130,7 +131,6 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  char **mess
             frames[i]= zframe_new(values[i], strlen((char *)values[i]));
         }
     }
-
     va_end(valist);
 
     // it to all servers in a round robin fashion
@@ -147,7 +147,9 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  char **mess
          zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        }
         // a different coded element for each different server
-       frames[n]= zframe_new(messages[i], msg_size);
+//       frames[n]= zframe_new(messages[i], msg_size);
+       char pay[] = "dkjfkajdfjdakfjdkassjfjdkdfjkasjfkdjasfjkasjdfkljasdkjkajsdfjaksdfjajkadfdjkfjdkkakdjfkjakdfjkdjasfkjdasfjdajfldjasfkljdsklfjajdfkljdkajfkldjasfjasdklfjkldasjfkldjasfkljdsfjkajfdajfkdjkljafkdjfkddfdfdasfjdkasjfdjafjadlfjdasljfdklafdajfklasdfjldasfjkladjfdjaskfdkasjfkdajkdaskjffjdaskfkdasjflkdajfdkjjfasd";
+       frames[n]= zframe_new( pay, strlen(pay));
        if(DEBUG_MODE) printf("\t\t\tFRAME%d :%s  %d\n", n, "payload",  msg_size );
        zframe_send( &frames[n], sock_to_servers, ZFRAME_REUSE);
        if(DEBUG_MODE)  printf("\n");
@@ -155,9 +157,11 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  char **mess
 
     if( values!=NULL) free(values); 
 
+/*
     for(i=0; i < n+1; i++ ) {
        zframe_destroy(frames+i);
     }
+*/
     if( frames!=NULL) free(frames);
 }
 

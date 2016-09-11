@@ -29,7 +29,7 @@ extern int s_interrupted;
 
 
 // this fethers the max tag
-TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num, 
+TAG *SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num, 
                       zsock_t *sock_to_servers,  char **servers, 
                           unsigned int num_servers, char *port)
 {
@@ -37,9 +37,9 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
     // send out the messages to all servers
 
     char buf[400];
-    char algorithm[64];
-    char phase[64];
-    char tag_str[64];
+    char algorithm[100];
+    char phase[100];
+    char tag_str[100];
     char buf1[400];
     unsigned int round;
 
@@ -50,8 +50,8 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
 
 
     unsigned int majority =  ceil(((float)num_servers+1)/2);
-     unsigned int responses =0;
-     zlist_t *tag_list = zlist_new();
+    unsigned int responses =0;
+    zlist_t *tag_list = zlist_new();
      
      TAG *tag;
      while (true) {
@@ -83,7 +83,10 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
                    string_to_tag(tag_str, tag);
                    zlist_append(tag_list, (void *)tag);
 
-                   if(responses >= majority) break;
+                   if(responses >= majority) { 
+                      printf("received majority %d\n", majority);
+                      break;
+                   }
                    //if(responses >= num_servers) break;
                 }
                 else{
@@ -96,10 +99,14 @@ TAG SODAW_write_get_or_read_get_phase(char *obj_name, unsigned int op_num,
             }
      }
    //comute the max tag now and return 
-     TAG max_tag = get_max_tag(tag_list);
-
+     printf("max_tag computation %d\n", majority);
+     TAG *max_tag = get_max_tag(tag_list);
      free_items_in_list(tag_list);
      zlist_destroy(&tag_list);
+
+     printf("done max_tag computation %d   (%d,  %s)\n", majority, max_tag->z, max_tag->id);
+     printf("now \n");
+
      return  max_tag;
 }
 
@@ -190,10 +197,6 @@ char *SODAW_read_value(
                 destroy_frames(frames);
             }
      }
-  // now we want to decode it
-    // value to 
-   //comute the max tag now and return 
-
  
     return value;
 }
@@ -255,8 +258,13 @@ void SODAW_write_put_phase(
     char *types[] = {"object", "algorithm", "phase", "opnum", "tag"};
     size =  encoded_data_info.num_blocks*encoded_data_info.encoded_symbol_size;
 
-    send_multisend_servers(sock_to_servers, num_servers, encoded_data_info.encoded_raw_data, size,
-             types,  5, obj_name, "SODAW", WRITE_PUT, &op_num, tag_str) ;
+    send_multisend_servers(
+                    sock_to_servers, num_servers, 
+                    encoded_data_info.encoded_raw_data, size,
+                    types,  5, obj_name, "SODAW", 
+                    WRITE_PUT, 
+                    &op_num, tag_str) ;
+
 
     int i;
     for(i=0; i < encoded_data_info.N; i++) {
@@ -328,27 +336,6 @@ void SODAW_read_complete_phase(
     send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "SODAW", READ_COMPLETE, tag_str) ;
 
 
-/*
-    zframe_t *object_name_frame = zframe_new(obj_name, strlen(obj_name));
-    zframe_t *algorithm_frame = zframe_new("SODAW", strlen("SODAW"));
-    zframe_t *phase_frame = zframe_new(READ_COMPLETE, strlen(READ_COMPLETE));
-
-    tag_to_string(max_tag, tag_str); 
-    zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
-
-    int i; 
-    for(i=0; i < num_servers; i++) {
-       zframe_send(&object_name_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-       zframe_send(&algorithm_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-       zframe_send(&phase_frame, sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
-       zframe_send(&tag_frame, sock_to_servers, ZFRAME_REUSE);
-    }
-
-    zframe_destroy(&object_name_frame);
-    zframe_destroy(&algorithm_frame);
-    zframe_destroy(&phase_frame);
-    zframe_destroy(&tag_frame);
-*/
 }
 
 
@@ -409,7 +396,7 @@ bool SODAW_write(
    printf("WRITE %d\n", op_num);
    printf("\tWRITE_GET (WRITER)\n");
 
-   TAG max_tag=  SODAW_write_get_or_read_get_phase(
+   TAG *max_tag=  SODAW_write_get_or_read_get_phase(
                       obj_name,  
                       op_num, 
                       sock_to_servers, 
@@ -418,9 +405,15 @@ bool SODAW_write(
                       port
                   );
 
-    TAG new_tag;
-    new_tag.z = max_tag.z + 1;
-    strcpy(new_tag.id, writer_id);
+   printf("\tWRITE_PUT 1(WRITER)\n");
+
+   TAG new_tag;
+
+   printf("\tWRITE_PUT 2(WRITER)\n");
+   new_tag.z = max_tag->z + 1;
+   printf("\tWRITE_PUT 3(WRITER)\n");
+   strcpy(new_tag.id, writer_id);
+   free(max_tag);
 
    printf("\tWRITE_PUT (WRITER)\n");
    SODAW_write_put_phase(
@@ -495,7 +488,7 @@ char *SODAW_read(
    printf("READ %d\n", op_num);
    printf("\tREAD_GET (READER)\n");
 
-   TAG read_tag=  SODAW_write_get_or_read_get_phase(
+   TAG *read_tag=  SODAW_write_get_or_read_get_phase(
                       obj_name,  
                       op_num, 
                       sock_to_servers, 
@@ -504,7 +497,7 @@ char *SODAW_read(
                       port
                   );
 
-    printf("\t\tmax tag (%d,%s)\n\n", read_tag.z, read_tag.id);
+    printf("\t\tmax tag (%d,%s)\n\n", read_tag->z, read_tag->id);
 
 
     printf("\tREAD_VALUE (READER)\n");
@@ -517,7 +510,7 @@ char *SODAW_read(
             servers, 
             num_servers, 
             port, 
-            read_tag 
+            *read_tag 
         );
 
 
@@ -529,7 +522,7 @@ char *SODAW_read(
             servers, 
             num_servers, 
             port, 
-            read_tag 
+            *read_tag 
         );
 
 
