@@ -2,7 +2,6 @@
 package daemons
 
 import (
-	_ "fmt"
 	"log"
 )
 
@@ -13,7 +12,7 @@ func Controller_process() {
 	data.processType = 3
 
 	InitializeParameters()
-    LogParameters()
+	LogParameters()
 
 	HTTP_Server()
 
