@@ -151,14 +151,18 @@ char *SODAW_read_value(
             if (items [0].revents & ZMQ_POLLIN) {
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
 
+            printf("\t\treceived data 0\n");
                 zlist_t *names = zlist_new();
+            printf("\t\treceived data 0.1\n");
                 zhash_t* frames = receive_message_frames_at_client(msg, names);
   
+            printf("\t\treceived data 1\n");
                 get_string_frame(phase, frames, "phase");
                 get_string_frame(tag_str, frames, "tag");
                 TAG tag;
                 get_tag_frame(frames, &tag);
 
+            printf("\t\treceived data 2\n");
                 if( zhash_lookup(received_data, tag_str)==NULL) {
                     zlist_t *data_list = zlist_new();
                     zhash_insert(received_data, tag_str,  (void *)data_list);
@@ -169,7 +173,7 @@ char *SODAW_read_value(
                    if(DEBUG_MODE) print_out_hash_in_order(frames, names);
 
                    void *payload_frame = zhash_lookup(frames, "payload");
-                   char str[3000];
+                   char str[9000];
                    get_string_frame(str, frames, "payload");
 
                    zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, tag_str);

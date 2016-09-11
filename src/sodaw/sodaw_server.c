@@ -121,9 +121,14 @@ static void send_reader_coded_element(void *worker, char *reader, TAG tagw, zfra
     zframe_send(&reader_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
     tag_to_string(tagw, tag_w_buff) ;
+
     zframe_t *tag_frame = zframe_new(tag_w_buff, strlen(tag_w_buff));
+
     if(DEBUG_MODE) printf("\t\ttag : %s\n", tag_w_buff);
+
+    if(DEBUG_MODE) printf("\t\tcoded elem : %s\n", zframe_size(cs));
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+
 
     zframe_t *cs_frame = zframe_dup(cs);
     if(DEBUG_MODE) printf("\t\tcoded elem : %s\n", zframe_size(cs));

@@ -469,21 +469,28 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
      char phase_name[100];
      zhash_t *frames = zhash_new();
 
+      printf("read value 1\n");
      zframe_t *object_name_frame= zmsg_pop (msg);
      zhash_insert(frames, "object", (void *)object_name_frame);
      get_string_frame(object_name, frames, "object");
      if( names!= NULL) zlist_append(names, "object");
  
+      printf("read value 2\n");
      zframe_t *algorithm_frame= zmsg_pop (msg);
      zhash_insert(frames, "algorithm", (void *)algorithm_frame);
      get_string_frame(algorithm_name, frames, "algorithm");
+      printf("read value 3 - %s\n", algorithm_name);
      if( names!= NULL) zlist_append(names, "algorithm");
 
+      printf("read value 3\n");
      zframe_t *phase_frame= zmsg_pop (msg);
+      printf("read value 3.1\n");
      zhash_insert(frames, "phase", (void *)phase_frame);
+      printf("read value 3.2\n");
      get_string_frame(phase_name, frames, "phase");
      if( names!= NULL) zlist_append(names, "phase");
 
+      printf("read value 4\n");
      if( strcmp(algorithm_name, "ABD") ==0 ) {
 
          zframe_t *opnum_frame= zmsg_pop (msg);
@@ -515,7 +522,10 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
          }
      }
 
+     printf("read value 5\n");
+     printf("read value 5 %s\n", algorithm_name);
      if( strcmp(algorithm_name, "SODAW") ==0 ) {
+          printf("read value 5.0\n");
          if( strcmp(phase_name, WRITE_GET) ==0 ) {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, "opnum", (void *)opnum_frame);
@@ -537,6 +547,7 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
          }
 
          if( strcmp(phase_name, READ_VALUE) ==0 ) {
+           printf("read value\n");
 
            zframe_t *tag_frame= zmsg_pop (msg);
            zhash_insert(frames, "tag", (void *)tag_frame);
@@ -547,6 +558,7 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
            if( names!= NULL) zlist_append(names, "payload");
          }
      }
+     printf("read value 6\n");
  
      return frames;
 }
