@@ -30,6 +30,16 @@ static zhash_t *metadata =NULL;
 static zhash_t *readerc = NULL;
 static int initialized = 0;
 
+void  destroy_metadata(METADATA *m) {
+    free(m->readerid);
+    free(m->serverid);
+} 
+
+
+void  destroy_regreader(REGREADER *r_tr){
+    free(r_tr->reader_op);
+    free(r_tr->reader_id);
+}
 void initialize_SODAW() {
     initialized = 1;
     metadata = zhash_new();
@@ -218,6 +228,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
          } 
     }
+    //zlist_destroy(&r_tr_keys);
 
     //read the local tag
     TAG tag;
@@ -233,6 +244,8 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
         // actually there should be only one key
         void *key = zlist_first(keys);  
+      //  zlist_destroy(&keys);  
+
         assert(key!=NULL);  // should not be empyt
           
         // get the  objects stored, i.e., the stored local value
@@ -245,15 +258,14 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
       
          // discount the metadata and data  
         //deleting it it    
+
+        zframe_destroy(&item);
         zhash_delete(temp_hash_hash, key);
-        free(item);
 
         //insert the new tag and coded value
 
-//        char *data =  (char *)malloc(size + 1);
- //       _zframe_str(payload, data);  // put in the storable format
-        zframe_t *new_payload_frame = zframe_new(zframe_data(payload), zframe_size(payload));
-
+        //zframe_t *new_payload_frame = zframe_new(zframe_data(payload), zframe_size(payload));
+        zframe_t *new_payload_frame = zframe_dup(payload);
         zhash_insert(temp_hash_hash, tag_w_str, (void *) new_payload_frame);
 
 
@@ -290,7 +302,7 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
 
     REGREADER *r_tr = RegReader_create(tag_r, readerid, opnum);
     char *r_tr_key = RegReader_keystring(r_tr);
-     
+    destroy_regreader(r_tr); 
 
     void *item = zhash_lookup((void *)readerc, (const char *)r_tr_key);
     if( item != NULL) {
@@ -299,6 +311,8 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
 
         zlist_t *Hr = metadata_with_reader(metadata, reader_op);
         metadata_remove_keys(metadata, Hr);
+      //  zlist_destroy(&Hr);
+
     }
     else {
           TAG tag;
@@ -350,14 +364,17 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
              zlist_t *Htr = metadata_with_tag_reader(metadata, tag, readerid);
 
              if( zlist_size(Htr) >= server_args->K) {
-
-                regreader_remove_key(readerc, RegReader_keystring(r_tag_pair));
+                char *r_tag_pair_char= RegReader_keystring(r_tag_pair);
+                regreader_remove_key(readerc, r_tag_pair_char);
+                free(r_tag_pair_char);
 
                 zlist_t *Hr = metadata_with_reader(metadata, readerid);
                 metadata_remove_keys(metadata, Hr);
             }
+  //          zlist_destroy(&Htr);
          } 
     }
+  //  zlist_destroy(&r_tr_keys);
     printf("\tREAD_DISPERSE\n");
     return;
 }
@@ -418,6 +435,7 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
           printf("if 1  %s \n", h_str);
           zlist_t *Hr = metadata_with_reader(metadata, reader_op);
           metadata_remove_keys(metadata, Hr);
+          zlist_purge(Hr);
      } else {
           printf("if 2\n");
           REGREADER *r_tr_pair = RegReader_create(tag_r, _reader,  opnum);
@@ -482,13 +500,24 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
 
 void  metadata_remove_keys(zhash_t *metadata, zlist_t *Hr) {
     char *key;
-
+     METADATA *m;
+   
     for(key= zlist_first(Hr);  key!= NULL; key=zlist_next(Hr) ) {
+
+       m = zhash_lookup(metadata, (const char *)key);
+       free(m->readerid);
+       free(m->serverid);
+       free(m);
+
        zhash_delete((void *)metadata, (const char *)key);
     }
 }
 
 void  regreader_remove_key(zhash_t *regreaders, char *str_r_tr) {
+    REGREADER *r = zhash_lookup(readerc, (const char *)str_r_tr);
+    free(r->reader_op);
+    free(r->reader_id);
+    free(r);
     zhash_delete((void *)regreaders, (const char *)str_r_tr);
 }
 
@@ -507,6 +536,8 @@ zlist_t *metadata_with_reader(zhash_t *metadata, char *reader) {
             zlist_append((void *)relevant_keys, key);
          } 
     }
+    //zlist_destroy(&metadata_keys);
+
     return relevant_keys;
 }
 
@@ -530,6 +561,8 @@ zlist_t *metadata_with_tag_reader(zhash_t *metadata, TAG tag, char *reader) {
             zlist_append((void *)relevant_keys, key);
          } 
     }
+    //zlist_destroy(&metadata_keys);
+
     return relevant_keys;
 }
 

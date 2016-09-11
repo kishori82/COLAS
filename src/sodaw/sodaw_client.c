@@ -170,9 +170,8 @@ char *SODAW_read_value(
                    if(DEBUG_MODE) print_out_hash_in_order(frames, names);
 
                    void *payload_frame = zhash_lookup(frames, "payload");
-                   char str[9000];
-                   get_string_frame(str, frames, "payload");
 
+                     
                    zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, tag_str);
                    assert(coded_elements!=NULL);
 
@@ -251,6 +250,7 @@ void SODAW_write_put_phase(
 
     char *types[] = {"object", "algorithm", "phase", "opnum", "tag"};
     size =  encoded_data_info.num_blocks*encoded_data_info.encoded_symbol_size;
+    printf("===========================================SYMBOL size    %d\n",size);
 
     send_multisend_servers(
                     sock_to_servers, num_servers, 
