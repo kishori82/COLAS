@@ -128,9 +128,9 @@ char *SODAW_read_value(
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
-    char *types[] = {"object", "algorithm", "phase", "tag"};
+    char *types[] = {"object", "algorithm", "phase", "opnum", "tag"};
     tag_to_string(read_tag, tag_str); 
-    send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "SODAW", READ_VALUE,  tag_str) ;
+    send_multicast_servers(sock_to_servers, num_servers, types,  5, obj_name, "SODAW", READ_VALUE, &op_num,   tag_str) ;
 
     unsigned int majority =  ceil(((float)num_servers+1)/2);
      unsigned int responses =0;
