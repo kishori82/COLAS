@@ -307,7 +307,9 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
           char *h_str = MetaData_keystring(h);
           printf("if 2   %s \n", h_str);
           zhash_insert((void *)metadata, (const char *)h_str, (void *)h);
+          free(h_str);
     }
+    free(r_tr_key);
     printf("\tREAD_COMPLETE\n");
     return;
 }
@@ -332,11 +334,11 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
     METADATA *h = MetaData_create(tag, serverid, readerid);
     char *h_str_key = MetaData_keystring(h);
     zhash_insert(metadata, h_str_key, h);
+    free(h_str_key);
+
 
     zlist_t *r_tr_keys = zhash_keys(readerc);
-
     void *key; 
-
     for(key= zlist_first(r_tr_keys);  key!= NULL; key=zlist_next(r_tr_keys) ) {
         
          REGREADER *r_tag_pair  = (REGREADER *)zhash_lookup(readerc, (const char *)key);
@@ -419,8 +421,10 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
      } else {
           printf("if 2\n");
           REGREADER *r_tr_pair = RegReader_create(tag_r, _reader,  opnum);
+
           char *r_tr_key = RegReader_keystring(r_tr_pair);
           zhash_insert(readerc, r_tr_key, (void *)r_tr_pair);
+          free(r_tr_key);
 
           TAG tag_loc;
           get_object_tag(hash_object_SODAW, object_name, &tag_loc);
