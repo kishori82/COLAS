@@ -412,10 +412,6 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, "opnum", (void *)opnum_frame);
            if(names!=NULL) zlist_append(names, "opnum");
-
-           zframe_t *tag_frame= zmsg_pop (msg);
-           zhash_insert(frames, "tag", (void *)tag_frame);
-           if(names!=NULL) zlist_append(names, "tag");
          }
 
          if( strcmp(phase_name, WRITE_PUT) ==0 ) {
