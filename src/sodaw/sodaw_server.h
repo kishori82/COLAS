@@ -5,7 +5,8 @@
 
 typedef struct _R_C {
    TAG t_r;
-   char *readerid;
+   char *reader_op;
+   char *reader_id;
 } REGREADER;
 
 

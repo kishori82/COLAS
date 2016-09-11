@@ -65,18 +65,17 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
 
     // it to all servers in a round robin fashion
     if(DEBUG_MODE)  printf("\n");
-
-    if( DEBUG_MODE) printf("\tsending ..\n");
+    if( DEBUG_MODE) printf("\t\tsending ..\n");
     for(i=0; i < num_servers; i++) {
 
        for(j=0; j < n-1; j++) {
           if(DEBUG_MODE) {
             if( strcmp(names[j], "opnum")==0)  
-               printf("\t\tFRAME%d :%s  %d\n", j, names[j], *((unsigned int *)values[j]) );
+               printf("\t\t\tFRAME%d :%s  %d\n",j, names[j], *((unsigned int *)values[j]) );
             else if( strcmp(names[j], "payload")==0)  
-               printf("\t\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
+               printf("\t\t\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
             else
-               printf("\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
+               printf("\t\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
              
             zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
          }
@@ -84,11 +83,11 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
 
        if(DEBUG_MODE) {
          if( strcmp(names[j], "opnum")==0)  
-            printf("\t\tFRAME%d :%s  %d\n", j, names[j],   *((unsigned int *)values[j]) );
+            printf("\t\t\tFRAME%d :%s  %d\n", j, names[j],   *((unsigned int *)values[j]) );
          else if( strcmp(names[j], "payload")==0)  
-            printf("\t\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
+            printf("\t\t\tFRAME%d :%s  %d\n", j, names[j],  strlen((char *)values[j]) );
          else
-            printf("\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
+            printf("\t\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
        }
       zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE);
       if(DEBUG_MODE)  printf("\n");
@@ -140,16 +139,16 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  char **mess
        for(j=0; j < n; j++) {
           if(DEBUG_MODE) {
             if( strcmp(names[j], "opnum")==0)  {
-              if(DEBUG_MODE) { printf("\t\tFRAME%d :%s  %d\n", j, names[j], *((unsigned int *)values[j]) ); }
+              if(DEBUG_MODE) { printf("\t\t\tFRAME%d :%s  %d\n", j, names[j], *((unsigned int *)values[j]) ); }
             } else {
-              if(DEBUG_MODE) {printf("\t\tFRAME%d :%s  %s\n", j, names[j], (char *)values[j]); }
+              if(DEBUG_MODE) {printf("\t\t\tFRAME%d :%s  %s\n", j, names[j], (char *)values[j]); }
             }
           }
          zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        }
         // a different coded element for each different server
        frames[n]= zframe_new(messages[i], msg_size);
-       if(DEBUG_MODE) printf("\t\tFRAME%d :%s  %d\n", n, "payload",  msg_size );
+       if(DEBUG_MODE) printf("\t\t\tFRAME%d :%s  %d\n", n, "payload",  msg_size );
        zframe_send( &frames[n], sock_to_servers, ZFRAME_REUSE);
        if(DEBUG_MODE)  printf("\n");
     }

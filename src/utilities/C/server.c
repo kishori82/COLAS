@@ -94,27 +94,27 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
            get_string_frame(algorithm_name, frames, "algorithm");
 
            if( strcmp(algorithm_name, "ABD")==0)  {
-                printf("ABD RESPONDING %s\n", server_args->server_id);
+                printf(" [[[ %s\n", server_args->server_id);
                 if(DEBUG_MODE) { 
                    printf("\t\treceiving... %s\n", server_args->server_id);  
                    print_out_hash_in_order(frames, frames_list); 
                 }
                  
                 algorithm_ABD(frames, worker, server_args);
-                printf("ABD RESPONSE COMPLETE\n\n");
+                printf("     ]]]\n\n");
            }
   
    
            if( strcmp(algorithm_name, "SODAW")==0)  {
 
-                printf("SODAW RESPONDING %s\n",server_args->server_id);
+                printf(" [[[ %s\n",server_args->server_id);
                 if(DEBUG_MODE) {
                    printf("\t\treceiving... %s\n", server_args->server_id);  
                    print_out_hash_in_order(frames, frames_list);
                 }
 
                 algorithm_SODAW(frames, worker, server_args);
-                printf("SODAW RESPONSE COMPLETE\n\n");
+                printf("      ]]]\n\n");
            }
 
            zlist_purge(frames_list);
@@ -143,7 +143,34 @@ int server_process(SERVER_ARGS *_server_args, SERVER_STATUS *_status)
    return 0;
 }
 
-int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *init_data, SERVER_STATUS *status) {
+
+int store_payload(zhash_t *object_hash, char *obj_name, TAG tag, zframe_t *payload, enum INSERT_DATA_POLICY policy) {
+    char tag_str[BUFSIZE];
+
+    zhash_t *single_object_hash = (zhash_t *)zhash_lookup(object_hash, obj_name);
+    tag_to_string(tag, tag_str);
+
+    if( single_object_hash==NULL) {
+       single_object_hash = zhash_new();
+       zhash_insert(object_hash, obj_name, (void *)single_object_hash); 
+    }
+    zframe_t *payload_frame = (zframe_t *)zhash_lookup(single_object_hash, tag_str);
+    if( policy == yield) {
+        if(payload_frame!=NULL) return -1;
+    }
+    else if(policy==force){
+        if(payload_frame!=NULL) {
+           zframe_destroy(&payload_frame);
+           zhash_delete(single_object_hash, tag_str);
+        }
+    }
+
+    return(zhash_insert(single_object_hash, tag_str, (void *)payload)); 
+}
+
+
+int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, 
+                 char *init_data, SERVER_STATUS *status) {
     void *item =NULL;
     char tag_str[BUFSIZE];
     TAG tag;
@@ -152,21 +179,23 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *i
     if( item!= NULL) return 0;
 
     
+    init_tag(&tag);
+    tag_to_string(tag, tag_str);
+
     if( strcmp(algorithm, "ABD")==0) {
        zhash_t *hash_hash = zhash_new();
-
-       init_tag(&tag);
-       tag_to_string(tag, tag_str);
 
        char *value =(void *)malloc(strlen(init_data)+1);
        strcpy(value, init_data);
        value[strlen(init_data)]= '\0';
+
+      
        zhash_insert(hash_hash, tag_str, (void *)value); 
 
        status->metadata_memory += (float) strlen(tag_str);
        status->data_memory += (float) strlen(init_data);
         
-       printf("\tCreated %s (size %d) \n", obj_name, status->data_memory);
+       printf("\tCreated \"%s\" (size %d) \n", obj_name, (int)status->data_memory);
        //add it to the main list 
        zhash_insert(object_hash, obj_name, (void *)hash_hash); 
 
@@ -174,26 +203,21 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *i
     }
 
     if( strcmp(algorithm, "SODAW")==0) {
-       zhash_t *hash_hash = zhash_new();
 
-       init_tag(&tag);
-       tag_to_string(tag, tag_str);
-
+    printf("object lookup :  %s\n",obj_name);
        char *value =(void *)malloc(strlen(init_data)+1);
        strcpy(value, init_data);
        value[strlen(init_data)]= '\0';
 
-       zframe_t *value_frame = zframe_new((void *)value, strlen(value));
-       zhash_insert(hash_hash, tag_str, (void *)value_frame); 
-
+       zframe_t *payload_frame = zframe_new((void *)value, strlen(init_data));
+       store_payload(object_hash, obj_name, tag, payload_frame, yield) ;
        free(value);
 
        status->metadata_memory += (float) strlen(tag_str);
        status->data_memory += (float) strlen(init_data);
         
-       printf("\tCreated %s (size %d) \n", obj_name, status->data_memory);
+       printf("\tCreated \"%s\" (size %d) \n", obj_name, status->data_memory, strlen(init_data));
        //add it to the main list 
-      zhash_insert(object_hash, obj_name, (void *)hash_hash);
       return 1;
    }
    
