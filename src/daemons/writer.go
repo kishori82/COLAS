@@ -1,7 +1,6 @@
 package daemons
 
 import (
-	utilities "../utilities/GO"
 	"container/list"
 	"encoding/base64"
 	//"fmt"
@@ -43,7 +42,7 @@ func writer_deamon() {
 				rand_data_file_size := int64(1024 * data.file_size)
 
 				rand_data := make([]byte, rand_data_file_size)
-				_ = utilities.Generate_random_data(rand_data, rand_data_file_size)
+				_ = Generate_random_data(rand_data, rand_data_file_size)
 
 				encoded := base64.StdEncoding.EncodeToString(rand_data)
 

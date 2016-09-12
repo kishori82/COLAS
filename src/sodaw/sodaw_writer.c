@@ -23,7 +23,7 @@ extern int s_interrupted;
 #ifdef ASLIBRARY
 
 
-TAG *SODAW_write_get_phase(char *obj_name, unsigned int op_num, 
+Tag *SODAW_write_get_phase(char *obj_name, unsigned int op_num, 
                       zsock_t *sock_to_servers,  char **servers, 
                           unsigned int num_servers, char *port)
 {
@@ -47,7 +47,7 @@ void SODAW_write_put_phase(
                       char *port, 
                       char *payload, 
                       int size, 
-                      TAG max_tag   // for read it is max and for write it is new
+                      Tag max_tag   // for read it is max and for write it is new
                    )
 {
     // send out the messages to all servers
@@ -77,7 +77,7 @@ void SODAW_write_put_phase(
     tag_to_string(max_tag, tag_str); 
 
 
-    char *types[] = {"object", "algorithm", "phase", "opnum", "tag"};
+    char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
     size =  encoded_data_info.num_blocks*encoded_data_info.encoded_symbol_size;
     printf("===========================================SYMBOL size    %d\n",size);
 
@@ -100,7 +100,7 @@ void SODAW_write_put_phase(
      int j =0;
      zlist_t *tag_list = zlist_new();
      
-     TAG *tag;
+     Tag *tag;
      while (true) {
            //  Tick once per second, pulling in arriving messages
             
@@ -119,8 +119,8 @@ void SODAW_write_put_phase(
                 zhash_t* frames = receive_message_frames_at_client(msg, names);
   
 
-                get_string_frame(phase, frames, "phase");
-                round = get_int_frame(frames, "opnum");
+                get_string_frame(phase, frames, PHASE);
+                round = get_int_frame(frames, OPNUM);
 
                 if(round==op_num && strcmp(phase, WRITE_PUT)==0) {
 
@@ -197,7 +197,7 @@ bool SODAW_write(
    printf("WRITE %d\n", op_num);
    printf("\tWRITE_GET (WRITER)\n");
 
-   TAG *max_tag=  SODAW_write_get_phase(
+   Tag *max_tag=  SODAW_write_get_phase(
                       obj_name,  
                       op_num, 
                       sock_to_servers, 
@@ -207,7 +207,7 @@ bool SODAW_write(
                   );
 
 
-   TAG new_tag;
+   Tag new_tag;
    new_tag.z = max_tag->z + 1;
    strcpy(new_tag.id, writer_id);
    free(max_tag);
@@ -275,7 +275,7 @@ int main (void)
    char port[]= {"8081"};
 
    char writer_id[] = { "writer_1"};
-   char obj_name[] = {"object"};
+   char obj_name[] = {OBJECT};
 
    unsigned int op_num;
    s_catch_signals();

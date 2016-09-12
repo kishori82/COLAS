@@ -50,7 +50,9 @@ int server_process(
                SERVER_STATUS *status
              );
 
-int store_payload(zhash_t *object_hash, char *obj_name, TAG tag, zframe_t *payload, enum INSERT_DATA_POLICY policy) ;
+zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names) ;
+int store_payload(zhash_t *object_hash, char *obj_name, Tag tag, zframe_t *payload, enum INSERT_DATA_POLICY policy) ;
 int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, char *init_data, SERVER_STATUS *status) ;
 
+void send_frames_at_server(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
 #endif

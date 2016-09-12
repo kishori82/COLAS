@@ -44,13 +44,13 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
 
 
     if( DEBUG_MODE ) printf("\t\t INSIDE WRITE VALUE\n");
-    TAG tag; 
-    get_string_frame(tag_str, frames, "tag");
+    Tag tag; 
+    get_string_frame(tag_str, frames, TAG);
     string_to_tag(tag_str, &tag);
      
-    get_string_frame(object_name, frames, "object");
+    get_string_frame(object_name, frames, OBJECT);
 
-    TAG local_tag;
+    Tag local_tag;
     get_object_tag(hash_object_ABD, object_name, &local_tag);
 
 //    if( DEBUG_MODE )printf("\t\t WRITE TAG for COMP (%d, %s)  (%d, %s)\n", local_tag.z, local_tag.id, tag.z, tag.id);
@@ -58,7 +58,7 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
     if( compare_tags(local_tag, tag)==-1 ) {
         if( DEBUG_MODE )printf("\t\tBEHIND\n");
 
-        zframe_t *payload_frame= (zframe_t *)zhash_lookup(frames, "payload");
+        zframe_t *payload_frame= (zframe_t *)zhash_lookup(frames, PAYLOAD);
         int size = zframe_size(payload_frame); 
         void *frame_data = zframe_data(payload_frame); 
         char *data =  (char *)malloc(size + 1);
@@ -108,10 +108,10 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
        if( DEBUG_MODE ) printf("\t\tSENT BEHIND\n");
     }
 
-    get_string_frame(tag_str, frames, "phase"); 
+    get_string_frame(tag_str, frames, PHASE); 
     printf("\tsending ...\n");
 
-    send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
+    send_frames_at_server(frames, worker, SEND_FINAL, 6,  SENDER, OBJECT,  ALGORITHM, PHASE, OPNUM, TAG);
 
     return;
 }
@@ -122,18 +122,18 @@ void algorithm_ABD_GET_TAG(zhash_t *frames, void *worker) {
      char tag_buf[100];
      printf("\tGET_TAG\n");
 
-     get_string_frame(object_name, frames, "object");
-     TAG tag;
+     get_string_frame(object_name, frames, OBJECT);
+     Tag tag;
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
 
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
-     zhash_insert(frames, "tag", (void *)tag_frame);
-     unsigned int opnum= get_uint_frame(frames, "opnum");
+     zhash_insert(frames, TAG, (void *)tag_frame);
+     unsigned int opnum= get_uint_frame(frames, OPNUM);
      assert(opnum>=0);
 
      printf("\t\tsending...\n,");
-     send_frames_at_server(frames, worker, SEND_FINAL, 6,  "sender", "object",  "algorithm", "phase", "opnum", "tag");
+     send_frames_at_server(frames, worker, SEND_FINAL, 6,  SENDER, OBJECT,  ALGORITHM, PHASE, OPNUM, TAG);
 }
 
 void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
@@ -141,8 +141,8 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      char object_name[100];
      printf("\tGET_TAG_VALUE\n");
 
-     get_string_frame(object_name, frames, "object");
-     TAG tag;
+     get_string_frame(object_name, frames, OBJECT);
+     Tag tag;
      get_object_tag(hash_object_ABD, object_name, &tag); 
      tag_to_string(tag, tag_buf);
 
@@ -158,14 +158,14 @@ void algorithm_ABD_GET_TAG_VALUE(zhash_t  *frames,  void *worker) {
      assert(key!=NULL);
 
      zframe_t *tag_frame= zframe_new(tag_buf, strlen(tag_buf));
-     zhash_insert(frames, "tag", (void *)tag_frame);
+     zhash_insert(frames, TAG, (void *)tag_frame);
 
      void *item = zhash_lookup(temp_hash_hash,key);
      zframe_t *data_frame= zframe_new((char *)item, strlen(item));
-     zhash_insert(frames, "payload", (void *)data_frame);
+     zhash_insert(frames, PAYLOAD, (void *)data_frame);
 
      printf("\tsending ...\n");
-     send_frames_at_server(frames, worker, SEND_FINAL, 7,  "sender", "object",  "algorithm", "phase", "opnum", "tag", "payload" );
+     send_frames_at_server(frames, worker, SEND_FINAL, 7,  SENDER, OBJECT,  ALGORITHM, PHASE, OPNUM, TAG, PAYLOAD );
 
 }
 
@@ -178,8 +178,8 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *_server_args) {
      char object_name[100];
 
 
-     get_string_frame(phase_buf, frames, "phase");
-     get_string_frame(object_name, frames, "object");
+     get_string_frame(phase_buf, frames, PHASE);
+     get_string_frame(object_name, frames, OBJECT);
 
      if( has_object(hash_object_ABD, object_name)==0) {
          SERVER_ARGS *server_args = (SERVER_ARGS *)_server_args;

@@ -12,28 +12,57 @@
 #include <fcntl.h>
 #include <stdarg.h>
 
+//  ABD
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
 #define GET_TAG_VALUE "GET_TAG_VALUE"
 
 
+/// SODAW
+#define WRITE_GET "WRITE_GET"
+#define WRITE_PUT "WRITE_PUT"
+#define READ_COMPLETE "READ_COMPLETE"
+#define READ_GET "READ_GET"
+#define READ_VALUE "READ_VALUE"
+
+#define READ_COMPLETE "READ_COMPLETE"
+#define READ_DISPERSE "READ_DISPERSE"
+#define META_TAG "META_TAG"
+#define META_SERVERID "META_SERVERID"
+#define META_READERID "META_READERID"
+
+
+
+// GENERAL
+#define OBJECT "OBJECT"
+#define ALGORITHM "ALGORITHM"
+#define OPNUM "OPNUM"
+#define PAYLOAD "PAYLOAD"
+#define PHASE "PHASE"
+#define SENDER "SENDER"
+#define TAG "TAG"
+
+#define SODAW "SODAW"
+
+
+
 typedef struct  _TAG {
     int z;
     char id[100];
-}  TAG;
+}  Tag;
 
 typedef struct  _TAG_VALUE {
-    TAG tag;
+    Tag tag;
     void *data;
     int size;
-}  TAG_VALUE;
+}  Tag_Valuu;
 
 
 void _zframe_int(zframe_t *f, int *i) ;
 
 void _zframe_uint(zframe_t *f, unsigned int *i) ;
 
-int  get_tag_frame(zhash_t *frames, TAG *tag);
+int  get_tag_frame(zhash_t *frames, Tag *tag);
 
 void _zframe_str(zframe_t *f, char *buf) ;
 
@@ -44,15 +73,13 @@ char *create_destinations(char **servers, unsigned int num_servers, char *port, 
 char *create_destination(char *server, char *port) ;
 
 
-void init_tag(TAG *tag) ;
+void init_tag(Tag *tag) ;
 
 
 /*
    returns -1 if a < b
             0 if a = b
            +1 if a > b
-
-
 */
 
 
@@ -60,25 +87,25 @@ int has_object(zhash_t *object_hash,  char *obj_name) ;
 
 int print_object_hash(zhash_t *object_hash) ;
 
-int compare_tag_ptrs(TAG *a, TAG *b) ;
+int compare_tag_ptrs(Tag *a, Tag *b) ;
 
-int compare_tags(TAG a, TAG b) ;
+int compare_tags(Tag a, Tag b) ;
 
 // converts a string to a tag
-void string_to_tag(char *str, TAG *tag) ;
+void string_to_tag(char *str, Tag *tag) ;
 
 // converts a tag to a string
-void tag_to_string(TAG tag, char *buf) ;
+void tag_to_string(Tag tag, char *buf) ;
 
-TAG *get_max_tag(zlist_t *tag_list) ;
+Tag *get_max_tag(zlist_t *tag_list) ;
      
 void free_items_in_list( zlist_t *list) ;
 
-int  get_object_tag(zhash_t *hash, char * object_name, TAG *tag) ;
+int  get_object_tag(zhash_t *hash, char * object_name, Tag *tag) ;
 
-char * get_object_value(zhash_t *hash, char * object_name, TAG tag) ;
+char * get_object_value(zhash_t *hash, char * object_name, Tag tag) ;
 
-zframe_t * get_object_frame(zhash_t *hash, char * object_name, TAG tag) ;
+zframe_t * get_object_frame(zhash_t *hash, char * object_name, Tag tag) ;
 
 char **create_server_names(char *servers_str) ;
 
@@ -95,14 +122,11 @@ void destroy_frames(zhash_t *frames);
 
 enum SEND_TYPE {SEND_MORE, SEND_FINAL};
 
-void send_frames_at_server(zhash_t *frames, void *worker, enum SEND_TYPE type, int n, ...) ;
 
 void print_out_hash(zhash_t* frames);
 
 void print_out_hash_in_order(zhash_t* frames, zlist_t *names);
 
-zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names) ;
 
-zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names) ;
 #endif
 

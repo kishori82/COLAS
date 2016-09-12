@@ -4,7 +4,7 @@ all: $(ALL)
 
 TARGET= abdprocess.go
 
-SRCS = daemons/params.go daemons/logger.go daemons/controllerRoutes.go daemons/getParamRoutes.go  daemons/setParamRoutes.go daemons/httpServer.go daemons/routes.go daemons/controller.go daemons/utils.go daemons/writer.go daemons/reader.go daemons/server.go utilities/GO/utilities.go
+SRCS = daemons/params.go daemons/logger.go daemons/controllerRoutes.go daemons/getParamRoutes.go  daemons/setParamRoutes.go daemons/httpServer.go daemons/routes.go daemons/controller.go daemons/utils.go daemons/writer.go daemons/reader.go daemons/server.go daemons/utilities.go
 
 CSRCS = abd/abd_client.c abd/abd_server.c abd/abd_client.h abd/abd_server.h  abd/algo_utils.h abd/algo_utils.c
 

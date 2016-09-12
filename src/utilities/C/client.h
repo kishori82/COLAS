@@ -14,6 +14,7 @@ void s_signal_handler(int signal_value);
 
 void s_catch_signals();
 
+zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names) ;
 void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[],  int n, ...) ;
-void send_multisend_servers(void *sock_to_servers, int num_servers, char **multipart, int size, char *names[],  int n, ...) ;
+void send_multisend_servers(void *sock_to_servers, int num_servers, uint8_t **multipart, int size, char *names[],  int n, ...) ;
 #endif

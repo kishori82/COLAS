@@ -18,15 +18,10 @@
 extern int s_interrupted;
 
 #ifdef ASLIBRARY
-
-#define WRITE_VALUE "WRITE_VALUE"
-#define GET_TAG "GET_TAG"
-#define GET_TAG_VALUE "GET_TAG_VALUE"
-
 #define DEBUG_MODE 1
 
 // this fethers the max tag
-TAG *get_max_tag_phase(char *obj_name, unsigned int op_num, 
+Tag *get_max_tag_phase(char *obj_name, unsigned int op_num, 
                       zsock_t *sock_to_servers,  char **servers, 
                           unsigned int num_servers, char *port)
 {
@@ -39,7 +34,7 @@ TAG *get_max_tag_phase(char *obj_name, unsigned int op_num,
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
-    char *types[] = {"object", "algorithm", "phase", "opnum"};
+    char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM};
     send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "ABD", GET_TAG, &op_num) ;
 
     unsigned int majority =  ceil(((float)num_servers+1)/2);
@@ -47,7 +42,7 @@ TAG *get_max_tag_phase(char *obj_name, unsigned int op_num,
      unsigned int responses =0;
      zlist_t *tag_list = zlist_new();
      
-     TAG *tag;
+     Tag *tag;
      while (true) {
         //  Tick once per second, pulling in arriving messages
             
@@ -65,16 +60,16 @@ TAG *get_max_tag_phase(char *obj_name, unsigned int op_num,
                 zlist_t *names = zlist_new();
                 zhash_t* frames = receive_message_frames_at_client(msg, names);
 
-                get_string_frame(phase, frames, "phase");
-                round = get_int_frame(frames, "opnum");
-                get_string_frame(tag_str, frames, "tag");
+                get_string_frame(phase, frames, PHASE);
+                round = get_int_frame(frames, OPNUM);
+                get_string_frame(tag_str, frames, TAG);
                   
                 if(round==op_num && strcmp(phase, GET_TAG)==0) {
                      if(DEBUG_MODE) print_out_hash_in_order(frames, names);
 
                      responses++;
                      // add tag to list                
-                     tag = (TAG *)malloc(sizeof(TAG));
+                     tag = (Tag *)malloc(sizeof(TAG));
                      string_to_tag(tag_str, tag);
                      zlist_append(tag_list, (void *)tag);
 
@@ -90,7 +85,7 @@ TAG *get_max_tag_phase(char *obj_name, unsigned int op_num,
            }
      }
    //comute the max tag now and return 
-     TAG *max_tag = get_max_tag(tag_list);
+     Tag *max_tag = get_max_tag(tag_list);
 
      free_items_in_list(tag_list);
      zlist_destroy(&tag_list);
@@ -106,7 +101,7 @@ void  get_max_tag_value_phase(
             char **servers, 
             unsigned int num_servers, 
             char *port, 
-            TAG **max_tag, 
+            Tag **max_tag, 
             char **max_value
         )
 {
@@ -118,11 +113,11 @@ void  get_max_tag_value_phase(
     char *value=NULL;
     unsigned int round;
 
-    TAG *tag;
+    Tag *tag;
 
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
-    char *types[] = {"object", "algorithm", "phase", "opnum"};
+    char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM};
     send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, "ABD", GET_TAG_VALUE, &op_num) ;
 
 
@@ -149,20 +144,20 @@ void  get_max_tag_value_phase(
                 zhash_t* frames = receive_message_frames_at_client(msg, names);
 
                 //value
-                zframe_t *value_frame = (zframe_t *)zhash_lookup(frames, "payload");
+                zframe_t *value_frame = (zframe_t *)zhash_lookup(frames, PAYLOAD);
                 assert(value_frame !=NULL);
                 value = (char *)malloc(  (zframe_size(value_frame) + 1)*sizeof(char) );
                 _zframe_str(value_frame, value);
 
-                get_string_frame(phase, frames, "phase");
-                round = get_int_frame(frames, "opnum");
-                get_string_frame(tag_str, frames, "tag");
+                get_string_frame(phase, frames, PHASE);
+                round = get_int_frame(frames, OPNUM);
+                get_string_frame(tag_str, frames, TAG);
  
 
                 if(round==op_num && strcmp(phase, GET_TAG_VALUE)==0) {
                    responses++;
                    // add tag to list                
-                   tag = (TAG *)malloc(sizeof(TAG));
+                   tag = (Tag *)malloc(sizeof(Tag));
                    string_to_tag(tag_str, tag);
                    zlist_append(tag_list, (void *)tag);
 
@@ -186,7 +181,7 @@ void  get_max_tag_value_phase(
 
 
 // this is the write tag value phase of ABD
-TAG write_value_phase(  
+Tag write_value_phase(  
                       char *obj_name,
                       char *writer_id, 
                       unsigned int op_num, 
@@ -196,7 +191,7 @@ TAG write_value_phase(
                       char *port, 
                       char *payload, 
                       int size, 
-                      TAG max_tag   // for read it is max and for write it is new
+                      Tag max_tag   // for read it is max and for write it is new
                    )
 {
     // send out the messages to all servers
@@ -212,7 +207,7 @@ TAG write_value_phase(
     tag_to_string(max_tag, tag_str); 
     zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
 
-    char *types[] = {"object", "algorithm", "phase", "opnum", "tag", "payload"};
+    char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG, PAYLOAD};
     send_multicast_servers(sock_to_servers, num_servers, types,  6, obj_name, "ABD",\
             WRITE_VALUE, &op_num, tag_str, payload) ;
 
@@ -234,8 +229,8 @@ TAG write_value_phase(
                zlist_t *names = zlist_new();
                zhash_t* frames = receive_message_frames_at_client(msg, names);
 
-               get_string_frame(phase, frames, "phase");
-               round = get_int_frame(frames, "opnum");
+               get_string_frame(phase, frames, PHASE);
+               round = get_int_frame(frames, OPNUM);
                   
                 zmsg_destroy (&msg);
         
@@ -311,9 +306,9 @@ bool ABD_write(
 
    printf("\tGET_TAG (WRITER)\n");
 
-   TAG *max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
+   Tag *max_tag=  get_max_tag_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port);
 
-    TAG new_tag;
+    Tag new_tag;
     new_tag.z = max_tag->z + 1;
     strcpy(new_tag.id, writer_id);
     free(max_tag);
@@ -381,7 +376,7 @@ char *ABD_read(
    printf("     MAX_TAG_VALUE (READER)\n");
 
    char *payload;
-   TAG *max_tag;
+   Tag *max_tag;
    get_max_tag_value_phase(obj_name,  op_num, sock_to_servers, servers, num_servers, port, &max_tag, &payload);
 
    printf("\tmax tag (%d,%s)\n\n", max_tag->z, max_tag->id);
@@ -440,7 +435,7 @@ int main (void)
    char port[]= {"8081"};
 
    char writer_id[] = { "writer_1"};
-   char obj_name[] = {"object"};
+   char obj_name[] = {OBJECT};
 
    unsigned int op_num;
    s_catch_signals();

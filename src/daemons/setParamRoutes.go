@@ -1,7 +1,6 @@
 package daemons
 
 import (
-	utilities "../utilities/GO"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -149,7 +148,7 @@ func SetSeed(w http.ResponseWriter, r *http.Request) {
 
 	const RANDSIZE int = 1000000000
 	if data.processType == 3 {
-		utilities.Set_random_seed(s)
+		Set_random_seed(s)
 		for ipaddr, _ := range data.readers {
 			seed := rand.Intn(RANDSIZE)
 			seed_str := fmt.Sprintf("%d", seed)
