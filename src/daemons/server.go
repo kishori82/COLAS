@@ -14,7 +14,7 @@ import (
 */
 import "C"
 
-func server_logger(status *C.SERVER_STATUS) {
+func server_logger(status *C.Server_Status) {
 	var cpu_use float64
 
 	cpu_use = CpuUsage()
@@ -35,8 +35,8 @@ func server_daemon() {
 	//	data.active = true
 	//	fmt.Println("init file ", 1024*data.init_file_size)
 
-	var status C.SERVER_STATUS
-	var server_args C.SERVER_ARGS
+	var status C.Server_Status
+	var server_args C.Server_Args
 
 	go server_logger(&status)
 
@@ -63,7 +63,7 @@ func server_daemon() {
 	}
 }
 
-func InitializeServerParameters(server_args *C.SERVER_ARGS, status *C.SERVER_STATUS) {
+func InitializeServerParameters(server_args *C.Server_Args, status *C.Server_Status) {
 	rand_data := make([]byte, (uint64)(1024*data.init_file_size))
 	_ = Generate_random_data(rand_data, int64(1024*data.init_file_size))
 	encoded := base64.StdEncoding.EncodeToString(rand_data)

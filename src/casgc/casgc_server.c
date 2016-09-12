@@ -19,7 +19,7 @@
 #define DEBUG_MODE 0
 extern int s_interrupted;
 
-extern SERVER_STATUS *status;
+extern Server_Status *status;
 
 
 #ifdef ASLIBRARY

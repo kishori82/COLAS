@@ -4,24 +4,12 @@
 //  it easier to start and stop the example. Each task has its own
 //  context and conceptually acts as a separate process.
 
-#include <czmq.h> 
-#include <zmq.h> 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define WRITE_VALUE "WRITE_VALUE"
-#define GET_TAG "GET_TAG"
-#define GET_TAG_VALUE "GET_TAG_VALUE"
-
 #include "abd_server.h"
-#include "algo_utils.h"
 
-#define DEBUG_MODE 0
 extern int s_interrupted;
 
-extern SERVER_STATUS *status;
-extern SERVER_STATUS *server_args;
+extern Server_Status *status;
+extern Server_Status *server_args;
 
 #ifdef ASLIBRARY
 static zhash_t *hash_object_ABD;
@@ -182,7 +170,7 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *_server_args) {
      get_string_frame(object_name, frames, OBJECT);
 
      if( has_object(hash_object_ABD, object_name)==0) {
-         SERVER_ARGS *server_args = (SERVER_ARGS *)_server_args;
+         Server_Args *server_args = (Server_Args *)_server_args;
     //     printf("%s  %d %p\n", object_name, strlen(server_args->init_data), status);
          create_object(hash_object_ABD, object_name, "ABD", server_args->init_data, status);
      }

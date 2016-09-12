@@ -1,9 +1,9 @@
 CC=gcc -g
 
-UTILS=../utilities/C
+UTILS=../utilities/
 
 LDFLAGS=-L../codes  -lm -lzmq -lczmq  -lrlnc_rs  -Wl,-rpath=../codes
-CIFLAGS=-I../utilities/C -I../codes #-Wall 
+CIFLAGS=-I../utilities -I../codes #-Wall 
 CFLAGS= -Wimplicit-function-declaration 
 
 DEPS=sodaw_client.h sodaw_server.h sodaw_reader.h sodaw_writer.h  $(UTILS)/base64.h $(UTILS)/algo_utils.h $(UTILS)/server.h $(UTILS)/client.h
