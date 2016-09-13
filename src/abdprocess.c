@@ -69,8 +69,11 @@ void reader_process(Parameters parameters) {
 
 void writer_process(Parameters parameters) {
     unsigned int opnum=0;
-    char *payload = get_random_data(parameters.filesize);
+    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+
+    char *payload = get_random_data(filesize);
     unsigned int payload_size=0;
+    srand(time(NULL));
     char *servers_str = get_servers_str(parameters);
 
     for( opnum=0; opnum< 1000;opnum++) {
@@ -237,8 +240,7 @@ Server_Status * get_server_status( Parameters parameters) {
 }
 
 
-char * get_random_data(float filesize) {
-   unsigned int size = (unsigned int) (filesize*1024);
+char * get_random_data(unsigned int size) {
    int i;
    char *data = (char *)malloc(size*sizeof(char));
 

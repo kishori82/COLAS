@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "utilities/algo_utils.h"
 #include "codes/rlnc_rs.h"
@@ -39,7 +40,7 @@ char *get_servers_str(Parameters parameters) ;
 
 void reader_process(Parameters parameters) ;
 void writer_process(Parameters parameters) ;
-char * get_random_data(float filesize);
+char * get_random_data(unsigned int filesize);
 
 
 #endif
