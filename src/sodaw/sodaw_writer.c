@@ -79,7 +79,6 @@ void SODAW_write_put_phase(
 
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
     size =  encoded_data_info.num_blocks*encoded_data_info.encoded_symbol_size;
-    printf("===========================================SYMBOL size    %d\n",size);
 
     send_multisend_servers(
                     sock_to_servers, num_servers, 
@@ -217,7 +216,6 @@ bool SODAW_write(
    strcpy(new_tag.id, writer_id);
    free(max_tag);
    printf("\tWRITE_PUT (WRITER)\n");
-   printf("payload size in seide the writer %d\n", size);
    SODAW_write_put_phase(
                           obj_name, 
                           writer_id,  

@@ -352,16 +352,13 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
 
      char *key;
      for( key = (char *)zlist_first(names);  key != NULL; key = (char *)zlist_next(names)) {
-          printf("%s\n", key);
           if( strcmp(key, OPNUM)==0) {
             temp_int=get_uint_frame(frames, key);
             printf("\t\t\t%s : %d\n", key, temp_int);
             assert(temp_int >=0);
           }
           else if( strcmp(key, PAYLOAD)==0) {
-          printf("%s\n", key);
              printf("\t\t\t%s : %d\n", key, zframe_size((zframe_t *)zhash_lookup(frames, key)));
-          printf("%s\n   smallle", key);
              if( zframe_size(zhash_lookup(frames, key)) < 100) {  printf("ERROR : small payload\n"); exit(0); }
           }
           else {
@@ -386,7 +383,6 @@ void destroy_frames(zhash_t *frames) {
            }
      }
      zlist_destroy(&keys);
-     printf("size of the zhash %d\n", zhash_size(frames));
 }
 
 

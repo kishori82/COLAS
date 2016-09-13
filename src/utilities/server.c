@@ -360,13 +360,8 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
 
            zframe_t *payload_frame= zmsg_pop (msg);
            zframe_t *t = zframe_dup(payload_frame); 
-           printf("Received a payload of size %d\n", zframe_size(payload_frame));
            zhash_insert(frames, PAYLOAD, (void *)t);
-
-           zframe_t *s = zhash_lookup(frames, PAYLOAD);
-           printf("Received a payload of size -- %d\n", zframe_size(s));
            if(names!=NULL) zlist_append(names, PAYLOAD);
-
          }
 
          if( strcmp(phase_name, READ_VALUE) ==0 ) {
@@ -399,9 +394,7 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            if(names!=NULL) zlist_append(names, TAG);
           }
      }
-     printf("inside the calle %p\n", frames); 
      print_out_hash_in_order(frames, names); 
-     printf("returnign now \n"); 
      return frames;
 }
 

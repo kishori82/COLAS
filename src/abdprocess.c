@@ -98,7 +98,6 @@ void writer_process(Parameters parameters) {
     char *servers_str = get_servers_str(parameters);
 
     for( opnum=0; opnum< 10000;opnum++) {
-        printf("write r %s   %d\n",parameters.server_id, payload_size);
         SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
     }
     free(payload);
