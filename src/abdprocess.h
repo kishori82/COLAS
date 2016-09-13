@@ -17,9 +17,8 @@
 typedef struct _Parameters {
     char **ipaddresses;
     unsigned int num_servers;
-    char *server_id;
+    char server_id[BUFSIZE];
     char port[10];
-
     enum Algorithm algorithm;
     enum CodingAlgorithm codingalgorithm;
     int wait;

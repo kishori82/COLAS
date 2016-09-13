@@ -5,7 +5,44 @@
 //  context and conceptually acts as a separate process.
 
 #include "server.h"
+
+#include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/types.h>
+
 extern int s_interrupted;
+
+#define S_NOTIFY_MSG " "
+#define S_ERROR_MSG "Error while writing to self-pipe.\n"
+static int s_fd;
+static void s_signal_handler1 (int signal_value)
+{
+    int rc = write (s_fd, S_NOTIFY_MSG, sizeof(S_NOTIFY_MSG));
+    if (rc != sizeof(S_NOTIFY_MSG)) {
+        write (STDOUT_FILENO, S_ERROR_MSG, sizeof(S_ERROR_MSG)-1);
+        exit(1);
+    }
+}
+
+
+
+
+static void s_catch_signals1 (int fd)
+{
+    s_fd = fd;
+
+    struct sigaction action;
+    action.sa_handler = s_signal_handler1;
+    //  Doesn't matter if SA_RESTART set because self-pipe will wake up zmq_poll
+    //  But setting to 0 will allow zmq_read to be interrupted.
+    action.sa_flags = 0;
+    sigemptyset (&action.sa_mask);
+    sigaction (SIGINT, &action, NULL);
+    sigaction (SIGTERM, &action, NULL);
+}
+
 
 Server_Status *status;
 Server_Args *server_args;
@@ -49,7 +86,7 @@ void *server_task (void *server_args)
 
 
 static void
-server_worker (void *_server_args, zctx_t *ctx, void *pipe)
+server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
 {
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
     zsocket_connect(worker, "inproc://backend");
@@ -59,11 +96,34 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
     
     printf("Initial value size %ld\n", strlen(server_args->init_data));
 
+/*
+    int pipefds[2];
+    int rc= pipe(pipefds);
+
+    if (rc != 0) {
+        perror("Creating self-pipe");
+        exit(1);
+    }
+    for (int i = 0; i < 2; i++) {
+        int flags = fcntl(pipefds[i], F_GETFL, 0);
+        if (flags < 0) {
+            perror ("fcntl(F_GETFL)");
+            exit(1);
+        }
+        rc = fcntl (pipefds[i], F_SETFL, flags | O_NONBLOCK);
+        if (rc != 0) {
+            perror ("fcntl(F_SETFL)");
+            exit(1);
+        }
+    }
+
+    s_catch_signals1(pipefds[1]);
+*/
+
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
-
         int rc = zmq_poll(items, 1, -1);
-        if( rc < 0 || s_interrupted ) {
+        if( rc < 0 || s_interrupted==1) {
              exit(0);
         }
         
@@ -114,7 +174,6 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
 int server_process(Server_Args *_server_args, Server_Status *_status)
 {
 
-   s_catch_signals();
 
    server_args = _server_args;
    status = _status;

@@ -1,6 +1,27 @@
 #include "algo_utils.h"
 
 
+extern int s_interrupted;
+void s_signal_handler(int signal_value)
+{
+    s_interrupted=1;
+}
+
+void s_catch_signals ()
+{
+    struct sigaction action;
+    action.sa_handler = s_signal_handler;
+    //  Doesn't matter if SA_RESTART set because self-pipe will wake up zmq_poll
+    //  But setting to 0 will allow zmq_read to be interrupted.
+    s_interrupted=0;
+    action.sa_flags = 0;
+    sigemptyset (&action.sa_mask);
+    sigaction (SIGINT, &action, NULL);
+    sigaction (SIGTERM, &action, NULL);
+}
+
+
+
 void _zframe_int(zframe_t *f, int *i) {
     byte *data = zframe_data(f);
     *i = *((int *) data);

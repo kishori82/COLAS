@@ -5,8 +5,10 @@ int main(int argc, char *argv[]) {
 
    char usage[] = "Usage: abdprocessc --process-type [0 (R), 1 (W), 2 (S)]\n\t\t\t[--ip  xx.xx.xx.xx] [...] (servers)\n\t\t\t[--filesize  s] (default 1 KB)\n\t\t\t[--wait m] (default 100ms)\n\t\t\t[--algorithm ABD/SODAW(default)]\n\t\t\t[--code rlnc(default)/reed-solomon]\n\t\t\t--serverid name\n";
 
+
    Parameters parameters;    
    
+   srand(time(NULL));
    setDefaults(&parameters);
    if( readParameters(argc, argv, &parameters)==0)  {
       printf("%s\n", usage);
@@ -19,6 +21,22 @@ int main(int argc, char *argv[]) {
 
    printf("Server Str : %s\n", server_args->servers_str); 
    printf("MDS     : (%d, %d)\n", server_args->N, server_args->K); 
+
+   char buf[BUFSIZE];
+   switch(parameters.processtype) {
+      case reader:
+                 sprintf(buf, "reader-%d", rand());
+                 break;
+      case writer:
+                 sprintf(buf, "writer-%d", rand());
+                 break;
+      case server:
+                 sprintf(buf, "server-%d", rand());
+                 break;
+      default:
+                 break;
+   }
+   strcpy(parameters.server_id, buf);
 
    if(parameters.processtype==reader) {
        reader_process(parameters);
@@ -73,7 +91,6 @@ void writer_process(Parameters parameters) {
 
     char *payload = get_random_data(filesize);
     unsigned int payload_size=0;
-    srand(time(NULL));
     char *servers_str = get_servers_str(parameters);
 
     for( opnum=0; opnum< 1000;opnum++) {
@@ -102,8 +119,7 @@ unsigned int readParameters(int argc, char *argv[], Parameters *parameters) {
            strcpy( parameters->ipaddresses[j++], argv[++i]);
        }
        else if( strncmp(argv[i], "--serverid", strlen("--serverid"))==0) { 
-           parameters->server_id= (char *)malloc(strlen(argv[++i])*sizeof(char));
-           strcpy(parameters->server_id, argv[i]);
+           strcpy(parameters->server_id, argv[++i]);
        }
        else if( strncmp(argv[i], "--process-type", strlen("-process-type") )==0) { 
           parameters->processtype = atoi(argv[++i]);

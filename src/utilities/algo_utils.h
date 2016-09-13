@@ -52,6 +52,8 @@
 #define BUFSIZE 100
 #define PAYLOADBUF_SIZE 3000
 
+int s_interrupted;
+
 typedef struct  _TAG {
     int z;
     char id[100];
@@ -92,6 +94,9 @@ typedef struct _Server_Args {
     Server_Status *status;
 } Server_Args;
 
+void s_signal_handler(int signal_value);
+
+void s_catch_signals ();
 
 enum ProcessType { server=2, reader=0, writer=1  };
 
