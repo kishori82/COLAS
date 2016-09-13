@@ -10,6 +10,7 @@ src/ZMQ/zmqlibs/*
 
 
 abdprocess
+abdprocessc
 src/abd/C/abd_server
 src/abd/C/abd_client
 src/logs/logs.txt

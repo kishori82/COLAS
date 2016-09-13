@@ -1,5 +1,5 @@
 ALL = abdprocess 
-CC=gcc
+CC=gcc -g
 
 CFLAGS= -Iutilities/ -Iabd/ -Icodes/ -Isodaw
 LDFLAGS= -lm -Labd/ -Lcodes/ -Lsodaw -lsodaw -lrlnc_rs -labd -Wimplicit-function-declaration -fPIC -Wall 

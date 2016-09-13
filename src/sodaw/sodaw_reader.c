@@ -160,9 +160,11 @@ char *SODAW_read(
 	s_catch_signals();
 	int j;
 	int num_servers = count_num_servers(servers_str);
+  printf("helloo\n");
 	char **servers = create_server_names(servers_str);
+  printf("helloooooo\n");
 
-#ifndef DEBUG_MODE
+#ifdef DEBUG_MODE
 	printf("\t\tObj name       : %s\n",obj_name);
 	printf("\t\tWriter name    : %s\n",reader_id);
 	printf("\t\tOperation num  : %d\n",op_num);
@@ -187,7 +189,7 @@ char *SODAW_read(
 	zctx_t *ctx  = zctx_new();
 	void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
 	zctx_set_linger(ctx, 0);
-	assert (sock_to_servers);
+	assert(sock_to_servers);
 
 	zsocket_set_identity(sock_to_servers,  reader_id);
 
