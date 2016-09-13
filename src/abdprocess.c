@@ -246,6 +246,7 @@ Server_Args * get_server_args( Parameters parameters) {
      server_args->port =  (char *) malloc(10*sizeof(char));
      strcpy(server_args->port, "8081");
 
+     server_args->init_data= get_random_data(parameters.filesize);
      server_args->sock_to_servers = NULL;
      server_args->symbol_size = 1400;
      server_args->coding_algorithm = parameters.codingalgorithm;
