@@ -12,6 +12,9 @@
 #include <fcntl.h>
 #include <stdarg.h>
 
+
+
+
 //  ABD
 #define WRITE_VALUE "WRITE_VALUE"
 #define GET_TAG "GET_TAG"
@@ -43,8 +46,11 @@
 #define TAG "TAG"
 
 #define SODAW "SODAW"
+#define ABD "ABD"
 
-
+// Parameters
+#define BUFSIZE 100
+#define PAYLOADBUF_SIZE 3000
 
 typedef struct  _TAG {
     int z;
@@ -56,6 +62,54 @@ typedef struct  _TAG_VALUE {
     void *data;
     int size;
 }  Tag_Valuu;
+
+
+
+enum INSERT_DATA_POLICY{
+   force, yield
+};
+
+typedef struct _Server_Status {
+    float network_data;
+    float  metadata_memory;
+    float data_memory;
+    float  cpu_load;
+    int time_point;
+    float process_memory;
+} Server_Status;
+
+typedef struct _Server_Args {
+    char *init_data;
+    char *server_id;
+    char *servers_str;
+    char *port;
+    void *sock_to_servers; 
+    int num_servers;
+    int symbol_size;
+    unsigned int coding_algorithm; // 0 if full-vector and 1 is reed-solomon
+    unsigned int K;
+    unsigned int N;
+    Server_Status *status;
+} Server_Args;
+
+
+enum ProcessType { server=2, reader=0, writer=1  };
+
+enum Algorithm {abd=0, sodaw=1};
+
+int server_process(
+               Server_Args *server_args, 
+/*
+               char *server_id, 
+               char *servers_str, 
+               char *port,
+               char *init_data,
+*/
+               Server_Status *status
+             );
+
+
+
 
 
 void _zframe_int(zframe_t *f, int *i) ;
@@ -111,7 +165,6 @@ char **create_server_names(char *servers_str) ;
 
 void  destroy_server_names(char **servers, int num_servers) ;
 unsigned int count_num_servers(char *servers_str) ;
-
 
 
 int  get_string_frame(char *buf, zhash_t *frames,  const char *str);

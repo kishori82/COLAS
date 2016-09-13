@@ -7,8 +7,8 @@
 
 
 enum CodingAlgorithm {
-   full_vector,
-   reed_solomon 
+   full_vector = 0,
+   reed_solomon = 1
 };
 
 

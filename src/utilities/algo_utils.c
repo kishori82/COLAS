@@ -1,11 +1,6 @@
 #include "algo_utils.h"
 
 
-#define DEBUG_MODE 1
-
-#define PAYLOADBUF_SIZE 100000
-#define BUFSIZE 100
-
 void _zframe_int(zframe_t *f, int *i) {
     byte *data = zframe_data(f);
     *i = *((int *) data);

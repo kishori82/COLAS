@@ -2,8 +2,8 @@ CC=gcc
 
 
 
-UTILS=../utilities/C
-CIFLAGS= -I$(UTILS) -I../ZMQ/czmqlibs/include
+UTILS=../utilities
+CIFLAGS= -I$(UTILS) -I../ZMQ/czmqlibs/include  -I../utilities/
 CFLAGS= -lm -L../ZMQ/zmqlibs -lzmq  -L../ZMQ/czmqlibs/lib -lczmq -Wimplicit-function-declaration -fPIC -Wall 
 
 #SOURCES: hwserver.c asyncsrv.c

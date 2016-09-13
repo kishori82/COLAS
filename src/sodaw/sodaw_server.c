@@ -15,8 +15,8 @@
 #define DEBUG_MODE 1
 extern int s_interrupted;
 
-extern SERVER_STATUS *status;
-extern SERVER_ARGS *server_args;
+extern Server_Status *status;
+extern Server_Args *server_args;
 
 #ifdef ASLIBRARY
 static zhash_t *hash_object_SODAW;
@@ -608,7 +608,7 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
      get_string_frame(object_name, frames, OBJECT);
      get_string_frame(buf, frames, SENDER);
 
-     SERVER_ARGS *server_args = (SERVER_ARGS *)_server_args;
+     Server_Args *server_args = (Server_Args *)_server_args;
 
      if( has_object(hash_object_SODAW, object_name)==0) {
          create_object(hash_object_SODAW, object_name, "SODAW", server_args->init_data, status);

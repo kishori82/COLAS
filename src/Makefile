@@ -1,8 +1,13 @@
 ALL = abdprocess 
+CC=gcc
+
+CFLAGS= -Iutilities/ -Iabd/ -Icodes/ -Isodaw
+LDFLAGS= -lm -Labd/ -Lcodes/ -Lsodaw -lsodaw -lrlnc_rs -labd -Wimplicit-function-declaration -fPIC -Wall 
+
 
 all: $(ALL)
 
-TARGET= abdprocess.go
+TARGET= abdprocess
 
 SRCS = daemons/params.go daemons/logger.go daemons/controllerRoutes.go daemons/getParamRoutes.go  daemons/setParamRoutes.go daemons/httpServer.go daemons/routes.go daemons/controller.go daemons/utils.go daemons/writer.go daemons/reader.go daemons/server.go daemons/utilities.go
 
@@ -29,16 +34,27 @@ CODES:
 	make -C codes clean
 	make -C codes
 
+rebuildc:
+	make -C codes clean
+	make -C abd clean
+	make -C sodaw clean
+	rm -rf  abdprocessc
+	make -C codes 
+	make -C abd 
+	make -C sodaw
+	$(CC) $(CFLAGS)  abdprocess.c  -o abdprocessc  $(LDFLAGS)
+
+
 
 rebuild:
 	make -C codes clean
 	make -C abd clean
 	make -C sodaw clean
-	rm -rf  abdprocess
+	rm -rf  $(TARGET)
 	make -C codes 
 	make -C abd 
 	make -C sodaw
-	go build -x -o abdprocess  $(TARGET)
+	go build -x -o $(TARGET) abdprocess.go
 
 clean:
-	rm -rf logs abdprocess 
+	rm -rf logs $(TARGET) abdprocessc

@@ -4,25 +4,11 @@
 //  it easier to start and stop the example. Each task has its own
 //  context and conceptually acts as a separate process.
 
-#include <czmq.h> 
-#include <zmq.h> 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "client.h"
 #include "server.h"
-#include "algo_utils.h"
-
-#include "../../sodaw/sodaw_server.h"
-
-#include "../../abd/abd_server.h"
-
-#define DEBUG_MODE 1
 extern int s_interrupted;
 
-SERVER_STATUS *status;
-SERVER_ARGS *server_args;
+Server_Status *status;
+Server_Args *server_args;
 
 #ifdef ASLIBRARY
 
@@ -69,7 +55,7 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
     zsocket_connect(worker, "inproc://backend");
     char algorithm_name[100];
 
-    SERVER_ARGS *server_args = (SERVER_ARGS *)_server_args;
+    Server_Args *server_args = (Server_Args *)_server_args;
     
     printf("Initial value size %ld\n", strlen(server_args->init_data));
 
@@ -124,8 +110,8 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe)
    
 }
 
-//int server_process(char *server_id, char *servers_str, char *port, char *init_data, SERVER_STATUS *_status)
-int server_process(SERVER_ARGS *_server_args, SERVER_STATUS *_status)
+//int server_process(char *server_id, char *servers_str, char *port, char *init_data, Server_Status *_status)
+int server_process(Server_Args *_server_args, Server_Status *_status)
 {
 
    s_catch_signals();
@@ -170,7 +156,7 @@ int store_payload(zhash_t *object_hash, char *obj_name, Tag tag, zframe_t *paylo
 
 
 int create_object(zhash_t *object_hash, char *obj_name, char *algorithm, 
-                 char *init_data, SERVER_STATUS *status) {
+                 char *init_data, Server_Status *status) {
     void *item =NULL;
     char tag_str[BUFSIZE];
     Tag tag;
@@ -338,8 +324,6 @@ void send_frames_at_server(zhash_t *frames, void *worker,  enum SEND_TYPE type, 
     char *key;
     va_list valist;
     int i =0;
-    char buf[PAYLOADBUF_SIZE];
-    unsigned int temp_int;
 
     va_start(valist, n);
      
