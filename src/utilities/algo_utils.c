@@ -328,18 +328,20 @@ void print_out_hash(zhash_t *frames) {
 
      char *key;
      for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
+          printf("\t\t\t%s : ", key);
           if( strcmp(key, OPNUM)==0) {
             temp_int=get_uint_frame(frames, key);
-            printf("\t\t\t%s : %d\n", key, temp_int);
+            printf("%d\n", temp_int);
             assert(temp_int >=0);
           }
           else if( strcmp(key, PAYLOAD)==0) {
              get_string_frame(buf, frames, key);
-             printf("\t\t\t%s : %d\n", key, zframe_size(zhash_lookup(frames, key)));
+             zframe_t *s = zhash_lookup(frames,key);
+             if(s!=NULL) printf("%d\n", zframe_size(s));
           }
           else {
               get_string_frame(buf, frames, key);
-              printf("\t\t\t%s : %s\n", key, buf);
+              printf("%s\n", buf);
           }
      }
 }
@@ -351,6 +353,7 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
 
      char *key;
      for( key = (char *)zlist_first(names);  key != NULL; key = (char *)zlist_next(names)) {
+          printf("%s\n", key);
           if( strcmp(key, OPNUM)==0) {
             temp_int=get_uint_frame(frames, key);
             printf("\t\t\t%s : %d\n", key, temp_int);
@@ -358,7 +361,9 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
           }
           else if( strcmp(key, PAYLOAD)==0) {
              get_string_frame(buf, frames, key);
-             printf("\t\t\t%s : %d\n", key, zframe_size(zhash_lookup(frames, key)));
+          printf("%s\n", key);
+             printf("\t\t\t%s : %d\n", key, zframe_size((zframe_t *)zhash_lookup(frames, key)));
+          printf("%s\n   smallle", key);
              if( zframe_size(zhash_lookup(frames, key)) < 100) {  printf("ERROR : small payload\n"); exit(0); }
           }
           else {
@@ -383,6 +388,7 @@ void destroy_frames(zhash_t *frames) {
            }
      }
      zlist_destroy(&keys);
+     printf("size of the zhash %d\n", zhash_size(frames));
 }
 
 
