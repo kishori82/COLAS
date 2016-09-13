@@ -92,9 +92,10 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
     zsocket_connect(worker, "inproc://backend");
     char algorithm_name[100];
 
-    Server_Args *server_args = (Server_Args *)_server_args;
+    server_args = (Server_Args *)_server_args;
     
     printf("Initial value size %ld\n", strlen(server_args->init_data));
+    printf("Initial server str %s\n", server_args->servers_str);
 
 /*
     int pipefds[2];
@@ -245,8 +246,6 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm,
     }
 
     if( strcmp(algorithm, SODAW)==0) {
-
-       printf("object lookup :  %s\n",obj_name);
        char *value =(void *)malloc(strlen(init_data)+1);
        strcpy(value, init_data);
        value[strlen(init_data)]= '\0';

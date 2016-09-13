@@ -226,6 +226,7 @@ Server_Args * get_server_args( Parameters parameters) {
 
 
      server_args->servers_str =  get_servers_str(parameters);
+     printf("servers args %s\n", server_args->servers_str);
 
      strcpy(server_args->server_id, parameters.server_id);
       

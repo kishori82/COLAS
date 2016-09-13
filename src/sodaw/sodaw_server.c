@@ -36,12 +36,13 @@ void  destroy_regreader(RegReader *r_tr){
 }
 void initialize_SODAW() {
     initialized = 1;
+
     metadata = zhash_new();
     readerc =  zhash_new();
+
     hash_object_SODAW= zhash_new();
     
     create_metadata_sending_sockets() ;
-
     server_args->K =  ceil(((float)server_args->num_servers+1)/2);
 }
 
@@ -608,15 +609,13 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
      get_string_frame(object_name, frames, OBJECT);
      get_string_frame(buf, frames, SENDER);
 
-     Server_Args *server_args = (Server_Args *)_server_args;
 
      if( has_object(hash_object_SODAW, object_name)==0) {
          create_object(hash_object_SODAW, object_name, "SODAW", server_args->init_data, status);
-        // printf("\t\tCreated object %s\n",object_name);
      }
 
       if( strcmp(phasebuf, WRITE_GET)==0)  {
-         //  printf("\tSODAW WRITE_GET from client %s\n", buf);
+     //      printf("\tSODAW WRITE_GET from client %s\n", buf);
            algorithm_SODAW_WRITE_GET(frames,  worker);
       }
 
@@ -626,7 +625,7 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
       }
 
       if( strcmp(phasebuf, READ_GET)==0)  {
-           //printf("\tSODAW READ_GET\n");
+      //     printf("\tSODAW READ_GET\n");
            algorithm_SODAW_READ_GET(frames, worker);
       }
 
