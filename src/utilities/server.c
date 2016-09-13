@@ -328,6 +328,13 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            if(names!=NULL) zlist_append(names, OPNUM);
          }
 
+         if( strcmp(phase_name, READ_GET) ==0 ) {
+           zframe_t *opnum_frame= zmsg_pop (msg);
+           zhash_insert(frames, OPNUM, (void *)opnum_frame);
+           if(names!=NULL) zlist_append(names, OPNUM);
+         }
+
+
          if( strcmp(phase_name, WRITE_PUT) ==0 ) {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, OPNUM, (void *)opnum_frame);
