@@ -196,7 +196,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
          // char dest_reader  = get_reader_from_reader_op(dest_reader, value->readerid);
          if(  compare_tags(tag_w, value->t_r) >= 0 ) {
             printf("\t\tsending coded element\n");
-/*/
+/*
             send_reader_coded_element(worker, value->reader_id, 
                                       object_name, algorithm, "READ-VALUE",  
                                       value->t_r, payload
@@ -605,6 +605,7 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
 
      if(initialized==0) initialize_SODAW();
 
+      printf("\t inside the algorithmSODAW WRITE PUT\n");
      get_string_frame(phasebuf, frames, PHASE);
      get_string_frame(object_name, frames, OBJECT);
      get_string_frame(buf, frames, SENDER);
@@ -620,7 +621,7 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
       }
 
       if( strcmp(phasebuf, WRITE_PUT)==0)  {
-           //printf("\t SODAW WRITE PUT\n");
+           printf("\t SODAW WRITE PUT\n");
            algorithm_SODAW_WRITE_PUT(frames, worker);
       }
 

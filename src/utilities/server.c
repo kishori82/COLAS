@@ -89,9 +89,14 @@ static void
 server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
 {
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
+
+
+
     zsocket_connect(worker, "inproc://backend");
     char algorithm_name[100];
 
+    int64_t affinity = 50000;
+    int rc = zmq_setsockopt(socket, ZMQ_RCVBUF, &affinity, sizeof affinity);
     server_args = (Server_Args *)_server_args;
     
     printf("Initial value size %ld\n", strlen(server_args->init_data));
@@ -136,7 +141,21 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            status->network_data += (float)zmsg_content_size(msg) ;
 
            zlist_t *frames_list = zlist_new(); 
+
            zhash_t *frames = receive_message_frames_at_server(msg, frames_list);
+            printf("inside the caller \n");
+            printf("inside the caller %p\n", frames);
+            print_out_hash(frames); 
+           zframe_t *s = (zframe_t *)zhash_lookup(frames, PAYLOAD);
+           if(s==NULL)
+              printf("payload missing\n");
+           else{
+              printf("payload is captured %d\n", ZMQ_MAXMSGSIZE);
+              printf("size is %p\n", s);
+
+            }
+
+
 
            get_string_frame(algorithm_name, frames, ALGORITHM);
 
@@ -153,9 +172,13 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
   
    
            if( strcmp(algorithm_name, SODAW)==0)  {
+              //zframe_t *s = zhash_lookup(frames, PAYLOAD);
+              //if( s !=NULL);
+             // printf("++++ before REceived a payload of size -- %d\n", zframe_size(s));
 
                 printf(" [[[ %s\n",server_args->server_id);
                 if(DEBUG_MODE) {
+                   //print_out_hash(frames); 
                    printf("\t\treceiving... %s\n", server_args->server_id);  
                    print_out_hash_in_order(frames, frames_list);
                 }
@@ -337,9 +360,14 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            if(names!=NULL) zlist_append(names, TAG);
 
            zframe_t *payload_frame= zmsg_pop (msg);
-           zhash_insert(frames, PAYLOAD, (void *)payload_frame);
-           printf("size of payload %lu\n", zframe_size(payload_frame));
+           zframe_t *t = zframe_dup(payload_frame); 
+           printf("Received a payload of size %d\n", zframe_size(payload_frame));
+           zhash_insert(frames, PAYLOAD, (void *)t);
+
+           zframe_t *s = zhash_lookup(frames, PAYLOAD);
+           printf("Received a payload of size -- %d\n", zframe_size(s));
            if(names!=NULL) zlist_append(names, PAYLOAD);
+
          }
 
          if( strcmp(phase_name, READ_VALUE) ==0 ) {
@@ -372,6 +400,9 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            if(names!=NULL) zlist_append(names, TAG);
           }
      }
+     printf("inside the calle %p\n", frames); 
+     print_out_hash_in_order(frames, names); 
+     printf("returnign now \n"); 
      return frames;
 }
 
