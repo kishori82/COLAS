@@ -91,10 +91,11 @@ void writer_process(Parameters parameters) {
     unsigned int filesize = (unsigned int) (parameters.filesize*1024);
 
     char *payload = get_random_data(filesize);
-    unsigned int payload_size=0;
+    unsigned int payload_size=filesize;
     char *servers_str = get_servers_str(parameters);
 
-    for( opnum=0; opnum< 1000;opnum++) {
+    for( opnum=0; opnum< 10000;opnum++) {
+        printf("write r%s\n",parameters.server_id);
         SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
     }
     free(payload);

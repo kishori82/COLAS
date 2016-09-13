@@ -40,7 +40,7 @@ Tag *SODAW_write_get_or_read_get_phase(
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM};
-    send_multicast_servers(sock_to_servers, num_servers, types, 4, obj_name, SODAW, READ_GET, &op_num) ;
+    send_multicast_servers(sock_to_servers, num_servers, types, 4, obj_name, SODAW, _phase, &op_num) ;
 
     unsigned int majority =  ceil(((float)num_servers+1)/2);
     unsigned int responses =0;
