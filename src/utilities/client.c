@@ -199,7 +199,18 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
      }
 
      if( strcmp(algorithm_name, SODAW) ==0 ) {
+
          if( strcmp(phase_name, WRITE_GET) ==0 ) {
+           zframe_t *opnum_frame= zmsg_pop (msg);
+           zhash_insert(frames, OPNUM, (void *)opnum_frame);
+           if( names!= NULL) zlist_append(names, OPNUM);
+
+           zframe_t *tag_frame= zmsg_pop (msg);
+           zhash_insert(frames, TAG, (void *)tag_frame);
+           if( names!= NULL) zlist_append(names, TAG);
+         }
+
+         if( strcmp(phase_name, READ_GET) ==0 ) {
            zframe_t *opnum_frame= zmsg_pop (msg);
            zhash_insert(frames, OPNUM, (void *)opnum_frame);
            if( names!= NULL) zlist_append(names, OPNUM);
