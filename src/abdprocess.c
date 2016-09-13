@@ -1,42 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "abdprocess.h"
 
-#include "utilities/algo_utils.h"
-#include "codes/rlnc_rs.h"
-#include "sodaw/sodaw_client.h"
-#include "sodaw/sodaw_reader.h"
-#include "sodaw/sodaw_writer.h"
-#include "sodaw/sodaw_server.h"
-
-
-typedef struct _Parameters {
-    char **ipaddresses;
-    unsigned int num_servers;
-    char *server_id;
-    char port[10];
-
-    enum Algorithm algorithm;
-    enum CodingAlgorithm codingalgorithm;
-    int wait;
-    float filesize;
-    enum ProcessType processtype;
-} Parameters;
-
-void setDefaults(Parameters *parameters);
-
-unsigned int readParameters(int argc, char *argv[], Parameters *parameters);
-
-void printParameters(Parameters parameters);
-
-Server_Args *get_server_args(Parameters parameters) ;
-
-Server_Status * get_server_status( Parameters parameters) ;
-char *get_servers_str(Parameters parameters) ;
-
-void reader_process(Parameters parameters) ;
-void writer_process(Parameters parameters) ;
-char * get_random_data(float filesize);
 
 int main(int argc, char *argv[]) {
 
@@ -56,6 +19,7 @@ int main(int argc, char *argv[]) {
 
    printf("Server Str : %s\n", server_args->servers_str); 
    printf("MDS     : (%d, %d)\n", server_args->N, server_args->K); 
+
    if(parameters.processtype==reader) {
        reader_process(parameters);
    }
@@ -65,6 +29,8 @@ int main(int argc, char *argv[]) {
    else if(parameters.processtype==server) {
        server_process(server_args, server_status);
    }
+ 
+   return 0;
 }
 
 
@@ -76,7 +42,7 @@ char *get_servers_str(Parameters parameters) {
      strncpy(p, parameters.ipaddresses[0], strlen(parameters.ipaddresses[0]));
      p += strlen(parameters.ipaddresses[0]);
      for(i=1; i < parameters.num_servers; i++) {
-        *p = '_'; p++;
+        *p = ' '; p++;
         strncpy(p, parameters.ipaddresses[i], strlen(parameters.ipaddresses[i]));
         p += strlen(parameters.ipaddresses[i]);
      } 
@@ -89,9 +55,11 @@ char *get_servers_str(Parameters parameters) {
 void reader_process(Parameters parameters) {
     unsigned int opnum=0;
     char *servers_str = get_servers_str(parameters);
+    printf("%s\n", servers_str);
     char *payload;
     for( opnum=0; opnum< 1000;opnum++) {
         usleep(parameters.wait*1000);
+        printf("%s  %d  %s %s\n", parameters.server_id, opnum, servers_str, parameters.port);
         SODAW_read("atomic_object", parameters.server_id, opnum, servers_str, parameters.port);       
     } 
 }
