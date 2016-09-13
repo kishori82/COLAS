@@ -66,7 +66,7 @@ void SODAW_write_put_phase(
     int symbol_size = 1024;
 
     
-    ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), full_vector) ;
+    ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, size, full_vector) ;
     //ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), reed_solomon) ;
 //    destroy_encoded_data(encoded_data_info);
 
@@ -187,6 +187,11 @@ bool SODAW_write(
     assert (sock_to_servers);
 
     zsocket_set_identity(sock_to_servers,  writer_id);
+
+    int64_t affinity = 50000;
+    int rc = zmq_setsockopt(socket, ZMQ_SNDBUF, &affinity, sizeof affinity);
+
+
     for(j=0; j < num_servers; j++) {    
        char *destination = create_destination(servers[j], port);
        int rc = zsocket_connect(sock_to_servers, (const char *)destination);
@@ -212,6 +217,7 @@ bool SODAW_write(
    strcpy(new_tag.id, writer_id);
    free(max_tag);
    printf("\tWRITE_PUT (WRITER)\n");
+   printf("payload size in seide the writer %d\n", size);
    SODAW_write_put_phase(
                           obj_name, 
                           writer_id,  
