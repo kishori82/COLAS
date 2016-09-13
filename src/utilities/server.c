@@ -228,15 +228,11 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm,
     if( strcmp(algorithm, "ABD")==0) {
        zhash_t *hash_hash = zhash_new();
 
-       char *value =(void *)malloc(strlen(init_data)+1);
-       strcpy(value, init_data);
-       value[strlen(init_data)]= '\0';
-
       
-       zhash_insert(hash_hash, tag_str, (void *)value); 
+       zhash_insert(hash_hash, tag_str, server_args->init_data); 
 
        status->metadata_memory += (float) strlen(tag_str);
-       status->data_memory += (float) strlen(init_data);
+       status->data_memory += (float) server_args->init_data_size;
         
        printf("\tCreated \"%s\" (size %d) \n", obj_name, (int)status->data_memory);
        //add it to the main list 
@@ -246,16 +242,13 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm,
     }
 
     if( strcmp(algorithm, SODAW)==0) {
-       char *value =(void *)malloc(strlen(init_data)+1);
-       strcpy(value, init_data);
-       value[strlen(init_data)]= '\0';
+       zframe_t *payload_frame = 
+                    zframe_new((void *)server_args->init_data, server_args->init_data_size);
 
-       zframe_t *payload_frame = zframe_new((void *)value, strlen(init_data));
        store_payload(object_hash, obj_name, tag, payload_frame, yield) ;
-       free(value);
 
        status->metadata_memory += (float) strlen(tag_str);
-       status->data_memory += (float) strlen(init_data);
+       status->data_memory += (float) server_args->init_data_size;
         
        printf("\tCreated \"%s\" (size %d) \n", obj_name, status->data_memory, strlen(init_data));
        //add it to the main list 
@@ -395,7 +388,6 @@ void send_frames_at_server(zhash_t *frames, void *worker,  enum SEND_TYPE type, 
         key = va_arg(valist, char *); 
         zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);
 
-        printf("\t\t%s\n", key);
         assert(zframe_is(frame));
         zlist_append(names, key);
 /*

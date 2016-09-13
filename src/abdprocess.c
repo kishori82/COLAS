@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
 
    Server_Args *server_args =  get_server_args(parameters);
    Server_Status *server_status =  get_server_status(parameters);
+
    printf("Server Str : %s\n", server_args->servers_str); 
    printf("MDS     : (%d, %d)\n", server_args->N, server_args->K); 
 
@@ -46,6 +47,8 @@ int main(int argc, char *argv[]) {
        writer_process(parameters);
    }
    else if(parameters.processtype==server) {
+
+
        server_process(server_args, server_status);
    }
  
@@ -88,8 +91,8 @@ void reader_process(Parameters parameters) {
 
 void writer_process(Parameters parameters) {
     unsigned int opnum=0;
-    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
 
+    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
     char *payload = get_random_data(filesize);
     unsigned int payload_size=filesize;
     char *servers_str = get_servers_str(parameters);
@@ -221,6 +224,9 @@ void printParameters(Parameters parameters) {
 
 
 Server_Args * get_server_args( Parameters parameters) {
+
+
+
      Server_Args *server_args = (Server_Args *) malloc(sizeof(Server_Args));
 
      strcpy(server_args->server_id, parameters.server_id);
@@ -233,13 +239,17 @@ Server_Args * get_server_args( Parameters parameters) {
       
      strcpy(server_args->port, "8081");
 
-     server_args->init_data= get_random_data(parameters.filesize);
+     unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+     server_args->init_data= get_random_data(filesize);
+     server_args->init_data_size= filesize;
+
      server_args->sock_to_servers = NULL;
      server_args->symbol_size = 1400;
      server_args->coding_algorithm = parameters.codingalgorithm;
      server_args->N = parameters.num_servers;
      server_args->K = ceil((float)parameters.num_servers + 1)/2;
      server_args->status = NULL;
+
 
      return server_args;
 }

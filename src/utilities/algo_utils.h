@@ -82,6 +82,8 @@ typedef struct _Server_Status {
 
 typedef struct _Server_Args {
     char *init_data;
+    unsigned int init_data_size;
+
     char server_id[BUFSIZE];
     char *servers_str;
     char port[BUFSIZE];
