@@ -152,7 +152,6 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            else{
               printf("payload is captured %d\n", ZMQ_MAXMSGSIZE);
               printf("size is %p\n", s);
-
             }
 
 

@@ -335,7 +335,6 @@ void print_out_hash(zhash_t *frames) {
             assert(temp_int >=0);
           }
           else if( strcmp(key, PAYLOAD)==0) {
-             get_string_frame(buf, frames, key);
              zframe_t *s = zhash_lookup(frames,key);
              if(s!=NULL) printf("%d\n", zframe_size(s));
           }
@@ -360,7 +359,6 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
             assert(temp_int >=0);
           }
           else if( strcmp(key, PAYLOAD)==0) {
-             get_string_frame(buf, frames, key);
           printf("%s\n", key);
              printf("\t\t\t%s : %d\n", key, zframe_size((zframe_t *)zhash_lookup(frames, key)));
           printf("%s\n   smallle", key);
