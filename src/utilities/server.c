@@ -171,11 +171,8 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
 }
 
 //int server_process(char *server_id, char *servers_str, char *port, char *init_data, Server_Status *_status)
-int server_process(Server_Args *_server_args, Server_Status *_status)
+int server_process(Server_Args *server_args, Server_Status *_status)
 {
-
-
-   server_args = _server_args;
    status = _status;
 
    zthread_new(server_task, (void *)server_args);

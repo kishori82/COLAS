@@ -14,13 +14,6 @@ int main(int argc, char *argv[]) {
       printf("%s\n", usage);
       exit(0);
    }
-   printParameters(parameters);
-
-   Server_Args *server_args =  get_server_args(parameters);
-   Server_Status *server_status =  get_server_status(parameters);
-
-   printf("Server Str : %s\n", server_args->servers_str); 
-   printf("MDS     : (%d, %d)\n", server_args->N, server_args->K); 
 
    char buf[BUFSIZE];
    switch(parameters.processtype) {
@@ -37,6 +30,14 @@ int main(int argc, char *argv[]) {
                  break;
    }
    strcpy(parameters.server_id, buf);
+
+   printParameters(parameters);
+
+   Server_Args *server_args =  get_server_args(parameters);
+   Server_Status *server_status =  get_server_status(parameters);
+   printf("Server Str : %s\n", server_args->servers_str); 
+   printf("MDS     : (%d, %d)\n", server_args->N, server_args->K); 
+
 
    if(parameters.processtype==reader) {
        reader_process(parameters);
@@ -221,7 +222,6 @@ void printParameters(Parameters parameters) {
 Server_Args * get_server_args( Parameters parameters) {
      Server_Args *server_args = (Server_Args *) malloc(sizeof(Server_Args));
 
-     server_args->server_id =  (char *) malloc( strlen(parameters.server_id)*sizeof(char));
      strcpy(server_args->server_id, parameters.server_id);
 
 
@@ -229,8 +229,6 @@ Server_Args * get_server_args( Parameters parameters) {
 
      strcpy(server_args->server_id, parameters.server_id);
       
-
-     server_args->port =  (char *) malloc(10*sizeof(char));
      strcpy(server_args->port, "8081");
 
      server_args->init_data= get_random_data(parameters.filesize);

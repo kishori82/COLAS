@@ -82,9 +82,9 @@ typedef struct _Server_Status {
 
 typedef struct _Server_Args {
     char *init_data;
-    char *server_id;
+    char server_id[BUFSIZE];
     char *servers_str;
-    char *port;
+    char port[BUFSIZE];
     void *sock_to_servers; 
     int num_servers;
     int symbol_size;
