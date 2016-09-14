@@ -79,28 +79,59 @@ void reader_process(Parameters parameters) {
     char *servers_str = get_servers_str(parameters);
     printf("%s\n", servers_str);
     char *payload;
+    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+
     for( opnum=0; opnum< 1000;opnum++) {
         usleep(parameters.wait*1000);
+        char *payload = get_random_data(filesize);
+
         printf("%s  %d  %s %s\n", parameters.server_id, opnum, servers_str, parameters.port);
-        SODAW_read("atomic_object", parameters.server_id, opnum, servers_str, parameters.port);       
+        char *payload_read = SODAW_read("atomic_object", parameters.server_id, opnum, servers_str, parameters.port);       
+
+
+        if( is_equal(payload, payload_read, filesize) ) {
+           printf("INFO: The data sets are equal!!\n");
+        }
+        else {
+            printf("ERROR: The data sets are NOT equal!!\n");
+        }
+
+       free(payload);
     } 
+    free(servers_str);
 }
 
 
+bool is_equal(char *payload1, char*payload2, unsigned int size) {
+    int i =0;
+    for(i=0; i <size ; i++) {
+        if(payload1[i]!=payload2[i]) return false;
+    }
+    return true;
+}
 
 
 void writer_process(Parameters parameters) {
     unsigned int opnum=0;
 
     unsigned int filesize = (unsigned int) (parameters.filesize*1024);
-    char *payload = get_random_data(filesize);
+    
     unsigned int payload_size=filesize;
     char *servers_str = get_servers_str(parameters);
 
-    for( opnum=0; opnum< 10000;opnum++) {
+    for( opnum=0; opnum< 100000;opnum++) {
+
+       char *payload = get_random_data(filesize);
+    
+
         SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
+
+        free(payload);
+
+
+
     }
-    free(payload);
+    free(servers_str);
 }
 
 unsigned int readParameters(int argc, char *argv[], Parameters *parameters) {
@@ -266,6 +297,7 @@ Server_Status * get_server_status( Parameters parameters) {
 
 
 char * get_random_data(unsigned int size) {
+   srand(23);
    int i;
    char *data = (char *)malloc(size*sizeof(char));
 

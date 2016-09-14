@@ -64,7 +64,28 @@ Tag *SODAW_write_get_or_read_get_phase(
             zhash_t* frames = receive_message_frames_at_client(msg, names);
 
             get_string_frame(phase, frames, PHASE);
+
+            print_out_hash(frames);
+             printf("=======================\n");
+            print_out_hash_in_order(frames, names);
+            zframe_t *r = zhash_lookup(frames, PHASE); 
+            if( r==NULL) {
+                 printf("a null phase  %s\n", phase);
+            }
+            else{
+                 printf("a null phase  %s\n", phase);
+                 printf("a non-null tag of size %d\n", zframe_size(r));
+            }
             round = get_int_frame(frames, OPNUM);
+
+            zframe_t *s = zhash_lookup(frames, TAG); 
+            if( s==NULL) {
+                 printf("a null tag\n");
+            }
+            else{
+                 printf("a non-null tag of size %d\n", zframe_size(s));
+            }
+
             get_string_frame(tag_str, frames, TAG);
 
             if(round==op_num && strcmp(phase, _phase)==0) {

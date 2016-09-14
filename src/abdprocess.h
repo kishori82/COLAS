@@ -41,5 +41,6 @@ void reader_process(Parameters parameters) ;
 void writer_process(Parameters parameters) ;
 char * get_random_data(unsigned int filesize);
 
+bool is_equal(char *payload1, char*payload2, unsigned int size) ;
 
 #endif
