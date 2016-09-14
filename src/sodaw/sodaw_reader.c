@@ -47,7 +47,8 @@ char *SODAW_read_value(
 		char **servers, 
 		unsigned int num_servers, 
 		char *port, 
-		Tag read_tag
+		Tag read_tag, 
+        ENCODED_DATA *encoding_info
 		)
 {
 
@@ -71,6 +72,7 @@ char *SODAW_read_value(
 	zlist_t *tag_list = zlist_new();
 
 	zhash_t *received_data= zhash_new();
+    char *decodeableKey ;
 	while (true) {
 		//  Tick once per second, pulling in arriving messages
 
@@ -101,15 +103,15 @@ char *SODAW_read_value(
 			if(compare_tags(tag, read_tag) >=0 && strcmp(phase, READ_VALUE)==0) {
 				if(DEBUG_MODE) print_out_hash_in_order(frames, names);
 
-				void *payload_frame = zhash_lookup(frames, PAYLOAD);
-
+				zframe_t *payload_frame = (zframe_t *)zhash_lookup(frames, PAYLOAD);
 
 				zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, tag_str);
 				assert(coded_elements!=NULL);
 
-				zlist_append(coded_elements, payload_frame); 
+                zframe_t *dup_payload_frame =zframe_dup(payload_frame);
+				zlist_append(coded_elements, dup_payload_frame); 
 
-				char *decodeableKey = number_responses_at_least(received_data, majority);
+				decodeableKey = number_responses_at_least(received_data, majority);
 
 				if(decodeableKey!= NULL) break;
 			}
@@ -122,10 +124,58 @@ char *SODAW_read_value(
 			destroy_frames(frames);
 		}
 	}
+    get_encoded_info(received_data, decodeableKey, encoding_info);
 
+   
+    printf("Key to decode %s\n", decodeableKey);
+
+    value = decode(
+                 encoding_info->N, 
+                 encoding_info->K, 
+                 encoding_info->K, 
+                 encoding_info->symbol_size, 
+                 *encoding_info, 
+                 full_vector
+                 );
 	return value;
 }
 
+
+int get_encoded_info(zhash_t *received_data, char *decodeableKey, ENCODED_DATA *encoding_info) {
+    printf("N : %d\n", encoding_info->N); 
+    printf("K : %d\n", encoding_info->K); 
+    printf("Symbol size : %d\n", encoding_info->symbol_size);
+    printf("actual datasize %d\n", encoding_info->actual_data_size);
+    printf("num_blocks %d\n", encoding_info->num_blocks);
+
+
+	zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, decodeableKey);
+    
+    zframe_t *data_frame;
+    int size=0, cum_size=0;;
+    for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
+        printf("Length of data %d\n", zframe_size(data_frame));
+        size = zframe_size(data_frame); 
+        cum_size += size; 
+    } 
+
+    int i;
+    encoding_info->encoded_raw_data = (uint8_t **)malloc( encoding_info->K *sizeof(uint8_t*));
+    for(i =0; i < encoding_info->K; i++) {
+         encoding_info->encoded_raw_data[i] = (uint8_t *)malloc( size*sizeof(uint8_t));
+    }
+
+    i=0;
+    for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
+        size = zframe_size(data_frame); 
+        cum_size += size; 
+        memcpy(encoding_info->encoded_raw_data[i++], zframe_data(data_frame), size);
+    } 
+
+    printf("encoded symbol size %d\n", cum_size/(encoding_info->num_blocks*encoding_info->K));
+    encoding_info->encoded_symbol_size = ceil(cum_size/(encoding_info->num_blocks*encoding_info->K));
+
+}
 
 // this is the write tag value phase of SODAW
 void SODAW_read_complete_phase(  
@@ -154,7 +204,8 @@ char *SODAW_read(
 		char *reader_id, 
 		unsigned int op_num ,
 		char *servers_str, 
-		char *port
+		char *port,
+        ENCODED_DATA *encoded_data
 		)
 {
 	s_catch_signals();
@@ -225,7 +276,8 @@ char *SODAW_read(
 			servers, 
 			num_servers, 
 			port, 
-			*read_tag 
+			*read_tag, 
+            encoded_data 
 			);
 
 

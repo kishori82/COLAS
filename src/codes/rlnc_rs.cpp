@@ -236,7 +236,7 @@ std::vector< std::vector < std::vector<uint8_t> > > *convert_from_C_to_vector(EN
     
     int c=0;
     for(int b =0; b < num_blocks; b++) {
-        for(int s =0; s < N; s++) {
+        for(int s =0; s < K; s++) {
             std::vector<uint8_t> encoded_symbol; 
             c=b*encoded_symbol_size;
             for(int e =0; e < encoded_symbol_size; e++) {

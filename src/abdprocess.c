@@ -76,24 +76,48 @@ char *get_servers_str(Parameters parameters) {
 
 void reader_process(Parameters parameters) {
     unsigned int opnum=0;
+
+    write_initial_data(parameters);
+
     char *servers_str = get_servers_str(parameters);
     printf("%s\n", servers_str);
     char *payload;
     unsigned int filesize = (unsigned int) (parameters.filesize*1024);
 
-    for( opnum=0; opnum< 1000;opnum++) {
+
+    ENCODED_DATA  encoding_info;
+    encoding_info.N = parameters.num_servers; 
+    encoding_info.K= ceil((float)parameters.num_servers + 1)/2;
+    encoding_info.symbol_size = SYMBOL_SIZE;
+    encoding_info.actual_data_size = filesize;
+    encoding_info.num_blocks = ceil( (float)filesize/SYMBOL_SIZE);
+
+
+    for( opnum=0; opnum< 20000;opnum++) {
         usleep(parameters.wait*1000);
         char *payload = get_random_data(filesize);
 
+   //     payload[5] ='4';        
         printf("%s  %d  %s %s\n", parameters.server_id, opnum, servers_str, parameters.port);
-        char *payload_read = SODAW_read("atomic_object", parameters.server_id, opnum, servers_str, parameters.port);       
+
+        char *payload_read = SODAW_read("atomic_object", parameters.server_id, opnum, servers_str, parameters.port, &encoding_info);       
+
+        int i;
+/*
+        for(i=0; i < filesize; i++) {
+          printf("%c",payload_read[i]);
+        }
+        printf("\n");
+*/
 
 
+       
         if( is_equal(payload, payload_read, filesize) ) {
-           printf("INFO: The data sets are equal!!\n");
+           printf("INFO: The data sets %d are equal!!\n", opnum);
         }
         else {
-            printf("ERROR: The data sets are NOT equal!!\n");
+            printf("ERROR: The data sets %d are NOT equal!!\n", opnum);
+            exit(0);
         }
 
        free(payload);
@@ -122,17 +146,26 @@ void writer_process(Parameters parameters) {
     for( opnum=0; opnum< 100000;opnum++) {
 
        char *payload = get_random_data(filesize);
-    
 
-        SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
+       SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
 
-        free(payload);
-
-
-
+       free(payload);
     }
     free(servers_str);
 }
+
+void write_initial_data(Parameters parameters) {
+    unsigned int opnum=0;
+    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+    unsigned int payload_size=filesize;
+    char *servers_str = get_servers_str(parameters);
+    char *payload = get_random_data(filesize);
+    printf("initial data%s\n", payload);
+    SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
+    free(payload);
+    free(servers_str);
+}
+
 
 unsigned int readParameters(int argc, char *argv[], Parameters *parameters) {
 
@@ -299,11 +332,13 @@ Server_Status * get_server_status( Parameters parameters) {
 char * get_random_data(unsigned int size) {
    srand(23);
    int i;
-   char *data = (char *)malloc(size*sizeof(char));
+   char *data = (char *)malloc( (size+1)*sizeof(char));
 
    for( i = 0 ; i < size ; i++ ) 
    {
-      data[i] = rand()%256; 
+      data[i] = 65 + rand()%25; 
+      //data[i] = 65 + i%25; 
    }
+   data[i]='\0';
    return data;
 }

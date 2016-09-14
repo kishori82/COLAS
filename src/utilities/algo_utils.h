@@ -51,6 +51,7 @@
 // Parameters
 #define BUFSIZE 100
 #define PAYLOADBUF_SIZE 3000
+#define SYMBOL_SIZE 1024
 
 int s_interrupted;
 

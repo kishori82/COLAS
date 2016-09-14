@@ -20,7 +20,8 @@ char *SODAW_read(char *obj_name,
                unsigned int op_num,  
                //char *payload, 
                char *servers, 
-               char *port
+               char *port,
+               ENCODED_DATA *encoding_info
              );
 
 #endif

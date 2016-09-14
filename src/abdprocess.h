@@ -39,6 +39,7 @@ char *get_servers_str(Parameters parameters) ;
 
 void reader_process(Parameters parameters) ;
 void writer_process(Parameters parameters) ;
+void write_initial_data(Parameters parameters);
 char * get_random_data(unsigned int filesize);
 
 bool is_equal(char *payload1, char*payload2, unsigned int size) ;

@@ -63,10 +63,11 @@ void SODAW_write_put_phase(
     unsigned int majority =  ceil(((float)num_servers+1)/2);
     int K = majority;
 
-    int symbol_size = 1024;
+    int symbol_size = SYMBOL_SIZE;
 
     
     ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, size, full_vector) ;
+
     //ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), reed_solomon) ;
 //    destroy_encoded_data(encoded_data_info);
 
