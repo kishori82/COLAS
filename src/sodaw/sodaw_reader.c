@@ -135,7 +135,7 @@ char *SODAW_read_value(
                  encoding_info->K, 
                  encoding_info->symbol_size, 
                  *encoding_info, 
-                 full_vector
+                 reed_solomon
                  );
 	return value;
 }

@@ -66,7 +66,7 @@ void SODAW_write_put_phase(
     int symbol_size = SYMBOL_SIZE;
 
     
-    ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, size, full_vector) ;
+    ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, size, reed_solomon) ;
 
     //ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), reed_solomon) ;
 //    destroy_encoded_data(encoded_data_info);
