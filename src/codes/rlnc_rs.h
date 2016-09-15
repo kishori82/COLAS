@@ -16,26 +16,30 @@ enum CodingAlgorithm {
 extern "C" {
 #endif
 
+
 typedef struct _ENCODED_DATA {
-     uint8_t **encoded_raw_data;
+     uint8_t *decoded_data;
+     uint8_t **encoded_data;
+     uint8_t *raw_data;
     // std::vector< std::vector< std::vector<uint8_t> > >  *vdata;
      int encoded_symbol_size;
+     unsigned int offset_index;
      int num_blocks;
      int symbol_size;
-     int actual_data_size;
+     int raw_data_size;
      int padded_data_size;
      int total_data_size;
-     int K, N;
-     
-} ENCODED_DATA;
+     unsigned int fieldsize;
+     int N;
+     int K; // max symbols
+     enum CodingAlgorithm algorithm;
+} EncodeData;
 
 
-ENCODED_DATA encode(uint32_t N, uint32_t max_symbols, uint32_t max_symbol_size,  
-              char *data_in_char, int data_size, enum CodingAlgorithm) ;
+unsigned short encode(EncodeData *encode_data) ;
 
 
-uint8_t *decode(uint32_t N, uint32_t max_symbols, uint32_t M,  uint32_t max_symbol_size, 
-        ENCODED_DATA encoded_data_info, enum CodingAlgorithm) ;
+unsigned short decode(EncodeData *encode_data) ;
 
 #ifdef __cplusplus
    }

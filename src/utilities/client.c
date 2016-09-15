@@ -53,7 +53,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
        for(j=0; j < n-1; j++) {
           if(DEBUG_MODE) {
             if( strcmp(names[j], OPNUM)==0)  
-               printf("\t\t\tFRAME%d :%s  %lu\n",j, names[j], *((unsigned int *)values[j]) );
+               printf("\t\t\tFRAME%d :%s  %u\n",j, names[j], *((unsigned int *)values[j]) );
             else if( strcmp(names[j], PAYLOAD)==0)  
                printf("\t\t\tFRAME%d :%s  %lu\n", j, names[j],  strlen((char *)values[j]) );
             else
@@ -65,7 +65,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
 
        if(DEBUG_MODE) {
          if( strcmp(names[j], OPNUM)==0)  
-            printf("\t\t\tFRAME%d :%s  %lu\n", j, names[j],   *((unsigned int *)values[j]) );
+            printf("\t\t\tFRAME%d :%s  %u\n", j, names[j],   *((unsigned int *)values[j]) );
          else if( strcmp(names[j], PAYLOAD)==0)  
             printf("\t\t\tFRAME%d :%s  %lu\n", j, names[j],  strlen((char *)values[j]) );
          else

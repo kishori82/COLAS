@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "utilities/algo_utils.h"
+#include "utilities/client.h"
 #include "codes/rlnc_rs.h"
 #include "sodaw/sodaw_client.h"
 #include "sodaw/sodaw_reader.h"
@@ -22,7 +23,7 @@ typedef struct _Parameters {
     enum Algorithm algorithm;
     enum CodingAlgorithm codingalgorithm;
     int wait;
-    float filesize;
+    float filesize_kb;
     enum ProcessType processtype;
 } Parameters;
 

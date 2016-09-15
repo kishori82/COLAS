@@ -74,7 +74,7 @@ Tag *SODAW_write_get_or_read_get_phase(
             }
             else{
                  printf("a null phase  %s\n", phase);
-                 printf("a non-null tag of size %d\n", zframe_size(r));
+                 printf("a non-null tag of size %lu\n", zframe_size(r));
             }
             round = get_int_frame(frames, OPNUM);
 
@@ -83,7 +83,7 @@ Tag *SODAW_write_get_or_read_get_phase(
                  printf("a null tag\n");
             }
             else{
-                 printf("a non-null tag of size %d\n", zframe_size(s));
+                 printf("a non-null tag of size %lu\n", zframe_size(s));
             }
 
             get_string_frame(tag_str, frames, TAG);
