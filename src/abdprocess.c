@@ -114,7 +114,7 @@ void reader_process(Parameters parameters) {
     ClientArgs *client_args = create_ClientArgs(parameters);
 
     unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
-    for( opnum=0; opnum< 20000;opnum++) {
+    for( opnum=0; opnum< 60000;opnum++) {
         usleep(parameters.wait*1000);
         char *payload = get_random_data(filesize);
 
