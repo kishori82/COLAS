@@ -131,7 +131,7 @@ void reader_process(Parameters parameters) {
           printf("%c",payload_read[i]);
         }
         printf("\n");
-*/
+*//*
        
         if( is_equal(payload, payload_read, filesize) ) {
            printf("INFO: The data sets %d are equal!!\n", opnum);
@@ -140,6 +140,7 @@ void reader_process(Parameters parameters) {
             printf("ERROR: The data sets %d are NOT equal!!\n", opnum);
             exit(0);
         }
+*/
 
        free(payload);
     } 
@@ -342,7 +343,7 @@ Server_Status * get_server_status( Parameters parameters) {
 
 
 char * get_random_data(unsigned int size) {
-   srand(23);
+//   srand(23);
    int i;
    char *data = (char *)malloc( (size+1)*sizeof(char));
 
