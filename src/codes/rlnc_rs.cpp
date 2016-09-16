@@ -20,8 +20,6 @@
 
 #include <kodocpp/kodocpp.hpp>
 
-#define TRUE 1
-#define FALSE 0
 #include "rlnc_rs.h"
 typedef std::vector< std::vector< std::vector<uint8_t> > >   VECTOR_VECTOR_VECTOR_UINT8;
 typedef std::vector< std::vector<uint8_t> >                  VECTOR_VECTOR_UINT8;
@@ -67,6 +65,7 @@ unsigned short encode(EncodeData *encode_data) {
     kodocpp::encoder_factory *encoder_factory;
  
     if( encode_data->algorithm==full_vector ) {
+        printf("full vector\n");
         encoder_factory = new  kodocpp::encoder_factory(
         kodocpp::codec::full_vector,
         kodocpp::field::binary8,
@@ -75,6 +74,7 @@ unsigned short encode(EncodeData *encode_data) {
     }
 
     if( encode_data->algorithm==reed_solomon ) {
+        printf("reed full vector\n");
         encoder_factory = new kodocpp::encoder_factory(
         kodocpp::codec::reed_solomon,
         kodocpp::field::binary8,
@@ -276,6 +276,7 @@ unsigned short decode(EncodeData  *encode_data) {
     }
 
     if( encode_data->algorithm==reed_solomon ) {
+        printf("decoding with reed-solomon\n");
         decoder_factory = new kodocpp::decoder_factory(
         kodocpp::codec::reed_solomon,
         kodocpp::field::binary8,
@@ -295,7 +296,7 @@ unsigned short decode(EncodeData  *encode_data) {
     unsigned short success ;
     int decoded_block_size =0;
 
-    for(int i=0; i < num_blocks; i++) {
+    for(int b=0; b < num_blocks; b++) {
 
        //setting up the decoder
        kodocpp::decoder decoder = decoder_factory->build();
@@ -305,8 +306,8 @@ unsigned short decode(EncodeData  *encode_data) {
         
        uint8_t *decoded_block =  new uint8_t[encode_data->symbol_size*encode_data->K];
        unsigned short success = FALSE;
-       for(int j=0; j < encode_data->K ; j++) {
-          decoder.read_payload( (*encoded_data)[j][i].data());
+       for(int c=0; c < encode_data->K ; c++) {
+          decoder.read_payload( (*encoded_data)[c][b].data());
 
           if( decoder.is_complete() ) {
              success=TRUE;
@@ -334,7 +335,7 @@ unsigned short decode(EncodeData  *encode_data) {
         delete decoded_blocks[i];
    }
    decoded_blocks.clear();
-
+   
    return TRUE;
 }
 

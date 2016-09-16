@@ -129,7 +129,10 @@ char *SODAW_read_value(
    
     printf("Key to decode %s\n", decodeableKey);
 
-    decode(encoding_info);
+    if(decode(encoding_info)==0) {
+       printf("Failed to decode for key %s\n", decodeableKey);
+       exit(0);
+    }
 
 	return encoding_info->decoded_data;
 }
@@ -146,25 +149,25 @@ int get_encoded_info(zhash_t *received_data, char *decodeableKey, EncodeData *en
 	zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, decodeableKey);
     
     zframe_t *data_frame;
-    int size=0, cum_size=0;;
+    int frame_size=0, cum_size=0;;
     for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
-        printf("Length of data %lu\n", zframe_size(data_frame));
-        size = zframe_size(data_frame); 
-        cum_size += size; 
+    //    printf("Length of data %lu\n", zframe_size(data_frame));
+        frame_size = zframe_size(data_frame); 
+        cum_size += frame_size; 
     } 
 
     int i;
     encoding_info->encoded_data = (uint8_t **)malloc( encoding_info->K *sizeof(uint8_t*));
     for(i =0; i < encoding_info->K; i++) {
-         encoding_info->encoded_data[i] = (uint8_t *)malloc( size*sizeof(uint8_t));
+         encoding_info->encoded_data[i] = (uint8_t *)malloc(frame_size*sizeof(uint8_t));
     }
 
     i=0;
     for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
-        size = zframe_size(data_frame); 
-        cum_size += size; 
+        frame_size = zframe_size(data_frame); 
+        memcpy(encoding_info->encoded_data[i++], zframe_data(data_frame), frame_size);
+    }
 
-    } 
 
     printf("encoded symbol size %d\n", cum_size/(encoding_info->num_blocks*encoding_info->K));
     encoding_info->encoded_symbol_size = ceil(cum_size/(encoding_info->num_blocks*encoding_info->K));
@@ -281,7 +284,6 @@ char *SODAW_read(
 			client_args->port, 
 			*read_tag 
 			);
-
 
 	free(read_tag);
 	zsocket_destroy(ctx, sock_to_servers);

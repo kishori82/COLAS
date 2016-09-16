@@ -395,6 +395,22 @@ int has_object(zhash_t *object_hash,  char *obj_name) {
     return 1;
 }
 
+bool is_equal(char *payload1, char*payload2, unsigned int size) {
+    int i =0;
+//    bool final=true;
+    for(i=0; i <size ; i++) {
+        if(payload1[i]!=payload2[i]) {
+           printf("INFO: Mismatch at index %d  (%c %c)\n",i, payload1[i], (char )payload2[i]);
+      //     final=false;
+           return false;
+        }
+    }
+    return true;
+   // return final; //true;
+}
+
+
+
 
 int print_object_hash(zhash_t *object_hash) {
 

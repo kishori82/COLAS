@@ -45,8 +45,6 @@ void SODAW_write_put_phase(
                       char **servers, 
                       unsigned int num_servers, 
                       char *port, 
-                      char *payload, 
-                      int size, 
                       Tag max_tag,    // for read it is max and for write it is new
                       EncodeData *encoded_info
                    )
@@ -66,7 +64,10 @@ void SODAW_write_put_phase(
 
     int symbol_size = SYMBOL_SIZE;
 
-    encode(encoded_info);
+    if(encode(encoded_info)==FALSE) {
+        printf("Failed to encode data \n"); exit(0);
+    }
+    
 
     //ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), reed_solomon) ;
 //    destroy_encoded_data(encoded_data_info);
@@ -79,11 +80,11 @@ void SODAW_write_put_phase(
 
 
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
-    size =  encoded_info->num_blocks*encoded_info->encoded_symbol_size;
+    int per_server_payload_size =  encoded_info->num_blocks*encoded_info->encoded_symbol_size;
 
     send_multisend_servers(
                     sock_to_servers, num_servers, 
-                    encoded_info->encoded_data, size,
+                    encoded_info->encoded_data, per_server_payload_size,
                     types,  5, obj_name, "SODAW", 
                     WRITE_PUT, 
                     &op_num, tag_str) ;
@@ -146,7 +147,7 @@ bool SODAW_write(
                 char *obj_name,
                 unsigned int op_num ,
                 char *payload, 
-                unsigned int size, 
+                unsigned int payload_size, 
                 EncodeData *encoded_data,
                 ClientArgs *client_args
              )
@@ -162,7 +163,7 @@ bool SODAW_write(
     printf("\t\tObj name       : %s\n",obj_name);
     printf("\t\tWriter name    : %s\n",client_args->client_id);
     printf("\t\tOperation num  : %d\n",op_num);
-    printf("\t\tSize of data   : %d\n", size);
+    printf("\t\tSize of data   : %d\n", payload_size);
 
     printf("\t\tServer string  : %s\n", client_args->servers_str);
     printf("\t\tPort           : %s\n", client_args->port);
@@ -213,6 +214,8 @@ bool SODAW_write(
    strcpy(new_tag.id, client_args->client_id);
    free(max_tag);
    printf("\tWRITE_PUT (WRITER)\n");
+   encoded_data->raw_data = payload;
+   encoded_data->raw_data_size = payload_size;
    SODAW_write_put_phase(
                           obj_name, 
                           client_args->client_id,  
@@ -220,8 +223,6 @@ bool SODAW_write(
                           sock_to_servers, servers,
                           num_servers, 
                           client_args->port, 
-                          payload, 
-                          size, 
                           new_tag,
                           encoded_data
                         );

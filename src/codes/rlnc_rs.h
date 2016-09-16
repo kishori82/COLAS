@@ -16,6 +16,8 @@ enum CodingAlgorithm {
 extern "C" {
 #endif
 
+#define TRUE 1
+#define FALSE 0
 
 typedef struct _ENCODED_DATA {
      uint8_t *decoded_data;

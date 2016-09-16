@@ -21,7 +21,7 @@ typedef struct _Parameters {
     char server_id[BUFSIZE];
     char port[10];
     enum Algorithm algorithm;
-    enum CodingAlgorithm codingalgorithm;
+    enum CodingAlgorithm coding_algorithm;
     int wait;
     float filesize_kb;
     enum ProcessType processtype;

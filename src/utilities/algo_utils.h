@@ -13,6 +13,8 @@
 #include <stdarg.h>
 
 
+#define TRUE 1
+#define FALSE 0
 
 
 //  ABD
@@ -82,6 +84,7 @@ enum ProcessType { server=2, reader=0, writer=1  };
 enum Algorithm {abd=0, sodaw=1};
 
 
+bool is_equal(char *payload1, char*payload2, unsigned int size);
 
 void _zframe_int(zframe_t *f, int *i) ;
 

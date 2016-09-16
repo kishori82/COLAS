@@ -82,6 +82,8 @@ EncodeData *create_EncodeData(Parameters parameters) {
     encoding_info->symbol_size = SYMBOL_SIZE;
     encoding_info->raw_data_size = filesize;
     encoding_info->num_blocks = ceil( (float)filesize/(encoding_info->K*SYMBOL_SIZE));
+    encoding_info->algorithm= parameters.coding_algorithm;
+    encoding_info->offset_index=0;
  
     return encoding_info;
 }
@@ -112,7 +114,7 @@ void reader_process(Parameters parameters) {
     ClientArgs *client_args = create_ClientArgs(parameters);
 
     unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
-    for( opnum=0; opnum< 2;opnum++) {
+    for( opnum=0; opnum< 2000;opnum++) {
         usleep(parameters.wait*1000);
         char *payload = get_random_data(filesize);
 
@@ -130,8 +132,6 @@ void reader_process(Parameters parameters) {
         }
         printf("\n");
 */
-
-
        
         if( is_equal(payload, payload_read, filesize) ) {
            printf("INFO: The data sets %d are equal!!\n", opnum);
@@ -145,21 +145,6 @@ void reader_process(Parameters parameters) {
     } 
 }
 
-
-bool is_equal(char *payload1, char*payload2, unsigned int size) {
-    int i =0;
-    bool final=true;
-    for(i=0; i <size ; i++) {
-        if(payload1[i]!=payload2[i]) {
-     //      printf("INFO: Mismatch at index %d  (%c %c)\n",i, payload1[i], payload2[i]);
-           final=false;
-      //     return false;
-        }
-    }
-    return final; //true;
-}
-
-
 void writer_process(Parameters parameters) {
     unsigned int opnum=0;
 
@@ -169,11 +154,10 @@ void writer_process(Parameters parameters) {
 
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
-    for( opnum=0; opnum< 100000;opnum++) {
+
+    for( opnum=0; opnum< 2000;opnum++) {
 
        char *payload = get_random_data(filesize);
-
-       //SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
 
        SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
 
@@ -191,7 +175,6 @@ void write_initial_data(Parameters parameters) {
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
-//    SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
 
     SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
 
@@ -239,11 +222,14 @@ unsigned int readParameters(int argc, char *argv[], Parameters *parameters) {
        }
        else if( strcmp(argv[i], "--code")==0) { 
           i++;
-          if( strcmp(argv[i], "full_vector")==0)
-               parameters->codingalgorithm = full_vector;
-
-          if( strcmp(argv[i], "reed_solomon")==0) {
-               parameters->codingalgorithm = reed_solomon;
+          if( strcmp(argv[i], "full_vector")==0) {
+               parameters->coding_algorithm = full_vector;
+          }
+          else  if( strcmp(argv[i], "reed_solomon")==0) {
+               parameters->coding_algorithm = reed_solomon;
+          }
+          else {
+             printf("ERROR: unknown coding algorithm choice \"%s\"\n",argv[i]); return 0;
           }
        }
        else { printf("ERROR: unknown argument \"%s\"\n",argv[i]); return 0; } } return 1;
@@ -254,7 +240,7 @@ void setDefaults(Parameters *parameters) {
      parameters->num_servers = 0;
      parameters->ipaddresses = NULL;
      parameters->algorithm = sodaw;
-     parameters->codingalgorithm = full_vector;
+     parameters->coding_algorithm = full_vector;
      parameters->wait = 100;
      parameters->filesize_kb = 1.1;
      parameters->processtype = server;
@@ -297,7 +283,7 @@ void printParameters(Parameters parameters) {
                 break;
      }
 
-     switch(parameters.codingalgorithm) {
+     switch(parameters.coding_algorithm) {
           case full_vector:
                 printf("\tcoding algorithm\t\t: %s\n", "RLNC"   );
                 break;
@@ -334,7 +320,7 @@ Server_Args * get_server_args( Parameters parameters) {
 
      server_args->sock_to_servers = NULL;
      server_args->symbol_size = 1400;
-     server_args->coding_algorithm = parameters.codingalgorithm;
+     server_args->coding_algorithm = parameters.coding_algorithm;
      server_args->N = parameters.num_servers;
      server_args->K = ceil((float)parameters.num_servers + 1)/2;
      server_args->status = NULL;
