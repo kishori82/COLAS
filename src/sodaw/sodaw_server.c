@@ -149,12 +149,14 @@ static void send_reader_coded_element(void *worker, char *reader,
     if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
-
     zframe_t *cs_frame = zframe_dup(cs);
     if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
     zframe_send(&cs_frame, worker, ZFRAME_REUSE);
 
     zframe_destroy(&reader_frame);
+    zframe_destroy(&object_frame);
+    zframe_destroy(&algorithm_frame);
+    zframe_destroy(&phase_frame);
     zframe_destroy(&tag_frame);
     zframe_destroy(&cs_frame);
 }
@@ -196,15 +198,17 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
          // char dest_reader  = get_reader_from_reader_op(dest_reader, value->readerid);
          if(  compare_tags(tag_w, value->t_r) >= 0 ) {
             printf("\t\tsending coded element\n");
-/*
+
             send_reader_coded_element(worker, value->reader_id, 
-                                      object_name, algorithm, "READ-VALUE",  
+                                      object_name, algorithm, READ_VALUE,  
                                       value->t_r, payload
                                      );
-*/
+
+/*
 
             send_frames_at_server(frames, worker, SEND_FINAL, 6, 
                        SENDER, OBJECT,  ALGORITHM, PHASE, TAG, PAYLOAD);
+*/
 
             MetaData *h = MetaData_create(tag_w, ID,  sender) ;
             newkey = MetaData_keystring(h);
@@ -424,6 +428,7 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
      int opnum =  get_int_frame(frames, OPNUM);
      reader_op_create(reader_op, _reader, opnum);
      get_string_frame(object_name, frames, OBJECT);
+     get_string_frame(algorithm_name, frames, ALGORITHM);
 
      MetaData *h = MetaData_create(tag0, server_args->server_id, reader_op);
      char *h_str = MetaData_keystring(h);
@@ -472,15 +477,22 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
                zhash_insert((void *)frames, PAYLOAD, (void *)dup_payload_frame);
      
                printf("\t\tsending...\n");
+/*
                send_frames_at_server(frames, worker, SEND_FINAL, 6, 
                        SENDER, OBJECT,  ALGORITHM, PHASE, TAG, PAYLOAD);
+*/
+
+              send_reader_coded_element(worker, _reader, 
+                                      object_name, algorithm_name, READ_VALUE,  
+                                      tag_loc, payload_frame
+                                     );
+
+
                MetaData *h = MetaData_create(tag_loc, server_args->server_id, reader_op) ;
                char *newkey = MetaData_keystring(h);
                zhash_insert((void *)metadata, (const char *)newkey, (void *)h);
      
                // now do the READ-DISPERSE
-               get_string_frame(algorithm_name, frames, ALGORITHM);
-     
                if(DEBUG_MODE) { 
                    print_object_hash(hash_object_SODAW);
                }
