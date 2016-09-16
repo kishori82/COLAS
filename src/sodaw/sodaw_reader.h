@@ -12,16 +12,13 @@
 #include <algo_utils.h>
 #include <base64.h>
 #include "client.h"
+#include "../codes/rlnc_rs.h"
 
 //   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
 
-char *SODAW_read(char *obj_name, 
-               char *writer_id, 
-               unsigned int op_num,  
-               //char *payload, 
-               char *servers, 
-               char *port,
-               ENCODED_DATA *encoding_info
-             );
+
+int get_encoded_info(zhash_t *received_data, char *decodeableKey, EncodeData *encoding_info) ;
+
+char *SODAW_read(char *obj_name, unsigned int op_num, EncodeData *encoding_info, ClientArgs *client_args);
 
 #endif

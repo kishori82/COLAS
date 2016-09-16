@@ -146,11 +146,11 @@ static void send_reader_coded_element(void *worker, char *reader,
 
     if(DEBUG_MODE) printf("\t\ttag : %s\n", tag_w_buff);
 
-    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
+    if(DEBUG_MODE) printf("\t\tcoded elem : %lu\n", zframe_size(cs));
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
     zframe_t *cs_frame = zframe_dup(cs);
-    if(DEBUG_MODE) printf("\t\tcoded elem : %d\n", zframe_size(cs));
+    if(DEBUG_MODE) printf("\t\tcoded elem : %lu\n", zframe_size(cs));
     zframe_send(&cs_frame, worker, ZFRAME_REUSE);
 
     zframe_destroy(&reader_frame);

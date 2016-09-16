@@ -1,7 +1,9 @@
 #include "rlnc_rs.h"
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
+#define REED_SOLOMON
 #define RLNC
 
 unsigned int decoded_correctly(char *a, char *b, int size) {
@@ -15,88 +17,126 @@ unsigned int decoded_correctly(char *a, char *b, int size) {
     return 1;
 }
 
-void destroy_encoded_data(ENCODED_DATA encoded_data_info){
+void destroy_EncodedData(EncodeData *encoded_data_info){
     int i;
-    for(i=0; i < encoded_data_info.N; i++) {
-        free(encoded_data_info.encoded_raw_data[i]);
+
+    for(i=0; i < encoded_data_info->N; i++) {
+       free(encoded_data_info->encoded_data[i]);
+    } 
+
+    free(encoded_data_info->raw_data);
+    free(encoded_data_info->decoded_data);
+}
+
+
+uint8_t *create_random_data(int size) {
+    int i;
+    uint8_t *a = (uint8_t *)malloc((size)*sizeof(uint8_t));
+    uint8_t * p = a;
+    for( i=0; i < size; i++ ) {
+       *p  = (uint8_t)rand()/256;
+        p++;
     }
-    free(encoded_data_info.encoded_raw_data);
+    return a;
 }
 
 
 int main() {
 
 
-    int data = 10000000;    
+    int data_size = 1000000;    
     int size=0;
     int i =0;
     char buf[20];
-    for( i=0; i < data; i++ ) {
-        sprintf(buf, " %d", i);
-        size += strlen(buf);
-    }
-    size += 2;
+    srand(time(NULL)); 
 
-    char *a = (char *)malloc((size)*sizeof(char));
-    char * p = a;
+/*
     *p ='<';
     p++;
 
-    for( i=0; i < data; i++ ) {
+    for( i=0; i < data_size; i++ ) {
         sprintf(buf, " %d", i);
         sprintf(p, " %d", i);
         p += strlen(buf);
     }
+
     *p ='>'; p++; *p='\0';
+*/
 
     int K = 40; //K
     int N = 55;
     int symbol_size = 1024;
     int j;
-    char *decoded;
 
    // printf("UNENCODED DATA : %s\n",a);
-    printf("UNENCODED DATA SIZE: %d\n",(int)strlen(a));
-    printf("UNENCODED DATA SIZE: %d\n",size);
-    ENCODED_DATA encoded_data_info;
+    printf("UNENCODED DATA SIZE: %d\n",data_size);
+    EncodeData encoded_data_info;
 
-    for(j=0; j < 4; j++) {
-#ifdef RS
+    for(j=0; j < 200; j++) {
+    uint8_t *a;
+    encoded_data_info.N = N;
+    encoded_data_info.symbol_size = symbol_size;
+    encoded_data_info.raw_data_size = data_size;
+    encoded_data_info.offset_index = 6;
+
+    encoded_data_info.fieldsize=2;
+#ifdef REED_SOLOMON
+    encoded_data_info.K = K;
     printf("CHECKING REED-SOLOMON CODE  \n");
 //    printf("UNCODED:%s\n",a);
-    
-    encoded_data_info = encode(N, K, symbol_size, a, strlen(a), reed_solomon) ;
-    decoded = (char *)decode(N, K, K, symbol_size, encoded_data_info, reed_solomon);
-    destroy_encoded_data(encoded_data_info);
+    a =  create_random_data(data_size);
+    encoded_data_info.raw_data = a;
+    encoded_data_info.algorithm = reed_solomon;
+ 
+    //encode(N, K, symbol_size, a, strlen(a), reed_solomon) ;
+    printf("SET PARAMSENCODED DATA : %d\n",data_size);
+    encode(&encoded_data_info) ;
 
-    printf("DECODED DATA SIZE: %d\n",(int)strlen(decoded));
+    printf("ENCODED DATA : %d\n",data_size);
+    //decode(N, K, K, symbol_size, encoded_data_info, reed_solomon);
+    if( decode(&encoded_data_info)==0) {
+      perror("Failed to decode\n");
+    }
 
-    if( decoded_correctly(decoded, a, size)) {
-       printf("REED-SOLOMON encoder/decoder worked correctly for %d bytes. CONGRATULATIONS!!\n",encoded_data_info.actual_data_size); 
+    if( decoded_correctly(encoded_data_info.decoded_data, encoded_data_info.raw_data, encoded_data_info.raw_data_size)) {
+       printf("REED-SOLOMON encoder/decoder worked correctly for %d bytes. CONGRATULATIONS!!\n",encoded_data_info.raw_data_size); 
     }
     else {
        printf("REED-SOLOMON encoder/decoder failed!\n") ;
     }
+    destroy_EncodedData(&encoded_data_info);
 //    printf("DECODED:%s\n",decoded);
-    free(decoded);
 
     printf("\n");
 #endif
 
 #ifdef RLNC
-    printf("CHECKING RLNC CODE \n");
-    encoded_data_info = encode(N, K, symbol_size, a, strlen(a), full_vector) ;
-    decoded = (char *)decode(N, K, K+ 2,  symbol_size, encoded_data_info, full_vector);
-    destroy_encoded_data(encoded_data_info);
 
-    if( decoded_correctly(decoded, a, size)) {
-       printf("RLNC encoder/decoder worked correctly for %d bytes. CONGRATULATIONS!!\n",encoded_data_info.actual_data_size); 
+
+    a =  create_random_data(data_size);
+    encoded_data_info.raw_data = a;
+
+
+    encoded_data_info.K =K+8;
+    encoded_data_info.algorithm = full_vector;
+
+    printf("CHECKING RLNC CODE \n");
+    encode(&encoded_data_info) ;
+
+    if( decode(&encoded_data_info)==0) {
+      perror("Failed to decode\n");
+      continue; 
+    }
+
+
+    if( decoded_correctly(encoded_data_info.decoded_data, encoded_data_info.raw_data, encoded_data_info.raw_data_size)) {
+       printf("RLNC encoder/decoder worked correctly for %d bytes. CONGRATULATIONS!!\n",encoded_data_info.raw_data_size); 
     }
     else {
        printf("RLNC encoder/decoder failed!\n") ;
     }
-    free(decoded);
 
+    destroy_EncodedData(&encoded_data_info);
    // printf("DECODED DATA : %s\n",decoded);
 #endif
 }

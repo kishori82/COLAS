@@ -336,7 +336,7 @@ void print_out_hash(zhash_t *frames) {
           }
           else if( strcmp(key, PAYLOAD)==0) {
              zframe_t *s = zhash_lookup(frames,key);
-             if(s!=NULL) printf("%d\n", zframe_size(s));
+             if(s!=NULL) printf("%lu\n", zframe_size(s));
           }
           else {
               get_string_frame(buf, frames, key);
@@ -358,7 +358,7 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
             assert(temp_int >=0);
           }
           else if( strcmp(key, PAYLOAD)==0) {
-             printf("\t\t\t%s : %d\n", key, zframe_size((zframe_t *)zhash_lookup(frames, key)));
+             printf("\t\t\t%s : %lu\n", key, zframe_size((zframe_t *)zhash_lookup(frames, key)));
              if( zframe_size(zhash_lookup(frames, key)) < 100) {  printf("ERROR : small payload\n"); exit(0); }
           }
           else {
@@ -414,10 +414,11 @@ int print_object_hash(zhash_t *object_hash) {
 
            for( key1 = (char *)zlist_first(keys1);  key1 != NULL; key1 = (char *)zlist_next(keys1)) {
             zhash_lookup(single_object_hash, key1);
-              printf("\t\t Tag: %s :   %d\n", key1, zframe_size((zframe_t *)zhash_lookup(single_object_hash, key1)));
+              printf("\t\t Tag: %s :   %lu\n", key1, zframe_size((zframe_t *)zhash_lookup(single_object_hash, key1)));
            }
            zlist_purge(keys1);
      }
      printf("\t ========================================\n");
      zlist_purge(keys);
+     return 1;
 }

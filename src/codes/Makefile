@@ -30,7 +30,7 @@ reed_solomon_example: reed_solomon_example.cpp
 librlnc_rs.so: rlnc_rs.cpp
 	$(CPP) -fPIC -shared -DDEBUG_MODE -DASLIBRARY $<  -o $@   $(CPPFLAGS) $(LDFLAGS) 
 
-rlnc_rs_check: rlnc_rs_check.c
+rlnc_rs_check: rlnc_rs_check.c  librlnc_rs.so
 	$(CC) -fPIC  $<  -o $@  $(CFLAGS)  $(LDFLAGS)  -L. -lrlnc_rs
 
 clean:

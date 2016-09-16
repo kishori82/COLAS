@@ -73,36 +73,57 @@ char *get_servers_str(Parameters parameters) {
 }
 
 
+EncodeData *create_EncodeData(Parameters parameters) {
+
+    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
+    EncodeData *encoding_info  = (EncodeData *)malloc(sizeof(EncodeData));
+    encoding_info->N = parameters.num_servers; 
+    encoding_info->K= ceil((float)parameters.num_servers + 1)/2;
+    encoding_info->symbol_size = SYMBOL_SIZE;
+    encoding_info->raw_data_size = filesize;
+    encoding_info->num_blocks = ceil( (float)filesize/(encoding_info->K*SYMBOL_SIZE));
+ 
+    return encoding_info;
+}
+
+ClientArgs *create_ClientArgs(Parameters parameters) {
+
+    char *servers_str = get_servers_str(parameters);
+
+    ClientArgs *client_args  = (ClientArgs *)malloc(sizeof(ClientArgs));
+
+    strcpy(client_args->client_id, parameters.server_id); 
+    strcpy(client_args->port, parameters.port); 
+
+    client_args->servers_str = (char *)malloc( (strlen(servers_str) +1)*sizeof(char));
+    strcpy(client_args->servers_str, servers_str); 
+
+    return client_args;
+}
+
 
 void reader_process(Parameters parameters) {
     unsigned int opnum=0;
 
     write_initial_data(parameters);
 
-    char *servers_str = get_servers_str(parameters);
-    printf("%s\n", servers_str);
-    char *payload;
-    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+    EncodeData *encoding_info = create_EncodeData(parameters);
 
+    ClientArgs *client_args = create_ClientArgs(parameters);
 
-    ENCODED_DATA  encoding_info;
-    encoding_info.N = parameters.num_servers; 
-    encoding_info.K= ceil((float)parameters.num_servers + 1)/2;
-    encoding_info.symbol_size = SYMBOL_SIZE;
-    encoding_info.actual_data_size = filesize;
-    encoding_info.num_blocks = ceil( (float)filesize/SYMBOL_SIZE);
-
-
-    for( opnum=0; opnum< 20000;opnum++) {
+    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
+    for( opnum=0; opnum< 2;opnum++) {
         usleep(parameters.wait*1000);
         char *payload = get_random_data(filesize);
 
-   //     payload[5] ='4';        
-        printf("%s  %d  %s %s\n", parameters.server_id, opnum, servers_str, parameters.port);
+   //   payload[5] ='4';        
+        printf("%s  %d  %s %s\n", parameters.server_id, opnum, client_args->servers_str, parameters.port);
 
-        char *payload_read = SODAW_read("atomic_object", parameters.server_id, opnum, servers_str, parameters.port, &encoding_info);       
+        //char *payload_read = SODAW_read("atomic_object", parameters.server_id, opnum, servers_str, parameters.port, &encoding_info);       
+      //  char *payload_read = SODAW_read("atomic_object", opnum, servers_str, parameters.port, &encoding_info);       
 
-        int i;
+        char *payload_read = SODAW_read("atomic_object", opnum,  encoding_info, client_args);       
+
 /*
         for(i=0; i < filesize; i++) {
           printf("%c",payload_read[i]);
@@ -122,48 +143,59 @@ void reader_process(Parameters parameters) {
 
        free(payload);
     } 
-    free(servers_str);
 }
 
 
 bool is_equal(char *payload1, char*payload2, unsigned int size) {
     int i =0;
+    bool final=true;
     for(i=0; i <size ; i++) {
-        if(payload1[i]!=payload2[i]) return false;
+        if(payload1[i]!=payload2[i]) {
+     //      printf("INFO: Mismatch at index %d  (%c %c)\n",i, payload1[i], payload2[i]);
+           final=false;
+      //     return false;
+        }
     }
-    return true;
+    return final; //true;
 }
 
 
 void writer_process(Parameters parameters) {
     unsigned int opnum=0;
 
-    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
     
     unsigned int payload_size=filesize;
-    char *servers_str = get_servers_str(parameters);
 
+    EncodeData *encoding_info = create_EncodeData(parameters);
+    ClientArgs *client_args = create_ClientArgs(parameters);
     for( opnum=0; opnum< 100000;opnum++) {
 
        char *payload = get_random_data(filesize);
 
-       SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
+       //SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
+
+       SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
 
        free(payload);
     }
-    free(servers_str);
 }
 
 void write_initial_data(Parameters parameters) {
+
     unsigned int opnum=0;
-    unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
     unsigned int payload_size=filesize;
-    char *servers_str = get_servers_str(parameters);
     char *payload = get_random_data(filesize);
-    printf("initial data%s\n", payload);
-    SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
+
+    EncodeData *encoding_info = create_EncodeData(parameters);
+    ClientArgs *client_args = create_ClientArgs(parameters);
+
+//    SODAW_write("atomic_object", parameters.server_id, opnum, payload, payload_size,  servers_str, parameters.port);       
+
+    SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
+
     free(payload);
-    free(servers_str);
 }
 
 
@@ -193,7 +225,7 @@ unsigned int readParameters(int argc, char *argv[], Parameters *parameters) {
           parameters->processtype = atoi(argv[++i]);
        }
        else if( strcmp(argv[i], "--filesize")==0) { 
-          parameters->filesize = atof(argv[++i]); }
+          parameters->filesize_kb = atof(argv[++i]); }
        else if( strcmp(argv[i], "--wait")==0) { 
           parameters->wait = atoi(argv[++i]);
        }
@@ -214,13 +246,7 @@ unsigned int readParameters(int argc, char *argv[], Parameters *parameters) {
                parameters->codingalgorithm = reed_solomon;
           }
        }
-       else {
-            printf("ERROR: unknown argument \"%s\"\n",argv[i]);
-            return 0;
-       }
-    }
-
-    return 1;
+       else { printf("ERROR: unknown argument \"%s\"\n",argv[i]); return 0; } } return 1;
 
 }
 
@@ -230,7 +256,7 @@ void setDefaults(Parameters *parameters) {
      parameters->algorithm = sodaw;
      parameters->codingalgorithm = full_vector;
      parameters->wait = 100;
-     parameters->filesize = 1.1;
+     parameters->filesize_kb = 1.1;
      parameters->processtype = server;
      strcpy(parameters->port, "8081");
 }
@@ -282,7 +308,7 @@ void printParameters(Parameters parameters) {
                 break;
      }
      printf("\tinter op wait (ms)\t\t: %d\n", parameters.wait);
-     printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.filesize);
+     printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.filesize_kb);
 }
 
 
@@ -302,7 +328,7 @@ Server_Args * get_server_args( Parameters parameters) {
       
      strcpy(server_args->port, "8081");
 
-     unsigned int filesize = (unsigned int) (parameters.filesize*1024);
+     unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
      server_args->init_data= get_random_data(filesize);
      server_args->init_data_size= filesize;
 

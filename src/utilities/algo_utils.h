@@ -72,30 +72,6 @@ enum INSERT_DATA_POLICY{
    force, yield
 };
 
-typedef struct _Server_Status {
-    float network_data;
-    float  metadata_memory;
-    float data_memory;
-    float  cpu_load;
-    int time_point;
-    float process_memory;
-} Server_Status;
-
-typedef struct _Server_Args {
-    char *init_data;
-    unsigned int init_data_size;
-
-    char server_id[BUFSIZE];
-    char *servers_str;
-    char port[BUFSIZE];
-    void *sock_to_servers; 
-    int num_servers;
-    int symbol_size;
-    unsigned int coding_algorithm; // 0 if full-vector and 1 is reed-solomon
-    unsigned int K;
-    unsigned int N;
-    Server_Status *status;
-} Server_Args;
 
 void s_signal_handler(int signal_value);
 
@@ -104,19 +80,6 @@ void s_catch_signals ();
 enum ProcessType { server=2, reader=0, writer=1  };
 
 enum Algorithm {abd=0, sodaw=1};
-
-int server_process(
-               Server_Args *server_args, 
-/*
-               char *server_id, 
-               char *servers_str, 
-               char *port,
-               char *init_data,
-*/
-               Server_Status *status
-             );
-
-
 
 
 

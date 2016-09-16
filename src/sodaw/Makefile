@@ -18,7 +18,7 @@ all: libsodaw.so
 
 
 libsodaw.so: $(OBJS)
-	$(CC) -fPIC -shared -o $@ $(OBJS)  $(CFLAGS) $(LDFLAGS) 
+	$(CC) -fPIC -shared -o $@ $(OBJS) $(CIFLAGS)  $(CFLAGS) $(LDFLAGS) 
 
 clean:
-	rm -f abd libsodaw.so  *.o lib* *.so  $(OBJS)  ../utilities/C/*.o
+	rm -f abd libsodaw.so  *.o lib* *.so  $(OBJS)  ../utilities/*.o

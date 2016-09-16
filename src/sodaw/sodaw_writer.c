@@ -47,7 +47,8 @@ void SODAW_write_put_phase(
                       char *port, 
                       char *payload, 
                       int size, 
-                      Tag max_tag   // for read it is max and for write it is new
+                      Tag max_tag,    // for read it is max and for write it is new
+                      EncodeData *encoded_info
                    )
 {
     // send out the messages to all servers
@@ -65,8 +66,7 @@ void SODAW_write_put_phase(
 
     int symbol_size = SYMBOL_SIZE;
 
-    
-    ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, size, reed_solomon) ;
+    encode(encoded_info);
 
     //ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), reed_solomon) ;
 //    destroy_encoded_data(encoded_data_info);
@@ -79,21 +79,21 @@ void SODAW_write_put_phase(
 
 
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
-    size =  encoded_data_info.num_blocks*encoded_data_info.encoded_symbol_size;
+    size =  encoded_info->num_blocks*encoded_info->encoded_symbol_size;
 
     send_multisend_servers(
                     sock_to_servers, num_servers, 
-                    encoded_data_info.encoded_raw_data, size,
+                    encoded_info->encoded_data, size,
                     types,  5, obj_name, "SODAW", 
                     WRITE_PUT, 
                     &op_num, tag_str) ;
 
 
     int i;
-    for(i=0; i < encoded_data_info.N; i++) {
-       free(encoded_data_info.encoded_raw_data[i]);
+    for(i=0; i < encoded_info->N; i++) {
+       free(encoded_info->encoded_data[i]);
     }
-    free(encoded_data_info.encoded_raw_data);
+    free(encoded_info->encoded_data);
 
 
      unsigned int responses =0;
@@ -144,32 +144,28 @@ void SODAW_write_put_phase(
 // SODAW write
 bool SODAW_write(
                 char *obj_name,
-                char *writer_id, 
                 unsigned int op_num ,
                 char *payload, 
                 unsigned int size, 
-                char *servers_str, 
-                char *port
-
+                EncodeData *encoded_data,
+                ClientArgs *client_args
              )
 {
     s_catch_signals();
     int j;
-    char *myb64 = (char *)malloc(strlen(payload));
-    b64_decode(payload, myb64);
-    int num_servers = count_num_servers(servers_str);
-    char **servers = create_server_names(servers_str);
+ //   char *myb64 = (char *)malloc(strlen(payload));
+  //  b64_decode(payload, myb64);
+    int num_servers = count_num_servers(client_args->servers_str);
+    char **servers = create_server_names(client_args->servers_str);
 
 #ifndef DEBUG_MODE
     printf("\t\tObj name       : %s\n",obj_name);
-    printf("\t\tWriter name    : %s\n",writer_id);
+    printf("\t\tWriter name    : %s\n",client_args->client_id);
     printf("\t\tOperation num  : %d\n",op_num);
-    printf("\t\tSize           : %d\n", size);
-    printf("\t\tSize of        : %u\n", (unsigned int)strlen(payload));
+    printf("\t\tSize of data   : %d\n", size);
 
-    printf("\t\tEncoded string : %s\n", strlen(payload));
-    printf("\t\tServer string  : %s\n", servers_str);
-    printf("\t\tPort           : %s\n", port);
+    printf("\t\tServer string  : %s\n", client_args->servers_str);
+    printf("\t\tPort           : %s\n", client_args->port);
 
     printf("\t\tNum of Servers  : %d\n",num_servers);
 
@@ -180,20 +176,20 @@ bool SODAW_write(
     printf("\n");
 #endif
 
-    free(myb64);
+//    free(myb64);
     zctx_t *ctx  = zctx_new();
     void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
     zctx_set_linger(ctx, 0);
     assert (sock_to_servers);
 
-    zsocket_set_identity(sock_to_servers,  writer_id);
+    zsocket_set_identity(sock_to_servers,  client_args->client_id);
 
     int64_t affinity = 50000;
     int rc = zmq_setsockopt(socket, ZMQ_SNDBUF, &affinity, sizeof affinity);
 
 
     for(j=0; j < num_servers; j++) {    
-       char *destination = create_destination(servers[j], port);
+       char *destination = create_destination(servers[j], client_args->port);
        int rc = zsocket_connect(sock_to_servers, (const char *)destination);
        assert(rc==0);
        free(destination);
@@ -208,25 +204,26 @@ bool SODAW_write(
                       sock_to_servers, 
                       servers, 
                       num_servers, 
-                      port
+                      client_args->port
                   );
 
 
    Tag new_tag;
    new_tag.z = max_tag->z + 1;
-   strcpy(new_tag.id, writer_id);
+   strcpy(new_tag.id, client_args->client_id);
    free(max_tag);
    printf("\tWRITE_PUT (WRITER)\n");
    SODAW_write_put_phase(
                           obj_name, 
-                          writer_id,  
+                          client_args->client_id,  
                           op_num, 
                           sock_to_servers, servers,
                           num_servers, 
-                          port, 
+                          client_args->port, 
                           payload, 
                           size, 
-                          new_tag
+                          new_tag,
+                          encoded_data
                         );
 
     zsocket_destroy(ctx, sock_to_servers);

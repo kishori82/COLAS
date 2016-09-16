@@ -16,6 +16,8 @@ extern int s_interrupted;
 
 #define S_NOTIFY_MSG " "
 #define S_ERROR_MSG "Error while writing to self-pipe.\n"
+
+/*
 static int s_fd;
 static void s_signal_handler1 (int signal_value)
 {
@@ -42,6 +44,7 @@ static void s_catch_signals1 (int fd)
     sigaction (SIGINT, &action, NULL);
     sigaction (SIGTERM, &action, NULL);
 }
+*/
 
 
 Server_Status *status;
@@ -272,7 +275,7 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm,
        status->metadata_memory += (float) strlen(tag_str);
        status->data_memory += (float) server_args->init_data_size;
         
-       printf("\tCreated \"%s\" (size %d) \n", obj_name, status->data_memory, strlen(init_data));
+       printf("\tCreated \"%s\" (size %lu) \n", obj_name,  strlen(init_data));
        //add it to the main list 
       return 1;
    }

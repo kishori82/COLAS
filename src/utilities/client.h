@@ -9,6 +9,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+typedef struct _client_Args {
+      char client_id[BUFSIZE];
+      char *servers_str; 
+      char port[10];
+} ClientArgs;
+
+
 
 void s_signal_handler(int signal_value);
 

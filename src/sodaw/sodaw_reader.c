@@ -12,7 +12,7 @@
 #include <algo_utils.h>
 #include "sodaw_client.h"
 #include "client.h"
-#include "sodaw_client.h"
+#include "sodaw_reader.h"
 #include <base64.h>
 #include <rlnc_rs.h>
 
@@ -48,7 +48,7 @@ char *SODAW_read_value(
 		unsigned int num_servers, 
 		char *port, 
 		Tag read_tag, 
-        ENCODED_DATA *encoding_info
+        EncodeData *encoding_info
 		)
 {
 
@@ -129,23 +129,17 @@ char *SODAW_read_value(
    
     printf("Key to decode %s\n", decodeableKey);
 
-    value = decode(
-                 encoding_info->N, 
-                 encoding_info->K, 
-                 encoding_info->K, 
-                 encoding_info->symbol_size, 
-                 *encoding_info, 
-                 reed_solomon
-                 );
-	return value;
+    decode(encoding_info);
+
+	return encoding_info->decoded_data;
 }
 
 
-int get_encoded_info(zhash_t *received_data, char *decodeableKey, ENCODED_DATA *encoding_info) {
+int get_encoded_info(zhash_t *received_data, char *decodeableKey, EncodeData *encoding_info) {
     printf("N : %d\n", encoding_info->N); 
     printf("K : %d\n", encoding_info->K); 
     printf("Symbol size : %d\n", encoding_info->symbol_size);
-    printf("actual datasize %d\n", encoding_info->actual_data_size);
+    printf("actual datasize %d\n", encoding_info->raw_data_size);
     printf("num_blocks %d\n", encoding_info->num_blocks);
 
 
@@ -154,22 +148,22 @@ int get_encoded_info(zhash_t *received_data, char *decodeableKey, ENCODED_DATA *
     zframe_t *data_frame;
     int size=0, cum_size=0;;
     for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
-        printf("Length of data %d\n", zframe_size(data_frame));
+        printf("Length of data %lu\n", zframe_size(data_frame));
         size = zframe_size(data_frame); 
         cum_size += size; 
     } 
 
     int i;
-    encoding_info->encoded_raw_data = (uint8_t **)malloc( encoding_info->K *sizeof(uint8_t*));
+    encoding_info->encoded_data = (uint8_t **)malloc( encoding_info->K *sizeof(uint8_t*));
     for(i =0; i < encoding_info->K; i++) {
-         encoding_info->encoded_raw_data[i] = (uint8_t *)malloc( size*sizeof(uint8_t));
+         encoding_info->encoded_data[i] = (uint8_t *)malloc( size*sizeof(uint8_t));
     }
 
     i=0;
     for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
         size = zframe_size(data_frame); 
         cum_size += size; 
-        memcpy(encoding_info->encoded_raw_data[i++], zframe_data(data_frame), size);
+
     } 
 
     printf("encoded symbol size %d\n", cum_size/(encoding_info->num_blocks*encoding_info->K));
@@ -201,23 +195,19 @@ void SODAW_read_complete_phase(
 
 char *SODAW_read(
 		char *obj_name,
-		char *reader_id, 
 		unsigned int op_num ,
-		char *servers_str, 
-		char *port,
-        ENCODED_DATA *encoded_data
+        EncodeData *encoded_data,
+        ClientArgs *client_args
 		)
 {
 	s_catch_signals();
 	int j;
-	int num_servers = count_num_servers(servers_str);
-  printf("helloo\n");
-	char **servers = create_server_names(servers_str);
-  printf("helloooooo\n");
+	int num_servers = count_num_servers(client_args->servers_str);
+	char **servers = create_server_names(client_args->servers_str);
 
 #ifdef DEBUG_MODE
 	printf("\t\tObj name       : %s\n",obj_name);
-	printf("\t\tWriter name    : %s\n",reader_id);
+	printf("\t\tWriter name    : %s\n",client_args->client_id);
 	printf("\t\tOperation num  : %d\n",op_num);
 
 	/* char *myb64 = (char *)malloc(strlen(payload));
@@ -225,8 +215,8 @@ char *SODAW_read(
 		 printf("Encoded string  : %s\n", payload);
 		 free(myb64);
 		 */
-	printf("\t\tServer string   : %s\n", servers_str);
-	printf("\t\tPort to Use     : %s\n", port);
+	printf("\t\tServer string   : %s\n", client_args->servers_str);
+	printf("\t\tPort to Use     : %s\n", client_args->port);
 	printf("\t\tNum of Servers  : %d\n",num_servers);
 
 	//    printf("Decoded string  : %s\n", myb64);
@@ -242,10 +232,10 @@ char *SODAW_read(
 	zctx_set_linger(ctx, 0);
 	assert(sock_to_servers);
 
-	zsocket_set_identity(sock_to_servers,  reader_id);
+	zsocket_set_identity(sock_to_servers,  client_args->client_id);
 
 	for(j=0; j < num_servers; j++) {    
-		char *destination = create_destination(servers[j], port);
+		char *destination = create_destination(servers[j], client_args->port);
 		int rc = zsocket_connect(sock_to_servers, destination);
 		assert(rc==0);
 		free(destination);
@@ -260,7 +250,7 @@ char *SODAW_read(
 			sock_to_servers, 
 			servers, 
 			num_servers, 
-			port
+			client_args->port
 			);
 
 	printf("\t\tmax tag (%d,%s)\n\n", read_tag->z, read_tag->id);
@@ -275,7 +265,7 @@ char *SODAW_read(
 			sock_to_servers,  
 			servers, 
 			num_servers, 
-			port, 
+			client_args->port, 
 			*read_tag, 
             encoded_data 
 			);
@@ -284,11 +274,11 @@ char *SODAW_read(
 	printf("\tREAD_COMPLETE (READER)\n");
 	SODAW_read_complete_phase(
 			obj_name, 
-			reader_id,
+			client_args->client_id,
 			sock_to_servers,  
 			servers, 
 			num_servers, 
-			port, 
+			client_args->port, 
 			*read_tag 
 			);
 
