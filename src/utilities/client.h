@@ -1,13 +1,17 @@
 #ifndef __CLIENT__
 #define __CLIENT__
 
-#include "czmq.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <czmq.h>
+#include <zmq.h>
+#include <czmq_library.h>
+#include <string.h>
+#include "algo_utils.h"
 
 typedef struct _client_Args {
       char client_id[BUFSIZE];

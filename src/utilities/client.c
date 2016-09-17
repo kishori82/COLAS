@@ -4,13 +4,59 @@
 //  it easier to start and stop the example. Each task has its own
 //  context and conceptually acts as a separate process.
 
-#include "czmq.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <algo_utils.h>
-#include <base64.h>
 #include "client.h"
+
+
+
+
+
+int
+special_zframe_send (zframe_t **self_p, void *dest, int flags)
+{
+    assert (dest);
+    assert (self_p);
+
+    void *handle = zsock_resolve (dest);
+    if (*self_p) {
+        zframe_t *self = *self_p;
+        assert (zframe_is (self));
+
+        int send_flags = (flags & ZFRAME_MORE)? ZMQ_SNDMORE: 0;
+        send_flags |= (flags & ZFRAME_DONTWAIT)? ZMQ_DONTWAIT: 0;
+        if (flags & ZFRAME_REUSE) {
+            zmq_msg_t copy;
+            zmq_msg_init (&copy);
+            if (zmq_msg_copy (&copy, zframe_data(self)))
+                return -1;
+            if (zmq_sendmsg (handle, &copy, send_flags) == -1) {
+                zmq_msg_close (&copy);
+                return -2;
+            }
+        }
+        else {
+            if (zmq_sendmsg (handle, zframe_data(&self), send_flags) >= 0)
+                zframe_destroy (self_p);
+            else
+                return -3;
+        }
+    }   
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #define DEBUG_MODE  1
@@ -46,6 +92,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
     va_end(valist);
 
     // it to all servers in a round robin fashion
+    int rc;
     if(DEBUG_MODE)  printf("\n");
     if( DEBUG_MODE) printf("\t\tsending ..\n");
     for(i=0; i < num_servers; i++) {
@@ -59,7 +106,21 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
             else
                printf("\t\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
              
-            zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
+           rc = zframe_send(&frames[j], sock_to_servers, ZFRAME_REUSE +  ZFRAME_MORE);
+
+//		 rc = special_zframe_send( &frames[j], sock_to_servers,  ZFRAME_REUSE + ZFRAME_MORE);
+
+
+     if( rc < 0) {
+        printf("ERROR: %d\n", rc);
+				exit(-1);
+     }
+
+
+          printf("\t\t\tSIZE%d :%d  %d\n", j, rc,  zframe_size(frames[j]));
+
+          assert(rc!=-1);
+             
          }
        }
 
@@ -71,8 +132,39 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
          else
             printf("\t\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
        }
-      zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE);
-      if(DEBUG_MODE)  printf("\n");
+
+/*
+     if( (rc=zframe_send( &frames[j], sock_to_servers,  ZFRAME_REUSE ))==-1) {
+        printf("ERROR: %s\n", zmq_strerror(errno));
+				exit(-1);
+     }
+*/
+
+     rc = zframe_send(&frames[j], sock_to_servers, ZFRAME_REUSE);
+    if( rc < 0) {
+        printf("ERROR: %d\n", rc);
+				exit(-1);
+     }
+
+
+
+/*
+		 int src = special_zframe_send( &frames[j], sock_to_servers,  ZFRAME_REUSE);
+     if( src < 0) {
+        //printf("ERROR: %s\n", zmq_strerror(errno));
+        printf("ERROR: %d\n", src);
+				exit(-1);
+     }
+*/
+
+/*
+     rc = zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE);
+     printf("\t\t\tSIZE%d :%d  %d\n", j, rc,  zframe_size(frames[j]));
+     assert(rc!=-1);
+*/
+
+
+     if(DEBUG_MODE)  printf("\n");
    }
 
     printf("\n");
