@@ -130,12 +130,13 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
+        printf("waiting to receive messages\n");
         int rc = zmq_poll(items, 1, -1);
+        printf("received message\n");
         if( rc < 0 || s_interrupted==1) {
              exit(0);
         }
         
-        zclock_sleep(1);
         if (items[0].revents & ZMQ_POLLIN) {
            printf("received message\n");
            zmsg_t *msg = zmsg_recv (worker);
@@ -146,14 +147,15 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            zlist_t *frames_list = zlist_new(); 
 
            zhash_t *frames = receive_message_frames_at_server(msg, frames_list);
-           print_out_hash(frames); printf("\n");
+           print_out_hash_in_order(frames, frames_list); printf("\n");
+
            zframe_t *s = (zframe_t *)zhash_lookup(frames, PAYLOAD);
+
            if(s==NULL)
               printf("payload missing\n");
            else{
               printf("payload is captured \n");
             }
-
 
 
            get_string_frame(algorithm_name, frames, ALGORITHM);
@@ -394,7 +396,7 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            if(names!=NULL) zlist_append(names, TAG);
           }
      }
-     print_out_hash_in_order(frames, names); 
+//     print_out_hash_in_order(frames, names); 
      return frames;
 }
 
