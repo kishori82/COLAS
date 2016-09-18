@@ -125,14 +125,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
             printf("\t\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
       }
 
-/*
-     if( (rc=zframe_send( &frames[j], sock_to_servers,  ZFRAME_REUSE ))==-1) {
-        printf("ERROR: %s\n", zmq_strerror(errno));
-				exit(-1);
-     }
-*/
 
-      rc = zframe_send(&frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_DONTWAIT);
     //  rc = zmq_send(sock_to_servers, zframe_data(frames[j]), zframe_size(frames[j]), 0);
       if( rc < 0) {
           printf("ERROR: %d\n", rc);

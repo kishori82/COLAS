@@ -156,7 +156,7 @@ void writer_process(Parameters parameters) {
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
-    for( opnum=0; opnum< 20000;opnum++) {
+    for( opnum=0; opnum< 50000;opnum++) {
 
        char *payload = get_random_data(filesize);
 

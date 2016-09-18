@@ -142,6 +142,20 @@ void SODAW_write_put_phase(
 }
 
 
+void *get_socket_servers(ClientArgs *client_args) {
+    static socket_create=0;
+    static void *sock_to_servers =0;
+
+    if( socket_create==1) return sock_to_servers;
+    socket_create=1;
+    zctx_t *ctx  = zctx_new();
+    sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
+    assert (sock_to_servers);
+    zsocket_set_identity(sock_to_servers,  client_args->client_id);
+    return sock_to_servers;
+}
+
+
 // SODAW write
 bool SODAW_write(
                 char *obj_name,
@@ -178,15 +192,21 @@ bool SODAW_write(
 #endif
 
 //    free(myb64);
+    
+    void *sock_to_servers;
+
+    sock_to_servers= get_socket_servers(client_args);
+/*
     zctx_t *ctx  = zctx_new();
     void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
-    zctx_set_linger(ctx, 0);
     assert (sock_to_servers);
-
     zsocket_set_identity(sock_to_servers,  client_args->client_id);
+*/
 
-    int64_t affinity = 50000;
+/*
+    int64_t affinity = 5000000;
     int rc = zmq_setsockopt(socket, ZMQ_SNDBUF, &affinity, sizeof affinity);
+*/
 
 
     for(j=0; j < num_servers; j++) {    
@@ -227,10 +247,13 @@ bool SODAW_write(
                           encoded_data
                         );
 
+
+/*
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
-
+*/
     destroy_server_names(servers, num_servers);
+
     return true;
 }
 
