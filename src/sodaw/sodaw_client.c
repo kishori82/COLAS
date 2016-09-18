@@ -4,16 +4,7 @@
 //  it easier to start and stop the example. Each task has its own
 //  context and conceptually acts as a separate process.
 
-#include "czmq.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include <algo_utils.h>
 #include "sodaw_client.h"
-#include "client.h"
-#include <base64.h>
-#include <rlnc_rs.h>
 
 #define DEBUG_MODE 1
 extern int s_interrupted;
