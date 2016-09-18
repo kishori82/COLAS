@@ -65,15 +65,15 @@ Tag *SODAW_write_get_or_read_get_phase(
 
             get_string_frame(phase, frames, PHASE);
 
-            print_out_hash(frames);
+        //    print_out_hash(frames);
              printf("=======================\n");
-            print_out_hash_in_order(frames, names);
+         //   print_out_hash_in_order(frames, names);
             zframe_t *r = zhash_lookup(frames, PHASE); 
             if( r==NULL) {
                  printf("a null phase  %s\n", phase);
             }
             else{
-                 printf("a null phase  %s\n", phase);
+                 printf("a non-null phase  %s\n", phase);
                  printf("a non-null tag of size %lu\n", zframe_size(r));
             }
             round = get_int_frame(frames, OPNUM);

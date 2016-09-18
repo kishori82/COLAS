@@ -198,7 +198,8 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
          // char dest_reader  = get_reader_from_reader_op(dest_reader, value->readerid);
          if(  compare_tags(tag_w, value->t_r) >= 0 ) {
             printf("\t\tsending coded element\n");
-
+            
+            printf("Sending CODED_ELEMENT\n"); 
             send_reader_coded_element(worker, value->reader_id, 
                                       object_name, algorithm, READ_VALUE,  
                                       value->t_r, payload
@@ -482,6 +483,7 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
                        SENDER, OBJECT,  ALGORITHM, PHASE, TAG, PAYLOAD);
 */
 
+              printf("Relaying CODED_ELEMENT\n"); 
               send_reader_coded_element(worker, _reader, 
                                       object_name, algorithm_name, READ_VALUE,  
                                       tag_loc, payload_frame

@@ -94,7 +94,6 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
 
 
-
     zsocket_connect(worker, "inproc://backend");
     char algorithm_name[100];
 
@@ -136,8 +135,9 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
              exit(0);
         }
         
-        zclock_sleep(5);
+        zclock_sleep(1);
         if (items[0].revents & ZMQ_POLLIN) {
+           printf("received message\n");
            zmsg_t *msg = zmsg_recv (worker);
 
            // receive the frames
@@ -146,15 +146,12 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            zlist_t *frames_list = zlist_new(); 
 
            zhash_t *frames = receive_message_frames_at_server(msg, frames_list);
-            printf("inside the caller \n");
-            printf("inside the caller %p\n", frames);
-            print_out_hash(frames); 
+           print_out_hash(frames); printf("\n");
            zframe_t *s = (zframe_t *)zhash_lookup(frames, PAYLOAD);
            if(s==NULL)
               printf("payload missing\n");
            else{
-              printf("payload is captured %d\n", ZMQ_MAXMSGSIZE);
-              printf("size is %p\n", s);
+              printf("payload is captured \n");
             }
 
 
