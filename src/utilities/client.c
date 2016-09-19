@@ -193,6 +193,7 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  uint8_t **m
        }
         // a different coded element for each different server
        frames[n]= zframe_new(messages[i], msg_size);
+       assert( zframe_size(frames[n])==msg_size);
 
    //    frames[n]= zframe_new( payload, strlen(pay));
        if(DEBUG_MODE) printf("\t\t\tFRAME%d :%s  %d\n", n, PAYLOAD,  msg_size );
