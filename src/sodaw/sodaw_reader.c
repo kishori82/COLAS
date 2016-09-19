@@ -117,13 +117,18 @@ char *SODAW_read_value(
 			}
 			else {
 				printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
-
 			}
 			zmsg_destroy (&msg);
 			zlist_purge(names);
 			destroy_frames(frames);
 		}
 	}
+
+     
+    zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, decodeableKey);
+    printf("Number of keys to decode %s   %d\n", decodeableKey, zlist_size(coded_elements));
+
+
     get_encoded_info(received_data, decodeableKey, encoding_info);
 
    

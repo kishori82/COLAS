@@ -94,8 +94,8 @@ int main() {
 
     printf("ENCODED DATA : %d\n",data_size);
     //decode(N, K, K, symbol_size, encoded_data_info, reed_solomon);
-    if( decode(&encoded_data_info)==0) {
-      perror("Failed to decode\n");
+    if(decode(&encoded_data_info)==0) {
+       perror("Failed to decode\n");
     }
 
     if( decoded_correctly(encoded_data_info.decoded_data, encoded_data_info.raw_data, encoded_data_info.raw_data_size)) {
