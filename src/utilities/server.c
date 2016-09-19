@@ -184,7 +184,7 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            zlist_destroy(&frames_list);
            destroy_frames(frames);
            zmsg_destroy(&msg); 
-           if(count++ > 1000) { zsocket_destroy(ctx, worker); exit(0); }
+         //  if(count++ > 1000) { zsocket_destroy(ctx, worker); exit(0); }
         }
     }
    
