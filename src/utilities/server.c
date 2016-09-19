@@ -128,7 +128,7 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
 
     s_catch_signals1(pipefds[1]);
 */
-    int count = 0; 
+  //  int count = 0; 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
         printf("waiting to receive messages\n");
@@ -157,7 +157,6 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            if( strcmp(algorithm_name, "ABD")==0)  {
                 printf(" [[[ %s\n", server_args->server_id);
                 if(DEBUG_MODE) { 
-                   printf("\t\treceiving... %s\n", server_args->server_id);  
                    print_out_hash_in_order(frames, frames_list); 
                 }
                  
@@ -169,10 +168,6 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            if( strcmp(algorithm_name, SODAW)==0)  {
                 printf(" [[[ %s\n",server_args->server_id);
                 if(DEBUG_MODE) {
-                   print_out_hash(frames); 
-
-                   printf("\t\treceiving... %s\n", server_args->server_id);  
-
                    print_out_hash_in_order(frames, frames_list);
                 }
 
@@ -184,10 +179,9 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            zlist_destroy(&frames_list);
            destroy_frames(frames);
            zmsg_destroy(&msg); 
-           if(count++ > 1000) { zsocket_destroy(ctx, worker); exit(0); }
+     //      if(count++ > 1000) { zsocket_destroy(ctx, worker); exit(0); }
         }
     }
-   
     printf("done\n");
 }
 

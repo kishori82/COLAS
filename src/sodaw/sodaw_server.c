@@ -182,8 +182,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
     get_string_frame(algorithm, frames, ALGORITHM);
     get_string_frame(ID, frames, "ID");
     get_string_frame(object_name, frames, OBJECT);
- 
-
 
     // loop through all the existing (r, tr) pairs 
     zlist_t *r_tr_keys = zhash_keys(readerc);
@@ -277,7 +275,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         status->data_memory += (float) size;
     }
     if(DEBUG_MODE) { 
-           print_object_hash(hash_object_SODAW);
+        print_object_hash(hash_object_SODAW);
      }
     printf("\t\tsending\n");
 

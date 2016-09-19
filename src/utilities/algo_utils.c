@@ -376,18 +376,18 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
 
 void destroy_frames(zhash_t *frames) {
 
-     printf("\t\tDeleting frames\n");
+   //  printf("\t\tDeleting frames\n");
      zlist_t *keys = zhash_keys(frames);
      char *key;
      for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
            zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);         
            if( frame!= NULL) {
-              printf("\t\t\t%s : %d\n",key, zframe_size(frame));
+    //          printf("\t\t\t%s : %d\n",key, zframe_size(frame));
               zhash_delete(frames, key);
               if( zframe_is(frame) ) zframe_destroy(&frame);
            }
      }
-     printf("\t\t\t%s : %d\n","frames", zhash_size(frames));
+     //printf("\t\t\t%s : %d\n","frames", zhash_size(frames));
      zlist_destroy(&keys);
      zhash_destroy(&frames);
 }
