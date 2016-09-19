@@ -173,6 +173,11 @@ unsigned short encode(EncodeData *encode_data) {
     }
 
 
+   int encoded_symbol_vector_size = encoded_data_vector[0].size();
+   for(int s =0; s <encode_data->N; s++) {
+       assert(encoded_symbol_vector_size = encoded_data_vector[s].size());
+   }
+
    encode_data->encoded_symbol_size = encoded_symbol_size;
    encode_data->num_blocks = block_num;
    encode_data->padded_data_size = data_encoded - encode_data->raw_data_size;
