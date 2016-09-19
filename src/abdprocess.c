@@ -151,8 +151,6 @@ void writer_process(Parameters parameters) {
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
-   // for( opnum=0; opnum< 500000;opnum++) {
-
     for( opnum=0; opnum< 100000;opnum++) {
        char *payload = get_random_data(filesize);
        SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
