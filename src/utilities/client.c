@@ -110,8 +110,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
 				      exit(-1);
            }
 
-
-           printf("\t\t\tSIZE%d :%d  %d\n", j, rc,  zframe_size(frames[j]));
+           //printf("\t\t\tSIZE%d :%d  %d\n", j, rc,  zframe_size(frames[j]));
 
            assert(rc!=-1);
              
