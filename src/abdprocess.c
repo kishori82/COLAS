@@ -111,7 +111,6 @@ void reader_process(Parameters parameters) {
     write_initial_data(parameters);
 
     EncodeData *encoding_info = create_EncodeData(parameters);
-
     ClientArgs *client_args = create_ClientArgs(parameters);
 
     unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
@@ -119,10 +118,7 @@ void reader_process(Parameters parameters) {
         usleep(parameters.wait*1000);
         char *payload = get_random_data(filesize);
 
-   //   payload[5] ='4';        
         printf("%s  %d  %s %s\n", parameters.server_id, opnum, client_args->servers_str, parameters.port);
-
-
         char *payload_read = SODAW_read("atomic_object", opnum,  encoding_info, client_args);       
 
 /*
@@ -156,10 +152,13 @@ void writer_process(Parameters parameters) {
     ClientArgs *client_args = create_ClientArgs(parameters);
 
    // for( opnum=0; opnum< 500000;opnum++) {
+<<<<<<< HEAD
     for( opnum=1; opnum< 2;opnum++) {
 
+=======
+    for( opnum=0; opnum< 100000;opnum++) {
+>>>>>>> 6957ccc19f84b0b94a54d5e85de1b7bd31155510
        char *payload = get_random_data(filesize);
-
        SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
 
        free(payload);

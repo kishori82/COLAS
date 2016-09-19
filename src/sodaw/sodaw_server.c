@@ -145,8 +145,7 @@ static void send_reader_coded_element(void *worker, char *reader,
     zframe_t *tag_frame = zframe_new(tag_w_buff, strlen(tag_w_buff));
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
-    if(DEBUG_MODE) printf("\t\tcoded elem : %lu\n", zframe_size(cs));
-    zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
+    if(DEBUG_MODE) printf("\t\tcoded-elem : %lu\n", zframe_size(cs));
     zframe_t *cs_frame = zframe_dup(cs);
     zframe_send(&cs_frame, worker, ZFRAME_REUSE);
 
@@ -189,6 +188,10 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
     void *key, *newkey;    
     void *value;
+    if(DEBUG_MODE) { 
+         print_object_hash(hash_object_SODAW);
+    }
+     
 
     for(key= zlist_first(r_tr_keys);  key!= NULL; key=zlist_next(r_tr_keys) ) {
          RegReader *value  = (RegReader *)zhash_lookup(readerc, (const char *)key);
@@ -244,14 +247,13 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         // actually there should be only one key
         void *key = zlist_first(keys);  
 
+        printf("will replace %s\n", key);
         assert(key!=NULL);  // should not be empyt
           
         // get the  objects stored, i.e., the stored local value
         zframe_t *item = (zframe_t *)zhash_lookup(temp_hash_hash,key);
         assert(item!=NULL);
 
-        zlist_purge(keys);
-        zlist_destroy(&keys);  
 
          // discount the metadata and data  
         status->data_memory -= (float)zframe_size((zframe_t *)item);
@@ -261,13 +263,24 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         //deleting it it    
 
         zframe_destroy(&item);
+        printf("deleting %s\n", key);
         zhash_delete(temp_hash_hash, key);
 
+        if(DEBUG_MODE) { 
+            print_object_hash(hash_object_SODAW);
+        }
+
+        printf("deleted\n");
+
+
+
+        item = (zframe_t *)zhash_lookup(temp_hash_hash,key);
+        assert(item==NULL);
         //insert the new tag and coded value
 
         //zframe_t *new_payload_frame = zframe_new(zframe_data(payload), zframe_size(payload));
         zframe_t *new_payload_frame = zframe_dup(payload);
-        zhash_insert(temp_hash_hash, tag_w_str, (void *) new_payload_frame);
+        zhash_insert(temp_hash_hash, tag_w_str,(void *) new_payload_frame);
 
 
         //count the data size now
@@ -308,9 +321,7 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
 
     void *item = zhash_lookup((void *)readerc, (const char *)r_tr_key);
     if( item != NULL) {
-        printf("if 1   %s \n", r_tr_key);
         zhash_delete((void *)readerc, (const char *)r_tr_key);
-
         zlist_t *Hr = metadata_with_reader(metadata, reader_op);
         metadata_remove_keys(metadata, Hr);
       //  zlist_destroy(&Hr);
@@ -321,7 +332,6 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
           init_tag(&tag);
           MetaData *h = MetaData_create(tag, ID, reader_op) ;
           char *h_str = MetaData_keystring(h);
-          printf("if 2   %s \n", h_str);
           zhash_insert((void *)metadata, (const char *)h_str, (void *)h);
           free(h_str);
     }
@@ -443,12 +453,10 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
     // printf("read value (%s,  %s,  %s,  %s)\n", h_str, buf, server_args->server_id, reader);
 
      if( zhash_lookup(metadata, h_str)!=NULL )  {
-          printf("if 1  %s \n", h_str);
           zlist_t *Hr = metadata_with_reader(metadata, reader_op);
           metadata_remove_keys(metadata, Hr);
           zlist_purge(Hr);
      } else {
-          printf("if 2\n");
           RegReader *r_tr_pair = RegReader_create(tag_r, _reader,  opnum);
 
           char *r_tr_key = RegReader_keystring(r_tr_pair);
@@ -466,7 +474,6 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
           //printf(" Local tag =  %s incoming tag = %s\n", tag_loc_str, tag_inc_str);
           if( compare_tags(tag_loc, tag_r)>=0 ) {
 
-                printf("if 3\n");
                tag_to_string(tag_loc, tag_loc_str);
                zframe_t *tag_loc_frame = zframe_new(tag_loc_str, strlen(tag_loc_str));
      
@@ -621,7 +628,6 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
 
      if(initialized==0) initialize_SODAW();
 
-      printf("\t inside the algorithmSODAW WRITE PUT\n");
      get_string_frame(phasebuf, frames, PHASE);
      get_string_frame(object_name, frames, OBJECT);
      get_string_frame(buf, frames, SENDER);
@@ -637,7 +643,6 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
       }
 
       if( strcmp(phasebuf, WRITE_PUT)==0)  {
-           printf("\t SODAW WRITE PUT\n");
            algorithm_SODAW_WRITE_PUT(frames, worker);
       }
 
