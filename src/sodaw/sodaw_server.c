@@ -382,6 +382,7 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
 
                 zlist_t *Hr = metadata_with_reader(metadata, readerid);
                 metadata_remove_keys(metadata, Hr);
+                printf("======================================================>>>>>>>>>>>>>>>>>\n");
             }
   //          zlist_destroy(&Htr);
          } 
