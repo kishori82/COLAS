@@ -26,16 +26,13 @@ Tag *SODAW_read_get_phase(
 		char *obj_name, 
 		unsigned int op_num, 
 		zsock_t *sock_to_servers,  
-		char **servers, 
-		unsigned int num_servers, 
-		char *port
+		unsigned int num_servers
 )
 {
 
 	return SODAW_write_get_or_read_get_phase(
 			obj_name, READ_GET, op_num, 
-			sock_to_servers,  servers, 
-			num_servers, port);
+			sock_to_servers, num_servers);
 }
 
 
@@ -44,9 +41,7 @@ char *SODAW_read_value(
 		char *obj_name, 
 		unsigned int op_num, 
 		zsock_t *sock_to_servers,  
-		char **servers, 
 		unsigned int num_servers, 
-		char *port, 
 		Tag read_tag, 
         EncodeData *encoding_info
 		)
@@ -113,7 +108,12 @@ char *SODAW_read_value(
 
 				decodeableKey = number_responses_at_least(received_data, majority);
 
-				if(decodeableKey!= NULL) break;
+				if(decodeableKey!= NULL) {
+			       zmsg_destroy (&msg);
+			       zlist_purge(names);
+			       destroy_frames(frames);
+                   break;
+                }
 			}
 			else {
 				printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
@@ -179,9 +179,7 @@ void SODAW_read_complete_phase(
 		char *obj_name,
 		char *reader_id, 
 		zsock_t *sock_to_servers,  
-		char **servers, 
 		unsigned int num_servers, 
-		char *port, 
 		Tag max_tag   // for read it is max and for write it is new
 		)
 {
@@ -205,9 +203,9 @@ char *SODAW_read(
 {
 	s_catch_signals();
 	int j;
-	int num_servers = count_num_servers(client_args->servers_str);
-	char **servers = create_server_names(client_args->servers_str);
 
+	int num_servers = count_num_servers(client_args->servers_str);
+    void *sock_to_servers= get_socket_servers(client_args);
 #ifdef DEBUG_MODE
 	printf("\t\tObj name       : %s\n",obj_name);
 	printf("\t\tWriter name    : %s\n",client_args->client_id);
@@ -223,12 +221,15 @@ char *SODAW_read(
 	printf("\t\tNum of Servers  : %d\n",num_servers);
 
 	//    printf("Decoded string  : %s\n", myb64);
+/*
 	for(j=0; j < num_servers; j++) {
 		printf("\t\t\tServer : %s\n", servers[j]);
 	}
 	printf("\n");
+*/
 #endif
 
+/*
 
 	zctx_t *ctx  = zctx_new();
 	void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
@@ -243,6 +244,7 @@ char *SODAW_read(
 		assert(rc==0);
 		free(destination);
 	}
+*/
 
 	printf("READ %d\n", op_num);
 	printf("\tREAD_GET (READER)\n");
@@ -251,9 +253,7 @@ char *SODAW_read(
 			obj_name,  
 			op_num, 
 			sock_to_servers, 
-			servers, 
-			num_servers, 
-			client_args->port
+			num_servers
 			);
 
 	printf("\t\tmax tag (%d,%s)\n\n", read_tag->z, read_tag->id);
@@ -266,9 +266,7 @@ char *SODAW_read(
 			obj_name, 
 			op_num, 
 			sock_to_servers,  
-			servers, 
 			num_servers, 
-			client_args->port, 
 			*read_tag, 
             encoded_data 
 			);
@@ -279,17 +277,18 @@ char *SODAW_read(
 			obj_name, 
 			client_args->client_id,
 			sock_to_servers,  
-			servers, 
 			num_servers, 
-			client_args->port, 
 			*read_tag 
 			);
 
 	free(read_tag);
+
+
+/*
 	zsocket_destroy(ctx, sock_to_servers);
 	zctx_destroy(&ctx);
-
 	destroy_server_names(servers, num_servers);
+*/
 
 	return payload;
 }

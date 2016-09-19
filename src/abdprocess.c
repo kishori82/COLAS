@@ -47,11 +47,12 @@ int main(int argc, char *argv[]) {
        writer_process(parameters);
    }
    else if(parameters.processtype==server) {
-
-
        server_process(server_args, server_status);
    }
  
+   destroy_server_args(server_args) ;
+   free(server_status);
+
    return 0;
 }
 
@@ -156,7 +157,8 @@ void writer_process(Parameters parameters) {
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
-    for( opnum=0; opnum< 50000;opnum++) {
+   // for( opnum=0; opnum< 500000;opnum++) {
+    for( opnum=0; opnum< 100000;opnum++) {
 
        char *payload = get_random_data(filesize);
 
@@ -298,15 +300,15 @@ void printParameters(Parameters parameters) {
      printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.filesize_kb);
 }
 
+void destroy_server_args(Server_Args *server_args) {
+    free(server_args->init_data);
+    free(server_args);
+}
 
 Server_Args * get_server_args( Parameters parameters) {
 
-
-
      Server_Args *server_args = (Server_Args *) malloc(sizeof(Server_Args));
-
      strcpy(server_args->server_id, parameters.server_id);
-
 
      server_args->servers_str =  get_servers_str(parameters);
      printf("servers args %s\n", server_args->servers_str);
@@ -316,7 +318,9 @@ Server_Args * get_server_args( Parameters parameters) {
      strcpy(server_args->port, "8081");
 
      unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
+
      server_args->init_data= get_random_data(filesize);
+
      server_args->init_data_size= filesize;
 
      server_args->sock_to_servers = NULL;

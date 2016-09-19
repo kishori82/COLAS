@@ -16,9 +16,8 @@ Tag *SODAW_write_get_or_read_get_phase(
         const char *_phase, 
         unsigned int op_num, 
         zsock_t *sock_to_servers,  
-        char **servers, 
-        unsigned int num_servers, 
-        char *port)
+        unsigned int num_servers
+        )
 {
     // send out the messages to all servers
     char buf[400];
@@ -31,6 +30,7 @@ Tag *SODAW_write_get_or_read_get_phase(
     zmq_pollitem_t items [] = { { sock_to_servers, 0, ZMQ_POLLIN, 0 } };
 
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM};
+
     send_multicast_servers(sock_to_servers, num_servers, types, 4, obj_name, SODAW, _phase, &op_num) ;
 
     unsigned int majority =  ceil(((float)num_servers+1)/2);
@@ -89,6 +89,10 @@ Tag *SODAW_write_get_or_read_get_phase(
                 zlist_append(tag_list, (void *)tag);
 
                 if(responses >= majority) { 
+                    zmsg_destroy (&msg);
+                    zlist_purge(names);
+                    zlist_destroy(&names);
+                    destroy_frames(frames);
                     break;
                 }
                 //if(responses >= num_servers) break;
@@ -97,11 +101,16 @@ Tag *SODAW_write_get_or_read_get_phase(
                 printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
 
             }
+
             zmsg_destroy (&msg);
             zlist_purge(names);
+            zlist_destroy(&names);
             destroy_frames(frames);
         }
     }
+
+
+
     //comute the max tag now and return 
     Tag *max_tag = get_max_tag(tag_list);
     free_items_in_list(tag_list);

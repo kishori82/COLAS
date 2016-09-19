@@ -372,18 +372,35 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
 
 
 void destroy_frames(zhash_t *frames) {
+
      zlist_t *keys = zhash_keys(frames);
      char *key;
      for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
            zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);         
            if( frame!= NULL) {
               zhash_delete(frames, key);
-
               if( zframe_is(frame) ) zframe_destroy(&frame);
            }
      }
      zlist_destroy(&keys);
+     zhash_destroy(&frames);
 }
+
+
+/*
+void destroy_zlist(zlist_t *list) {
+
+     zlist_t *keys = zhash_keys(frames);
+     char *key;
+     for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
+         zlist_destroy(&keys);
+     }
+
+     zhash_destroy(&list);
+}
+*/
+
+
 
 
 int has_object(zhash_t *object_hash,  char *obj_name) {

@@ -28,8 +28,7 @@ Tag *SODAW_write_get_or_read_get_phase(
         const char *_phase, 
         unsigned int op_num, 
         zsock_t *sock_to_servers,  
-        char **servers, 
-        unsigned int num_servers, 
-        char *port);
+        unsigned int num_servers
+        );
 
 #endif

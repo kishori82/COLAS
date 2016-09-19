@@ -179,6 +179,7 @@ unsigned short encode(EncodeData *encode_data) {
    encode_data->encoded_data = encoded_data;
    encode_data->total_data_size = data_encoded;
 
+   free(p);
 
 #ifdef DEBUG_MODE
    if(encode_data->algorithm==full_vector)

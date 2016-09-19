@@ -57,8 +57,13 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
     va_start(valist, n);
      
     void **values = (void **)malloc(n*sizeof(void *));
-    for(i=0; i < n; i++) 
+
+/*
+    for(i=0; i < n; i++)  {
        values[i] = (void *)malloc(10*sizeof(void));
+    }
+*/
+
 
     zframe_t **frames = (zframe_t **)malloc(n*sizeof(zframe_t *));
     assert(values!=NULL);
@@ -126,28 +131,10 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
       }
 
 
-    //  rc = zmq_send(sock_to_servers, zframe_data(frames[j]), zframe_size(frames[j]), 0);
       if( rc < 0) {
           printf("ERROR: %d\n", rc);
 		 	  	exit(-1);
       }
-
-
-
-/*
-		 int src = special_zframe_send( &frames[j], sock_to_servers,  ZFRAME_REUSE);
-     if( src < 0) {
-        //printf("ERROR: %s\n", zmq_strerror(errno));
-        printf("ERROR: %d\n", src);
-				exit(-1);
-     }
-*/
-
-/*
-     rc = zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE);
-     printf("\t\t\tSIZE%d :%d  %d\n", j, rc,  zframe_size(frames[j]));
-     assert(rc!=-1);
-*/
 
      if(DEBUG_MODE)  printf("\n");
    }
@@ -216,11 +203,10 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  uint8_t **m
 
     if( values!=NULL) free(values); 
 
-/*
     for(i=0; i < n+1; i++ ) {
        zframe_destroy(frames+i);
     }
-*/
+
     if( frames!=NULL) free(frames);
 }
 
@@ -318,6 +304,33 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
          }
      }
      return frames;
+}
+
+void *get_socket_servers(ClientArgs *client_args) {
+    int j;
+    static socket_create=0;
+    static void *sock_to_servers =0;
+
+    if( socket_create==1) return sock_to_servers;
+
+    int num_servers = count_num_servers(client_args->servers_str);
+    char **servers = create_server_names(client_args->servers_str);
+
+    socket_create=1;
+    zctx_t *ctx  = zctx_new();
+    sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
+    assert (sock_to_servers);
+    zsocket_set_identity(sock_to_servers,  client_args->client_id);
+
+
+    for(j=0; j < num_servers; j++) {    
+       char *destination = create_destination(servers[j], client_args->port);
+       int rc = zsocket_connect(sock_to_servers, (const char *)destination);
+       assert(rc==0);
+       free(destination);
+    }
+
+   return sock_to_servers;
 }
 
 

@@ -24,14 +24,14 @@ extern int s_interrupted;
 
 
 Tag *SODAW_write_get_phase(char *obj_name, unsigned int op_num, 
-                      zsock_t *sock_to_servers,  char **servers, 
-                          unsigned int num_servers, char *port)
+                      zsock_t *sock_to_servers, 
+                          unsigned int num_servers)
 {
 
 return SODAW_write_get_or_read_get_phase(
                      obj_name, "WRITE_GET",   op_num, 
-                      sock_to_servers,  servers, 
-                      num_servers, port);
+                      sock_to_servers, 
+                      num_servers);
 }
 
 
@@ -42,9 +42,7 @@ void SODAW_write_put_phase(
                       char *writer_id, 
                       unsigned int op_num, 
                       zsock_t *sock_to_servers,  
-                      char **servers, 
                       unsigned int num_servers, 
-                      char *port, 
                       Tag max_tag,    // for read it is max and for write it is new
                       EncodeData *encoded_info
                    )
@@ -99,7 +97,6 @@ void SODAW_write_put_phase(
 
      unsigned int responses =0;
      int j =0;
-     zlist_t *tag_list = zlist_new();
      
      Tag *tag;
      while (true) {
@@ -117,6 +114,7 @@ void SODAW_write_put_phase(
                 zmsg_t *msg = zmsg_recv (sock_to_servers);
 
                 zlist_t *names = zlist_new();
+
                 zhash_t* frames = receive_message_frames_at_client(msg, names);
   
 
@@ -128,7 +126,13 @@ void SODAW_write_put_phase(
                    if(DEBUG_MODE) print_out_hash_in_order(frames, names);
 
                    responses++;
-                   if(responses >= majority) break;
+                   if(responses >= majority) { 
+                       zmsg_destroy (&msg);
+                       destroy_frames(frames);
+                       zlist_purge(names);
+                       zlist_destroy(&names);
+                       break;
+                   }
                    //if(responses >= num_servers) break;
                 }
                 else{
@@ -137,23 +141,11 @@ void SODAW_write_put_phase(
                 zmsg_destroy (&msg);
                 destroy_frames(frames);
                 zlist_purge(names);
+                zlist_destroy(&names);
             }
      }
 }
 
-
-void *get_socket_servers(ClientArgs *client_args) {
-    static socket_create=0;
-    static void *sock_to_servers =0;
-
-    if( socket_create==1) return sock_to_servers;
-    socket_create=1;
-    zctx_t *ctx  = zctx_new();
-    sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
-    assert (sock_to_servers);
-    zsocket_set_identity(sock_to_servers,  client_args->client_id);
-    return sock_to_servers;
-}
 
 
 // SODAW write
@@ -170,8 +162,11 @@ bool SODAW_write(
     int j;
  //   char *myb64 = (char *)malloc(strlen(payload));
   //  b64_decode(payload, myb64);
+
     int num_servers = count_num_servers(client_args->servers_str);
+/*
     char **servers = create_server_names(client_args->servers_str);
+*/
 
 #ifndef DEBUG_MODE
     printf("\t\tObj name       : %s\n",obj_name);
@@ -193,9 +188,7 @@ bool SODAW_write(
 
 //    free(myb64);
     
-    void *sock_to_servers;
-
-    sock_to_servers= get_socket_servers(client_args);
+    void *sock_to_servers= get_socket_servers(client_args);
 /*
     zctx_t *ctx  = zctx_new();
     void *sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
@@ -208,13 +201,15 @@ bool SODAW_write(
     int rc = zmq_setsockopt(socket, ZMQ_SNDBUF, &affinity, sizeof affinity);
 */
 
-
+/*
     for(j=0; j < num_servers; j++) {    
        char *destination = create_destination(servers[j], client_args->port);
        int rc = zsocket_connect(sock_to_servers, (const char *)destination);
        assert(rc==0);
        free(destination);
     }
+*/
+
 
    printf("WRITE %d\n", op_num);
    printf("\tWRITE_GET (WRITER)\n");
@@ -223,9 +218,7 @@ bool SODAW_write(
                       obj_name,  
                       op_num, 
                       sock_to_servers, 
-                      servers, 
-                      num_servers, 
-                      client_args->port
+                      num_servers
                   );
 
 
@@ -240,9 +233,8 @@ bool SODAW_write(
                           obj_name, 
                           client_args->client_id,  
                           op_num, 
-                          sock_to_servers, servers,
+                          sock_to_servers,
                           num_servers, 
-                          client_args->port, 
                           new_tag,
                           encoded_data
                         );
@@ -251,9 +243,9 @@ bool SODAW_write(
 /*
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
-*/
     destroy_server_names(servers, num_servers);
 
+*/
     return true;
 }
 

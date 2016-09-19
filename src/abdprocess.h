@@ -45,4 +45,5 @@ char * get_random_data(unsigned int filesize);
 
 bool is_equal(char *payload1, char*payload2, unsigned int size) ;
 
+void destroy_server_args(Server_Args *server_args) ;
 #endif
