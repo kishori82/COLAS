@@ -131,15 +131,14 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
   //  int count = 0; 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
-        printf("waiting to receive messages\n");
+        printf("\twaiting for message\n");
         int rc = zmq_poll(items, 1, -1);
-        printf("received message\n");
         if( rc < 0 || s_interrupted==1) {
              exit(0);
         }
         
         if (items[0].revents & ZMQ_POLLIN) {
-           printf("received message\n");
+           printf("\treceived message\n");
 
            zmsg_t *msg = zmsg_recv(worker);
 
