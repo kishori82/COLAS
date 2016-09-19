@@ -343,6 +343,8 @@ void print_out_hash(zhash_t *frames) {
               printf("%s\n", buf);
           }
      }
+     zlist_purge(keys);
+     zlist_destroy(&keys);
 }
 
 
@@ -353,7 +355,7 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
      char *key;
      for( key = (char *)zlist_first(names);  key != NULL; key = (char *)zlist_next(names)) {
           if( strcmp(key, OPNUM)==0) {
-            temp_int=get_uint_frame(frames, key);
+            temp_int=get_uint_frame(frames, key); 
             printf("\t\t\t%s : %d\n", key, temp_int);
             assert(temp_int >=0);
           }
@@ -365,23 +367,27 @@ void print_out_hash_in_order(zhash_t *frames, zlist_t* names) {
               get_string_frame(buf, frames, key);
               printf("\t\t\t%s : %s\n", key, buf);
           }
-
      }
+
+
 }
 
 
 
 void destroy_frames(zhash_t *frames) {
 
+     printf("\t\tDeleting frames\n");
      zlist_t *keys = zhash_keys(frames);
      char *key;
      for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
            zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);         
            if( frame!= NULL) {
+              printf("\t\t\t%s : %d\n",key, zframe_size(frame));
               zhash_delete(frames, key);
               if( zframe_is(frame) ) zframe_destroy(&frame);
            }
      }
+     printf("\t\t\t%s : %d\n","frames", zhash_size(frames));
      zlist_destroy(&keys);
      zhash_destroy(&frames);
 }
@@ -450,8 +456,10 @@ int print_object_hash(zhash_t *object_hash) {
               printf("\t\t Tag: %s :   %lu\n", key1, zframe_size((zframe_t *)zhash_lookup(single_object_hash, key1)));
            }
            zlist_purge(keys1);
+           zlist_destroy(&keys1);
      }
      printf("\t ========================================\n");
      zlist_purge(keys);
+     zlist_destroy(&keys);
      return 1;
 }

@@ -1,4 +1,4 @@
-CC=gcc -g
+CC=gcc -g -DDEBUG
 
 
 

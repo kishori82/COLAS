@@ -141,16 +141,13 @@ static void send_reader_coded_element(void *worker, char *reader,
     zframe_send(&phase_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
   
     tag_to_string(tagw, tag_w_buff) ;
-
-    zframe_t *tag_frame = zframe_new(tag_w_buff, strlen(tag_w_buff));
-
     if(DEBUG_MODE) printf("\t\ttag : %s\n", tag_w_buff);
+    zframe_t *tag_frame = zframe_new(tag_w_buff, strlen(tag_w_buff));
+    zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
     if(DEBUG_MODE) printf("\t\tcoded elem : %lu\n", zframe_size(cs));
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
-
     zframe_t *cs_frame = zframe_dup(cs);
-    if(DEBUG_MODE) printf("\t\tcoded elem : %lu\n", zframe_size(cs));
     zframe_send(&cs_frame, worker, ZFRAME_REUSE);
 
     zframe_destroy(&reader_frame);
@@ -186,6 +183,8 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
     get_string_frame(ID, frames, "ID");
     get_string_frame(object_name, frames, OBJECT);
  
+
+
     // loop through all the existing (r, tr) pairs 
     zlist_t *r_tr_keys = zhash_keys(readerc);
     int empty = zhash_size(readerc);
@@ -228,7 +227,9 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
          } 
     }
-    //zlist_destroy(&r_tr_keys);
+
+    zlist_purge(r_tr_keys);
+    zlist_destroy(&r_tr_keys);
 
     //read the local tag
     Tag tag;
@@ -240,17 +241,19 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         zhash_t *temp_hash_hash = zhash_lookup(hash_object_SODAW, object_name);
 
         // get the stored keys (tags essentially)
-        zlist_t *keys = zhash_keys (temp_hash_hash);
+        zlist_t *keys = zhash_keys(temp_hash_hash);
 
         // actually there should be only one key
         void *key = zlist_first(keys);  
-      //  zlist_destroy(&keys);  
 
         assert(key!=NULL);  // should not be empyt
           
         // get the  objects stored, i.e., the stored local value
         zframe_t *item = (zframe_t *)zhash_lookup(temp_hash_hash,key);
         assert(item!=NULL);
+
+        zlist_purge(keys);
+        zlist_destroy(&keys);  
 
          // discount the metadata and data  
         status->data_memory -= (float)zframe_size((zframe_t *)item);
@@ -276,8 +279,9 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
     if(DEBUG_MODE) { 
            print_object_hash(hash_object_SODAW);
      }
-     printf("\t\tsending\n");
-     send_frames_at_server(frames, worker, SEND_FINAL, 6,  SENDER, OBJECT,  ALGORITHM, PHASE, OPNUM, TAG);
+    printf("\t\tsending\n");
+
+    send_frames_at_server(frames, worker, SEND_FINAL, 6,  SENDER, OBJECT,  ALGORITHM, PHASE, OPNUM, TAG);
     return;
 }
 

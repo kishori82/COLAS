@@ -1,5 +1,5 @@
-CC=gcc 
-CPP=g++ 
+CC=gcc  -DDEBUG
+CPP=g++  -DDEBUG
 ROOT=/home/$(USER)
 
 CPPFLAGS= -g -std=c++11 -I$(ROOT)/shared_kodocpp/include

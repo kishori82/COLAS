@@ -80,7 +80,7 @@ void *server_task (void *server_args)
 
     //  Connect backend to frontend via a proxy
     zmq_proxy (frontend, backend, NULL);
-
+    printf("back\n");
     zctx_destroy (&ctx);
 
     return NULL;
@@ -92,13 +92,14 @@ static void
 server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
 {
     void *worker = zsocket_new (ctx, ZMQ_DEALER);
-
-
     zsocket_connect(worker, "inproc://backend");
-    char algorithm_name[100];
 
-    int64_t affinity = 50000;
-    int rc = zmq_setsockopt(socket, ZMQ_RCVBUF, &affinity, sizeof affinity);
+
+   int64_t affinity = 5000;
+   int rc = zmq_setsockopt(socket, ZMQ_SNDBUF, &affinity, sizeof affinity);
+   rc = zmq_setsockopt(socket, ZMQ_RCVBUF, &affinity, sizeof affinity);
+
+    char algorithm_name[100];
     server_args = (Server_Args *)_server_args;
     
     printf("Initial value size %ld\n", strlen(server_args->init_data));
@@ -127,7 +128,7 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
 
     s_catch_signals1(pipefds[1]);
 */
-
+    int count = 0; 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
     while (true) {
         printf("waiting to receive messages\n");
@@ -139,7 +140,8 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
         
         if (items[0].revents & ZMQ_POLLIN) {
            printf("received message\n");
-           zmsg_t *msg = zmsg_recv (worker);
+
+           zmsg_t *msg = zmsg_recv(worker);
 
            // receive the frames
            status->network_data += (float)zmsg_content_size(msg) ;
@@ -147,16 +149,8 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            zlist_t *frames_list = zlist_new(); 
 
            zhash_t *frames = receive_message_frames_at_server(msg, frames_list);
-           print_out_hash_in_order(frames, frames_list); printf("\n");
 
            zframe_t *s = (zframe_t *)zhash_lookup(frames, PAYLOAD);
-
-           if(s==NULL)
-              printf("payload missing\n");
-           else{
-              printf("payload is captured \n");
-            }
-
 
            get_string_frame(algorithm_name, frames, ALGORITHM);
 
@@ -173,14 +167,12 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
   
    
            if( strcmp(algorithm_name, SODAW)==0)  {
-              //zframe_t *s = zhash_lookup(frames, PAYLOAD);
-              //if( s !=NULL);
-             // printf("++++ before REceived a payload of size -- %d\n", zframe_size(s));
-
                 printf(" [[[ %s\n",server_args->server_id);
                 if(DEBUG_MODE) {
-                   //print_out_hash(frames); 
+                   print_out_hash(frames); 
+
                    printf("\t\treceiving... %s\n", server_args->server_id);  
+
                    print_out_hash_in_order(frames, frames_list);
                 }
 
@@ -189,10 +181,14 @@ server_worker (void *_server_args, zctx_t *ctx, void *pipe1)
            }
 
            zlist_purge(frames_list);
+           zlist_destroy(&frames_list);
            destroy_frames(frames);
+           zmsg_destroy(&msg); 
+           if(count++ > 1000) { zsocket_destroy(ctx, worker); exit(0); }
         }
     }
    
+    printf("done\n");
 }
 
 //int server_process(char *server_id, char *servers_str, char *port, char *init_data, Server_Status *_status)
@@ -396,7 +392,6 @@ zhash_t *receive_message_frames_at_server(zmsg_t *msg, zlist_t *names)  {
            if(names!=NULL) zlist_append(names, TAG);
           }
      }
-//     print_out_hash_in_order(frames, names); 
      return frames;
 }
 
@@ -437,11 +432,12 @@ void send_frames_at_server(zhash_t *frames, void *worker,  enum SEND_TYPE type, 
         else
             zframe_send(&frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
     }
+    va_end(valist);
 
     if(DEBUG_MODE) print_out_hash_in_order(frames, names);
 
     zlist_purge(names);
-    va_end(valist);
+    zlist_destroy(&names);
 }
 
 #endif
