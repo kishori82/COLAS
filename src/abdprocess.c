@@ -143,16 +143,12 @@ void reader_process(Parameters parameters) {
 
 void writer_process(Parameters parameters) {
     unsigned int opnum=0;
-
-    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
-    
-    unsigned int payload_size=filesize;
-
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
     for( opnum=0; opnum< 100000;opnum++) {
-       char *payload = get_random_data(filesize);
+       unsigned int payload_size = (unsigned int) ( (parameters.filesize_kb + rand()%5)*1024);
+       char *payload = get_random_data(payload_size);
        SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
 
        free(payload);
