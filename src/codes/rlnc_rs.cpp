@@ -308,6 +308,7 @@ unsigned short decode(EncodeData  *encode_data) {
        uint8_t *decoded_block =  new uint8_t[encode_data->symbol_size*encode_data->K];
        unsigned short success = FALSE;
        for(int c=0; c < encode_data->K ; c++) {
+          printf(" (b, c) = (%d, %d)\n", b, c);
           decoder.read_payload( (*encoded_data)[c][b].data());
 
           if( decoder.is_complete() ) {

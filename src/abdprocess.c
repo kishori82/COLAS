@@ -134,7 +134,6 @@ void reader_process(Parameters parameters) {
         }
         else {
             printf("ERROR: The data sets %d are NOT equal!!\n", opnum);
-            exit(0);
         }
 
        free(payload);

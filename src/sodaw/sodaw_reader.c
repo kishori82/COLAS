@@ -156,7 +156,7 @@ int get_encoded_info(zhash_t *received_data, char *decodeableKey, EncodeData *en
     zframe_t *data_frame;
     int frame_size=0, cum_size=0;;
     for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
-    //    printf("Length of data %lu\n", zframe_size(data_frame));
+        printf("Length of data %lu\n", zframe_size(data_frame));
         frame_size = zframe_size(data_frame); 
         cum_size += frame_size; 
     } 
@@ -173,7 +173,7 @@ int get_encoded_info(zhash_t *received_data, char *decodeableKey, EncodeData *en
         memcpy(encoding_info->encoded_data[i++], zframe_data(data_frame), frame_size);
     }
 
-
+    printf("number of symbols used in decoding %d\n", i);
     printf("encoded symbol size %d\n", cum_size/(encoding_info->num_blocks*encoding_info->K));
     encoding_info->encoded_symbol_size = ceil(cum_size/(encoding_info->num_blocks*encoding_info->K));
 
