@@ -51,6 +51,7 @@ char *SODAW_read_value(
 
 	char algorithm[100];
 	char phase[100];
+	char hashbuf[100];
 	char tag_str[100];
 	char *value=NULL;
 	unsigned int round;
@@ -65,6 +66,9 @@ char *SODAW_read_value(
 	unsigned int majority =  ceil(((float)num_servers+1)/2);
 	unsigned int responses =0;
 	zlist_t *tag_list = zlist_new();
+
+
+    zhash_t *seen_values = zhash_new();
 
 	zhash_t *received_data= zhash_new();
     char *decodeableKey ;
@@ -95,10 +99,15 @@ char *SODAW_read_value(
 			}
 
 
-			if(compare_tags(tag, read_tag) >=0 && strcmp(phase, READ_VALUE)==0) {
+			if(  compare_tags(tag, read_tag) >=0 && strcmp(phase, READ_VALUE)==0) {
 				if(DEBUG_MODE) print_out_hash_in_order(frames, names);
 
-				zframe_t *payload_frame = (zframe_t *)zhash_lookup(frames, PAYLOAD);
+		        zframe_t *payload_frame = (zframe_t *)zhash_lookup(frames, PAYLOAD);
+                sprintf(hashbuf,"%x", simple_hash(zframe_data(payload_frame), zframe_size(payload_frame)));
+
+                if( zhash_lookup(seen_values, hashbuf) != NULL ) continue;
+
+                zhash_insert(seen_values, hashbuf, (void *)100);
 
 				zlist_t *coded_elements = (zlist_t *)zhash_lookup(received_data, tag_str);
 				assert(coded_elements!=NULL);
@@ -112,11 +121,12 @@ char *SODAW_read_value(
 			       zmsg_destroy (&msg);
 			       zlist_purge(names);
 			       destroy_frames(frames);
+                   clear_hash(seen_values);
                    break;
                 }
 			}
 			else {
-				printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
+				//printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
 			}
 			zmsg_destroy (&msg);
 			zlist_purge(names);

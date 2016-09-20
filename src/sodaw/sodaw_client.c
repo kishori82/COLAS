@@ -57,7 +57,7 @@ Tag *SODAW_write_get_or_read_get_phase(
             get_string_frame(phase, frames, PHASE);
 
         //    print_out_hash(frames);
-             printf("=======================\n");
+ //            printf("=======================\n");
        //   print_out_hash_in_order(frames, names);
             zframe_t *r = zhash_lookup(frames, PHASE); 
 /*
@@ -72,12 +72,15 @@ Tag *SODAW_write_get_or_read_get_phase(
             round = get_int_frame(frames, OPNUM);
 
             zframe_t *s = zhash_lookup(frames, TAG); 
+            printf("CURRENT OPNUM %d - INCOMING OPNUM %d \n", op_num, round);
+/*
             if( s==NULL) {
                  printf("a null tag\n");
             }
             else{
                  printf("a non-null tag of size %lu\n", zframe_size(s));
             }
+*/
 
             get_string_frame(tag_str, frames, TAG);
 
@@ -100,7 +103,7 @@ Tag *SODAW_write_get_or_read_get_phase(
                 //if(responses >= num_servers) break;
             }
             else{
-                printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
+             //   printf("\t\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
 
             }
 

@@ -147,6 +147,8 @@ int  get_int_frame(zhash_t *frames, const char *str);
 
 void destroy_frames(zhash_t *frames);
 
+void clear_hash(zhash_t *hash) ;
+
 enum SEND_TYPE {SEND_MORE, SEND_FINAL};
 
 
