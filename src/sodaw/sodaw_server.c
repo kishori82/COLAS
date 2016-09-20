@@ -202,7 +202,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
             printf("Sending CODED_ELEMENT\n"); 
             send_reader_coded_element(worker, value->reader_id, 
                                       object_name, algorithm, READ_VALUE,  
-                                      value->t_r, payload
+                                      tag_w, payload
                                      );
 
 /*
