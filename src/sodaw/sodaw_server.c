@@ -200,11 +200,13 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
             printf("\t\tsending coded element\n");
             
             printf("Sending CODED_ELEMENT\n"); 
+/*
             send_reader_coded_element(worker, value->reader_id, 
                                       object_name, algorithm, READ_VALUE,  
                                       tag_w, payload
                                      );
 
+*/
 /*
 
             send_frames_at_server(frames, worker, SEND_FINAL, 6, 
@@ -220,11 +222,13 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
              char *types[] = {OBJECT, ALGORITHM, PHASE, META_TAG, 
                                META_SERVERID, META_READERID};
      
+/*
              send_multicast_servers(
                    server_args->sock_to_servers, server_args->num_servers,
                    types,  6, object_name, "SODAW", READ_DISPERSE, 
                    tag_w_str, h->serverid, h->readerid
              ); 
+*/
 
          } 
     }
@@ -514,11 +518,14 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
                                META_SERVERID, META_READERID};
      
               tag_to_string(h->t_r, tag_buf_str);
+
+/*
               send_multicast_servers(
                    server_args->sock_to_servers, server_args->num_servers,
                    types,  6, object_name, "SODAW", READ_DISPERSE, 
                    tag_buf_str, h->serverid, h->readerid
               ); 
+*/
               //  metadata_disperse(object_name, algorithm_name,  h);
           }
      }
