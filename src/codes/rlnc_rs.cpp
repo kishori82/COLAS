@@ -172,7 +172,6 @@ unsigned short encode(EncodeData *encode_data) {
         }
     }
 
-
    encode_data->encoded_symbol_size = encoded_symbol_size;
    encode_data->num_blocks = block_num;
    encode_data->padded_data_size = data_encoded - encode_data->raw_data_size;
