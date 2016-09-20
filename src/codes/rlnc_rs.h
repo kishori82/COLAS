@@ -43,6 +43,7 @@ unsigned short encode(EncodeData *encode_data) ;
 
 unsigned short decode(EncodeData *encode_data) ;
 
+unsigned short checking_decoding(EncodeData *encoded_info);
 #ifdef __cplusplus
    }
 #endif

@@ -149,8 +149,14 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
     if( frames!=NULL) free(frames);
 }
 
-void send_multisend_servers(void *sock_to_servers, int num_servers,  uint8_t **messages, int msg_size, 
-        char *names[],  int n, ...) {
+void send_multisend_servers(
+          void *sock_to_servers, 
+          int num_servers,  
+          uint8_t **messages, 
+          int msg_size, 
+          char *names[],  
+          int n, ...) 
+  {
     va_list valist;
     int i =0, j;
     void **values = (void *)malloc(n*sizeof(void *));
@@ -192,7 +198,10 @@ void send_multisend_servers(void *sock_to_servers, int num_servers,  uint8_t **m
          zframe_send( &frames[j], sock_to_servers, ZFRAME_REUSE + ZFRAME_MORE);
        }
         // a different coded element for each different server
+
+
        frames[n]= zframe_new(messages[i], msg_size);
+
        assert( zframe_size(frames[n])==msg_size);
 
    //    frames[n]= zframe_new( payload, strlen(pay));

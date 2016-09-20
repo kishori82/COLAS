@@ -342,6 +342,15 @@ unsigned short decode(EncodeData  *encode_data) {
 
 
 
+unsigned short checking_decoding(EncodeData *encoded_data){
+  unsigned short failed= 1;
+  for(int index =0; index < 2; index++)  {
+    encoded_data->offset_index = index;
+    failed = decode(encoded_data); 
+    if(failed==0) return 0;
+  }
+  return failed;
+}
 
 
 #endif

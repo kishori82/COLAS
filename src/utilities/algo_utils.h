@@ -155,5 +155,6 @@ void print_out_hash(zhash_t* frames);
 void print_out_hash_in_order(zhash_t* frames, zlist_t *names);
 
 
+uint32_t simple_hash(const void *buf, size_t buflength) ;
 #endif
 

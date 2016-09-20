@@ -60,6 +60,7 @@ Tag *SODAW_write_get_or_read_get_phase(
              printf("=======================\n");
        //   print_out_hash_in_order(frames, names);
             zframe_t *r = zhash_lookup(frames, PHASE); 
+/*
             if( r==NULL) {
                  printf("a null phase  %s\n", phase);
             }
@@ -67,6 +68,7 @@ Tag *SODAW_write_get_or_read_get_phase(
                  printf("a non-null phase  %s\n", phase);
                  printf("a non-null tag of size %lu\n", zframe_size(r));
             }
+*/
             round = get_int_frame(frames, OPNUM);
 
             zframe_t *s = zhash_lookup(frames, TAG); 

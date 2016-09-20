@@ -65,9 +65,17 @@ void SODAW_write_put_phase(
     if(encode(encoded_info)==FALSE) {
         printf("Failed to encode data \n"); exit(0);
     }
+    else{
+        if(checking_decoding(encoded_info)==FALSE) {
+            printf("Failed to decode encoded data \n");
+            exit(0);
+        }
+        else{
+            printf("Successfully decoded encoded data \n"); 
+        }
+    }
     
-
-    //ENCODED_DATA  encoded_data_info = encode(N, K, symbol_size, payload, strlen(payload), reed_solomon) ;
+     printf("waiting\n");
 //    destroy_encoded_data(encoded_data_info);
 
     unsigned int round;
@@ -76,9 +84,19 @@ void SODAW_write_put_phase(
 
     tag_to_string(max_tag, tag_str); 
 
-
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
     int per_server_payload_size =  encoded_info->num_blocks*encoded_info->encoded_symbol_size;
+
+    if(N==3) {
+
+        sprintf(tag_str, "%s-%x-%x-%x", tag_str, 
+                         simple_hash(encoded_info->encoded_data[0], per_server_payload_size),
+                         simple_hash(encoded_info->encoded_data[1], per_server_payload_size),
+                         simple_hash(encoded_info->encoded_data[2], per_server_payload_size)
+               );
+
+
+    }
 
     send_multisend_servers(
                     sock_to_servers, num_servers, 
@@ -246,6 +264,7 @@ bool SODAW_write(
     destroy_server_names(servers, num_servers);
 
 */
+    printf("done\n");
     return true;
 }
 

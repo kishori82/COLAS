@@ -170,7 +170,10 @@ int get_encoded_info(zhash_t *received_data, char *decodeableKey, EncodeData *en
     i=0;
     for(data_frame= (zframe_t *) zlist_first(coded_elements); data_frame!=NULL; data_frame=zlist_next(coded_elements)) {
         frame_size = zframe_size(data_frame); 
-        memcpy(encoding_info->encoded_data[i++], zframe_data(data_frame), frame_size);
+        printf("-%x\n", simple_hash(zframe_data(data_frame), frame_size));
+        memcpy(encoding_info->encoded_data[i], zframe_data(data_frame), frame_size);
+        printf("+%x\n", simple_hash(encoding_info->encoded_data[i], frame_size));
+        i++;
     }
 
     printf("number of symbols used in decoding %d\n", i);
