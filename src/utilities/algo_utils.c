@@ -89,6 +89,7 @@ char **create_server_names(char *servers_str) {
     return servers;
 }
 
+//accepted Create a destructor for this memory
 void  destroy_server_names(char **servers, int num_servers) {
    int i =0; 
    for(i=0; i < num_servers; i++) {

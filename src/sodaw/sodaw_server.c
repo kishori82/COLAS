@@ -61,7 +61,7 @@ MetaData *MetaData_create(Tag tag, char  *serverid, char *readerid) {
 }
 
 RegReader *RegReader_create(Tag tag, char *readerid, int opnum) {
-     char buf[100];
+     char buf[BUFSIZE];
      RegReader *h = (RegReader *)malloc(sizeof(RegReader));
 
      h->t_r.z= tag.z;
@@ -82,7 +82,7 @@ void  *reader_op_create(char *buf, char *readerid, int opnum) {
 
 
  char *MetaData_keystring(MetaData *m) {
-    char buf[100];
+    char buf[BUFSIZE];
     int size = 0; 
     tag_to_string(m->t_r, buf);
     size += strlen(buf);
@@ -103,7 +103,7 @@ void  *reader_op_create(char *buf, char *readerid, int opnum) {
 }
 
 char * RegReader_keystring(RegReader *m) {
-    char buf[100];
+    char buf[BUFSIZE];
     int size = 0; 
     tag_to_string(m->t_r, buf);
     size += strlen(buf);
@@ -122,7 +122,7 @@ static void send_reader_coded_element(void *worker, char *reader,
                                       char *object_name, 
                                       char *algorithm, char *phase,  
                                       Tag tagw, zframe_t *cs) {
-    char tag_w_buff[100];
+    char tag_w_buff[BUFSIZE];
 
     if(DEBUG_MODE) printf("\t\treaderid : %s\n", reader);
     zframe_t *reader_frame = zframe_new(reader, strlen(reader));
@@ -159,11 +159,11 @@ static void send_reader_coded_element(void *worker, char *reader,
 
 //void algorithm_SODAW_WRITE_PUT(char *ID,  zmsg_t *msg, zhash_t *frames,  void *worker, char *client, char *object_name, char *algorithm) {
 void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
-    char tag_w_str[100];
-    char algorithm[100];
-    char sender[100];
-    char object_name[100];
-    char ID[100];
+    char tag_w_str[BUFSIZE];
+    char algorithm[BUFSIZE];
+    char sender[BUFSIZE];
+    char object_name[BUFSIZE];
+    char ID[BUFSIZE];
 
     //create the tag t_w as a string 
     Tag tag_w; 
@@ -276,8 +276,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 
         printf("deleted\n");
 
-
-
         item = (zframe_t *)zhash_lookup(temp_hash_hash,key);
         assert(item==NULL);
         //insert the new tag and coded value
@@ -290,6 +288,11 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         //count the data size now
         status->metadata_memory +=  strlen(tag_w_str);
         status->data_memory += (float) size;
+
+        //accepted This is the leak.
+        //accepted Destroy the list after everything is done
+        zlist_purge(keys);
+        zlist_destroy(&keys);
     }
     if(DEBUG_MODE) { 
         print_object_hash(hash_object_SODAW);
@@ -301,10 +304,10 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
 }
 
 void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
-    char tag_r_str[100];
-    char readerid[100];
-    char reader_op[100];
-    char ID[100];
+    char tag_r_str[BUFSIZE];
+    char readerid[BUFSIZE];
+    char reader_op[BUFSIZE];
+    char ID[BUFSIZE];
 
     printf("\tREAD_COMPLETE..\n");
     Tag tag_r; 
@@ -346,11 +349,11 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
 
 
 void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
-    char tag_str[100];
-    char r_tag_pair_str[100];
-    char serverid[100];
-    char readerid[100];
-    char object_name[100];
+    char tag_str[BUFSIZE];
+    char r_tag_pair_str[BUFSIZE];
+    char serverid[BUFSIZE];
+    char readerid[BUFSIZE];
+    char object_name[BUFSIZE];
 
     printf("\tREAD_DISPERSE...\n");
     get_string_frame(object_name, frames, OBJECT);
@@ -398,8 +401,8 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
 
 
 void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,const  char *phase,  void *worker) {
-     char object_name[100];
-     char tag_buf[100];
+     char object_name[BUFSIZE];
+     char tag_buf[BUFSIZE];
 
      printf("\t%s\n", phase);
      get_string_frame(object_name, frames, OBJECT);
@@ -429,14 +432,14 @@ void algorithm_SODAW_READ_GET(zhash_t *frames,  void *worker) {
 
 
 void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
-     char buf[100];
-     char _reader[100];
-     char reader_op[100];
-     char algorithm_name[100];
-     char object_name[100];
-     char tag_loc_str[100];
-     char tag_inc_str[100];
-     char tag_buf_str[100];
+     char buf[BUFSIZE];
+     char _reader[BUFSIZE];
+     char reader_op[BUFSIZE];
+     char algorithm_name[BUFSIZE];
+     char object_name[BUFSIZE];
+     char tag_loc_str[BUFSIZE];
+     char tag_inc_str[BUFSIZE];
+     char tag_buf_str[BUFSIZE];
 
      printf("\tREAD_VALUE\n");
      Tag tag0;
@@ -577,8 +580,8 @@ zlist_t *metadata_with_reader(zhash_t *metadata, char *reader) {
 
 zlist_t *metadata_with_tag_reader(zhash_t *metadata, Tag tag, char *reader) {
 
-    char tag_str[100];
-    char tag_str_meta[100];
+    char tag_str[BUFSIZE];
+    char tag_str_meta[BUFSIZE];
     zlist_t *metadata_keys = zhash_keys(metadata);
     zlist_t *relevant_keys = zlist_new();
 
@@ -622,16 +625,18 @@ void create_metadata_sending_sockets() {
         free(destination);
     }
    
+    destroy_server_names(servers, num_servers);
+
     server_args->sock_to_servers = sock_to_servers;
 }
 
 
 
 void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
-     char phasebuf[100];
-     char tag[100]; 
-     char buf[100]; 
-     char object_name[100];
+     char phasebuf[BUFSIZE];
+     char tag[BUFSIZE]; 
+     char buf[BUFSIZE]; 
+     char object_name[BUFSIZE];
      int  round;
 
      if(initialized==0) initialize_SODAW();
@@ -640,34 +645,24 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
      get_string_frame(object_name, frames, OBJECT);
      get_string_frame(buf, frames, SENDER);
 
-
+     static int count =0;
      if( has_object(hash_object_SODAW, object_name)==0) {
          create_object(hash_object_SODAW, object_name, "SODAW", server_args->init_data, status);
      }
 
+      if( count++ > 10000 ) exit(0);
+
       if( strcmp(phasebuf, WRITE_GET)==0)  {
-     //      printf("\tSODAW WRITE_GET from client %s\n", buf);
            algorithm_SODAW_WRITE_GET(frames,  worker);
-      }
-
-      if( strcmp(phasebuf, WRITE_PUT)==0)  {
+      } else if( strcmp(phasebuf, WRITE_PUT)==0)  {
            algorithm_SODAW_WRITE_PUT(frames, worker);
-      }
-
-      if( strcmp(phasebuf, READ_GET)==0)  {
-      //     printf("\tSODAW READ_GET\n");
+      } else if( strcmp(phasebuf, READ_GET)==0)  {
            algorithm_SODAW_READ_GET(frames, worker);
-      }
-
-      if( strcmp(phasebuf, READ_VALUE)==0)  {
+      } else if( strcmp(phasebuf, READ_VALUE)==0)  {
            algorithm_SODAW_READ_VALUE(frames, worker);
-      }
-
-      if( strcmp(phasebuf, READ_COMPLETE)==0)  {
+      } else if( strcmp(phasebuf, READ_COMPLETE)==0)  {
            algorithm_SODAW_READ_COMPLETE(frames, worker);
-      }
-
-      if( strcmp(phasebuf, READ_DISPERSE)==0)  {
+      } else if( strcmp(phasebuf, READ_DISPERSE)==0)  {
            algorithm_SODAW_READ_DISPERSE(frames, worker);
       }
  }

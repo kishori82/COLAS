@@ -21,3 +21,5 @@ system_controller/system_management
 *.la
 
 system_controller/log*
+massif*
+callgrind*

@@ -28,7 +28,6 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *server_args) ;
 
 void SODAW_initialize();
 
-
 char *create_a_key_from_metadata(MetaData *m) ;
 
 char *create_a_key_from_readerc(RegReader *m);
