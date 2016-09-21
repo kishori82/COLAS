@@ -141,6 +141,13 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
     printf("\n");
     if(DEBUG_MODE)  printf("\n");
 
+		//!! Do we not need to free the inner loopo?
+//!! potential memory conflict
+		/*
+    for(i=0; i < n; i++ ) {
+    	free(values[i]); 
+		}
+*/
     if( values!=NULL) free(values); 
 
     for(i=0; i < n; i++ ) {
@@ -158,27 +165,27 @@ void send_multisend_servers(
           int n, ...) 
   {
     va_list valist;
-    int i =0, j;
-    void **values = (void *)malloc(n*sizeof(void *));
+    int i, j;
+	
+		//!! cast...? We dont need casts in C, only in C++???
+    void **values = malloc(n*sizeof(void *));
     assert(values!=NULL);
 
     zframe_t **frames = (zframe_t **)malloc( (n+1)*sizeof(zframe_t *));
     assert(frames!=NULL);
-
    
     va_start(valist, n);
     for(i=0; i < n; i++ ) {
 
         if( strcmp(names[i], OPNUM)==0)   {
            values[i] = (void *)va_arg(valist, unsigned  int *); 
-        }
-        else
+        } else {
            values[i] = va_arg(valist, void *); 
+				}
 
         if( strcmp(names[i], OPNUM)==0) {
             frames[i]= zframe_new((const void *)values[i], sizeof(unsigned int));
-        }
-        else {
+        } else {
             frames[i]= zframe_new(values[i], strlen((char *)values[i]));
         }
     }
@@ -199,23 +206,29 @@ void send_multisend_servers(
        }
         // a different coded element for each different server
 
-
        frames[n]= zframe_new(messages[i], msg_size);
-
        assert( zframe_size(frames[n])==msg_size);
 
    //    frames[n]= zframe_new( payload, strlen(pay));
        if(DEBUG_MODE) printf("\t\t\tFRAME%d :%s  %d\n", n, PAYLOAD,  msg_size );
        zframe_send( &frames[n], sock_to_servers, ZFRAME_REUSE);
        if(DEBUG_MODE)  printf("\n");
+       zframe_destroy(&frames[n]);
     }
 
+		
+		//!! Inner loop of buffers not freed
+//!! potential memory conflict
+/*
+		for(i=0; i<n; i++){
+    	free(values[i]);
+		}
+*/
     if( values!=NULL) free(values); 
 
-    for(i=0; i < n+1; i++ ) {
-       zframe_destroy(frames+i);
+    for(i=0; i < n; i++ ) {
+       zframe_destroy(&frames[i]);
     }
-
     if( frames!=NULL) free(frames);
 }
 
@@ -341,5 +354,3 @@ void *get_socket_servers(ClientArgs *client_args) {
 
    return sock_to_servers;
 }
-
-

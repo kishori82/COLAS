@@ -260,6 +260,8 @@ bool SODAW_write(
                         );
 
 
+//!! Why was this turned off? We need to destroy the socket or else it becomes a memory leak
+// as we will constantly generate a new one
 /*
     zsocket_destroy(ctx, sock_to_servers);
     zctx_destroy(&ctx);
