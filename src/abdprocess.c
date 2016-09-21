@@ -145,10 +145,14 @@ void writer_process(Parameters parameters) {
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
-    for( opnum=0; opnum< 100000;opnum++) {
+    for( opnum=0; opnum< 500;opnum++) {
        unsigned int payload_size = (unsigned int) ( (parameters.filesize_kb + rand()%5)*1024);
        char *payload = get_random_data(payload_size);
-       SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
+       if( parameters.algorithm==abd)
+           ABD_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
+
+       if( parameters.algorithm==sodaw)
+           SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);       
 
        free(payload);
     }

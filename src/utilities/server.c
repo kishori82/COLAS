@@ -152,7 +152,7 @@ server_worker (void *_server_args, zctx_t *ctx)
             zmsg_destroy(&msg); 
 
             //!!
-            if(count++ > 1000) { zsocket_destroy(ctx, worker); exit(0); }
+       //     if(count++ > 1000) { zsocket_destroy(ctx, worker); exit(0); }
         }
     }
     printf("done\n");

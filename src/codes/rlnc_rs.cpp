@@ -348,6 +348,7 @@ unsigned short checking_decoding(EncodeData *encoded_data){
     encoded_data->offset_index = index;
     failed = decode(encoded_data); 
     if(failed==0) return 0;
+    free(encoded_data->decoded_data);
   }
   return failed;
 }

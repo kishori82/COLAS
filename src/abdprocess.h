@@ -27,6 +27,7 @@ typedef struct _Parameters {
     enum ProcessType processtype;
 } Parameters;
 
+
 void setDefaults(Parameters *parameters);
 
 unsigned int readParameters(int argc, char *argv[], Parameters *parameters);

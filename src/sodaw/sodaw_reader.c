@@ -302,6 +302,7 @@ char *SODAW_read(
 	free(read_tag);
 
 
+//!! Why was this turned off? Socket generates a memory leak
 /*
 	zsocket_destroy(ctx, sock_to_servers);
 	zctx_destroy(&ctx);
