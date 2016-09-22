@@ -271,11 +271,6 @@ bool SODAW_write(
     printf("done\n");
     return true;
 }
-
-
-
-
-
 #endif
 
 
@@ -311,7 +306,6 @@ int main (void)
                      "172.17.0.2"
                      };
 
-
    unsigned int num_servers = 1;
    char port[]= {"8081"};
 
@@ -329,8 +323,5 @@ int main (void)
 //   zclock_sleep(50*1000); 
    return 0;
 }
-
-
-
 
 #endif

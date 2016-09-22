@@ -175,6 +175,7 @@ void send_multisend_servers(
     assert(frames!=NULL);
    
     va_start(valist, n);
+    // for n arguments
     for(i=0; i < n; i++ ) {
 
         if( strcmp(names[i], OPNUM)==0)   {
@@ -193,8 +194,8 @@ void send_multisend_servers(
 
     // it to all servers in a round robin fashion
     if( DEBUG_MODE) printf("\tsending ..\n");
-    for(i=0; i < num_servers; i++) {
-       for(j=0; j < n; j++) {
+    for(i=0; i < num_servers; i++) {  // one server at a time
+       for(j=0; j < n; j++) { //send the first n arguments
           if(DEBUG_MODE) {
             if( strcmp(names[j], OPNUM)==0)  {
               if(DEBUG_MODE) { printf("\t\t\tFRAME%d :%s  %d\n", j, names[j], *((unsigned int *)values[j]) ); }
@@ -211,10 +212,11 @@ void send_multisend_servers(
 
    //    frames[n]= zframe_new( payload, strlen(pay));
        if(DEBUG_MODE) printf("\t\t\tFRAME%d :%s  %d\n", n, PAYLOAD,  msg_size );
-       zframe_send( &frames[n], sock_to_servers, ZFRAME_REUSE);
+       //zframe_send( &frames[n], sock_to_servers, ZFRAME_REUSE);
+       zframe_send( &frames[n], sock_to_servers, 0);
        if(DEBUG_MODE)  printf("\n");
        zframe_destroy(&frames[n]);
-    }
+    } //for a server end
 
 		
 		//!! Inner loop of buffers not freed
@@ -229,6 +231,7 @@ void send_multisend_servers(
     for(i=0; i < n; i++ ) {
        zframe_destroy(&frames[i]);
     }
+
     if( frames!=NULL) free(frames);
 }
 
