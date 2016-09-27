@@ -14,9 +14,9 @@
 #include "algo_utils.h"
 
 typedef struct _client_Args {
-      char client_id[BUFSIZE];
-      char *servers_str; 
-      char port[10];
+    char client_id[BUFSIZE];
+    char *servers_str;
+    char port[10];
 } ClientArgs;
 
 

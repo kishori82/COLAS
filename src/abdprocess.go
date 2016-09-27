@@ -78,7 +78,7 @@ func main() {
 
 	if usage_err == true {
 		usage()
-		os.Exit(9)
+		os.Exit(1)
 	}
 
 	if proc_type == 0 {

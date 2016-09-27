@@ -54,6 +54,7 @@
 #define BUFSIZE 100
 #define PAYLOADBUF_SIZE 3000
 #define SYMBOL_SIZE 1024
+#define PORT "8081"
 
 int s_interrupted;
 
@@ -70,8 +71,8 @@ typedef struct  _TAG_VALUE {
 
 
 
-enum INSERT_DATA_POLICY{
-   force, yield
+enum INSERT_DATA_POLICY {
+    force, yield
 };
 
 
@@ -126,7 +127,7 @@ void string_to_tag(char *str, Tag *tag) ;
 void tag_to_string(Tag tag, char *buf) ;
 
 Tag *get_max_tag(zlist_t *tag_list) ;
-     
+
 void free_items_in_list( zlist_t *list) ;
 
 int  get_object_tag(zhash_t *hash, char * object_name, Tag *tag) ;
@@ -158,5 +159,14 @@ void print_out_hash_in_order(zhash_t* frames, zlist_t *names);
 
 
 uint32_t simple_hash(const void *buf, size_t buflength) ;
+
+void insertIntoHash(const char* TYPE,
+                    zmsg_t *msg,
+                    zhash_t *frames);
+
+void insertIntoHashAndList(const char* TYPE,
+                           zmsg_t *msg,
+                           zhash_t *frames,
+                           zlist_t *names);
 #endif
 

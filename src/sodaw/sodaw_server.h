@@ -1,25 +1,26 @@
 #ifndef _SODAW_SERVER
 #define _SODAW_SERVER
+
 #include "server.h"
 #include <algo_utils.h>
 
 typedef struct _R_C {
-   Tag t_r;
-   char *reader_op;
-   char *reader_id;
+    Tag t_r;
+    char *reader_op;
+    char *reader_id;
 } RegReader;
 
 
 typedef struct _METADATA {
-   Tag t_r;
-   char *readerid;
-   char *serverid;
+    Tag t_r;
+    char *readerid;
+    char *serverid;
 } MetaData;
 
 
-void  destroy_regreader(RegReader *r_tr); 
+void  destroy_regreader(RegReader *r_tr);
 
-void  destroy_metadata(MetaData *r_tr); 
+void  destroy_metadata(MetaData *r_tr);
 
 //void algorithm_ABD_WRITE_VALUE( zmsg_t *msg, void *worker, char *object_name) ;
 //void algorithm_ABD_GET_TAG( zmsg_t *msg, void *worker, char *object_name) ;

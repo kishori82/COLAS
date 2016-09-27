@@ -1,0 +1,12 @@
+- Validate by running the tests
+- Validate correctness of the SODAW algorithm
+- Refactor SODAW to have everything passable as arguments, needs to run smoothly
+- Test if memory usage is constant
+- Test with docker
+- Test with COLAS cli
+
+- Pass on SODAW refactored design onto ABD
+- Add the necessary SODA module
+- Add the UDP modules
+
+- refactor the abdprocess.go with urfave cli
