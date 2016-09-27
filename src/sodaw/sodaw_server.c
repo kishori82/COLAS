@@ -641,7 +641,7 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
         create_object(hash_object_SODAW, object_name, "SODAW", server_args->init_data, status);
     }
 
-    if( count++ > 10000 ) exit(EXIT_FAILURE);
+//    if( count++ > 10000 ) exit(EXIT_FAILURE);
 
     if( strcmp(phasebuf, WRITE_GET)==0)  {
         algorithm_SODAW_WRITE_GET(frames,  worker);
