@@ -39,9 +39,9 @@ void *server_task (void *server_args) {
     zctx_t *ctx = zctx_new ();
     void *frontend = zsocket_new(ctx, ZMQ_ROUTER);
 
-char str[20];
-strcpy(str, "tcp://*:");
-strcat(str, PORT);
+    char str[20];
+    strcpy(str, "tcp://*:");
+    strcat(str, PORT);
 
     zsocket_bind(frontend, str);
 

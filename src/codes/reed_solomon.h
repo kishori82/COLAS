@@ -9,6 +9,6 @@ extern "C" {
 int demo_main();
 
 #ifdef __cplusplus
-   }
+}
 #endif
 #endif

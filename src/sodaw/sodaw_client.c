@@ -78,7 +78,7 @@ Tag *SODAW_write_get_or_read_get_phase (char *obj_name,
                     destroy_frames(frames);
                     break;
                 }
-            } 
+            }
             zmsg_destroy (&msg);
             zlist_purge(names);
             zlist_destroy(&names);

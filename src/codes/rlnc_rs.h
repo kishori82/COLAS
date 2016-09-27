@@ -7,8 +7,8 @@
 
 
 enum CodingAlgorithm {
-   full_vector = 0,
-   reed_solomon = 1
+    full_vector = 0,
+    reed_solomon = 1
 };
 
 
@@ -20,21 +20,21 @@ extern "C" {
 #define FALSE 0
 
 typedef struct _ENCODED_DATA {
-     uint8_t *decoded_data;
-     uint8_t **encoded_data;
-     uint8_t *raw_data;
+    uint8_t *decoded_data;
+    uint8_t **encoded_data;
+    uint8_t *raw_data;
     // std::vector< std::vector< std::vector<uint8_t> > >  *vdata;
-     int encoded_symbol_size;
-     unsigned int offset_index;
-     int num_blocks;
-     int symbol_size;
-     int raw_data_size;
-     int padded_data_size;
-     int total_data_size;
-     unsigned int fieldsize;
-     int N;
-     int K; // max symbols
-     enum CodingAlgorithm algorithm;
+    int encoded_symbol_size;
+    unsigned int offset_index;
+    int num_blocks;
+    int symbol_size;
+    int raw_data_size;
+    int padded_data_size;
+    int total_data_size;
+    unsigned int fieldsize;
+    int N;
+    int K; // max symbols
+    enum CodingAlgorithm algorithm;
 } EncodeData;
 
 
@@ -45,7 +45,7 @@ unsigned short decode(EncodeData *encode_data) ;
 
 unsigned short checking_decoding(EncodeData *encoded_info);
 #ifdef __cplusplus
-   }
+}
 #endif
 
 
