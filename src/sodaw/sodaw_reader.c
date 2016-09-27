@@ -189,13 +189,14 @@ void SODAW_read_complete_phase (char *obj_name,
                                 char *reader_id,
                                 zsock_t *sock_to_servers,
                                 unsigned int num_servers,
+                                int opnum,
                                 Tag max_tag   /* for read it is max and for write it is new*/ ) {
     // send out the messages to all servers
     char tag_str[BUFSIZE];
-    char *types[] = {OBJECT, ALGORITHM, PHASE, TAG};
+    char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
 
     tag_to_string(max_tag, tag_str);
-    send_multicast_servers(sock_to_servers, num_servers, types,  4, obj_name, SODAW, READ_COMPLETE, tag_str) ;
+    send_multicast_servers(sock_to_servers, num_servers, types,  5, obj_name, SODAW, READ_COMPLETE, opnum, tag_str) ;
 }
 
 char *SODAW_read (char *obj_name,
@@ -240,7 +241,8 @@ char *SODAW_read (char *obj_name,
     SODAW_read_complete_phase(obj_name,
                               client_args->client_id,
                               sock_to_servers,
-                              num_servers,
+                              num_servers, 
+                              op_num, 
                               *read_tag);
 
     free(read_tag);

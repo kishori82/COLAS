@@ -13,8 +13,8 @@ typedef struct _R_C {
 
 typedef struct _METADATA {
     Tag t_r;
-    char *readerid;
-    char *serverid;
+    char reader_opnum[BUFSIZE];
+    char serverid[BUFSIZE];
 } MetaData;
 
 

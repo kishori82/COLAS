@@ -260,6 +260,7 @@ void receive_message_frames_at_server_SODAW(
     }
 
     if( strcmp(phase_name, READ_COMPLETE) ==0 ) {
+        insertIntoHashAndList(OPNUM, msg, frames, names);
         insertIntoHashAndList(TAG, msg, frames, names);
     }
 }
