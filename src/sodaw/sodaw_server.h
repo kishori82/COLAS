@@ -6,8 +6,8 @@
 
 typedef struct _R_C {
     Tag t_r;
-    char *reader_op;
-    char *reader_id;
+    char reader_opnum[BUFSIZE];
+    char reader_id[BUFSIZE];
 } RegReader;
 
 

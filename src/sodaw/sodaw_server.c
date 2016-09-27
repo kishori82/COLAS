@@ -20,8 +20,8 @@ extern Server_Args *server_args;
 
 #ifdef ASLIBRARY
 static zhash_t *hash_object_SODAW;
-static zhash_t *metadata =NULL;
-static zhash_t *readerc = NULL;
+static zhash_t *metadata = NULL;
+static zhash_t *readerc  = NULL;
 static int initialized = 0;
 
 void  destroy_metadata(MetaData *m) {
@@ -29,11 +29,6 @@ void  destroy_metadata(MetaData *m) {
     free(m->serverid);
 }
 
-
-void  destroy_regreader(RegReader *r_tr) {
-    free(r_tr->reader_op);
-    free(r_tr->reader_id);
-}
 
 void initialize_SODAW() {
     initialized = 1;
@@ -69,10 +64,8 @@ RegReader *RegReader_create(Tag tag, char *readerid, int opnum) {
     strcpy(h->t_r.id, tag.id);
 
     sprintf(buf, "%s_%d", readerid, opnum);
-    h->reader_op = (char *)malloc( (strlen(buf)+1)*sizeof(char));
-    strcpy(h->reader_op, buf);
+    strcpy(h->reader_opnum, buf);
 
-    h->reader_id = (char *)malloc( (strlen(readerid)+1)*sizeof(char));
     strcpy(h->reader_id, readerid);
     return h;
 }
@@ -80,7 +73,6 @@ RegReader *RegReader_create(Tag tag, char *readerid, int opnum) {
 void  *reader_op_create(char *buf, char *readerid, int opnum) {
     sprintf(buf, "%s_%d", readerid, opnum);
 }
-
 
 char *MetaData_keystring(MetaData *m) {
     char buf[BUFSIZE];
@@ -99,7 +91,6 @@ char *MetaData_keystring(MetaData *m) {
 
     char *newkey = (char *)malloc(size*sizeof(char));
     strcpy(newkey, buf);
-
     return newkey;
 }
 
@@ -110,8 +101,8 @@ char * RegReader_keystring(RegReader *m) {
     size += strlen(buf);
     buf[size++]='_';
 
-    strncpy(buf+size, m->reader_op, strlen(m->reader_op));
-    size += strlen(m->reader_op);
+    strncpy(buf+size, m->reader_opnum, strlen(m->reader_opnum));
+    size += strlen(m->reader_opnum);
     buf[size++]='\0';
 
     char *newkey = (char *)malloc(size*sizeof(char));
@@ -147,18 +138,15 @@ static void send_reader_coded_element(void *worker, char *reader,
     zframe_send(&tag_frame, worker, ZFRAME_REUSE + ZFRAME_MORE);
 
     if(DEBUG_MODE) printf("\t\tcoded-elem : %lu\n", zframe_size(cs));
-    zframe_t *cs_frame = zframe_dup(cs);
-    zframe_send(&cs_frame, worker, ZFRAME_REUSE);
+    zframe_send(&cs, worker, ZFRAME_REUSE);
 
     zframe_destroy(&reader_frame);
     zframe_destroy(&object_frame);
     zframe_destroy(&algorithm_frame);
     zframe_destroy(&phase_frame);
     zframe_destroy(&tag_frame);
-    zframe_destroy(&cs_frame);
 }
 
-//void algorithm_SODAW_WRITE_PUT(char *ID,  zmsg_t *msg, zhash_t *frames,  void *worker, char *client, char *object_name, char *algorithm) {
 void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
     char tag_w_str[BUFSIZE];
     char algorithm[BUFSIZE];
@@ -195,7 +183,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         print_object_hash(hash_object_SODAW);
     }
 
-
     for(key= zlist_first(r_tr_keys);  key!= NULL; key=zlist_next(r_tr_keys) ) {
         RegReader *value  = (RegReader *)zhash_lookup(readerc, (const char *)key);
         // char dest_reader  = get_reader_from_reader_op(dest_reader, value->readerid);
@@ -208,8 +195,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
                                                   object_name, algorithm, READ_VALUE,
                                                   tag_w, payload
                                                  );
-            */
-            /*
                         send_frames_at_server(frames, worker, SEND_FINAL, 6,
                                    SENDER, OBJECT,  ALGORITHM, PHASE, TAG, PAYLOAD);
             */
@@ -260,7 +245,6 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         zframe_t *item = (zframe_t *)zhash_lookup(temp_hash_hash,key);
         assert(item!=NULL);
 
-
         // discount the metadata and data
         status->data_memory -= (float)zframe_size((zframe_t *)item);
         status->metadata_memory -=  (float)strlen(key);
@@ -281,9 +265,7 @@ void algorithm_SODAW_WRITE_PUT(zhash_t *frames,  void *worker) {
         item = (zframe_t *)zhash_lookup(temp_hash_hash,key);
         assert(item==NULL);
         //insert the new tag and coded value
-
-        zframe_t *new_payload_frame = zframe_dup(payload);
-        zhash_insert(temp_hash_hash, tag_w_str,(void *) new_payload_frame);
+        zhash_insert(temp_hash_hash, tag_w_str,(void *) payload);
 
         //count the data size now
         status->metadata_memory +=  strlen(tag_w_str);
@@ -312,7 +294,6 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
     get_string_frame(tag_r_str, frames, TAG);
     string_to_tag(tag_r_str, &tag_r);
 
-
     get_string_frame(readerid, frames, SENDER); // sender is the reader
     int opnum =  get_int_frame(frames, OPNUM);
     reader_op_create(reader_op, readerid, opnum);
@@ -322,15 +303,14 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
 
     RegReader *r_tr = RegReader_create(tag_r, readerid, opnum);
     char *r_tr_key = RegReader_keystring(r_tr);
-    destroy_regreader(r_tr);
 
     void *item = zhash_lookup((void *)readerc, (const char *)r_tr_key);
-    if( item != NULL) {
+    if(item != NULL) {
         zhash_delete((void *)readerc, (const char *)r_tr_key);
         zlist_t *Hr = metadata_with_reader(metadata, reader_op);
         metadata_remove_keys(metadata, Hr);
-        //  zlist_destroy(&Hr);
-
+         zlist_purge(Hr);
+         zlist_destroy(&Hr);
     } else {
         Tag tag;
         init_tag(&tag);
@@ -339,11 +319,10 @@ void algorithm_SODAW_READ_COMPLETE(zhash_t *frames, void *worker) {
         zhash_insert((void *)metadata, (const char *)h_str, (void *)h);
         free(h_str);
     }
+
     free(r_tr_key);
     printf("\tREAD_COMPLETE\n");
-    return;
 }
-
 
 /*
 void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
@@ -367,7 +346,6 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
     zhash_insert(metadata, h_str_key, h);
     free(h_str_key);
 
-
     zlist_t *r_tr_keys = zhash_keys(readerc);
     void *key;
     for(key= zlist_first(r_tr_keys);  key!= NULL; key=zlist_next(r_tr_keys) ) {
@@ -387,17 +365,19 @@ void algorithm_SODAW_READ_DISPERSE(zhash_t *frames,  void *worker) {
 
                 zlist_t *Hr = metadata_with_reader(metadata, readerid);
                 metadata_remove_keys(metadata, Hr);
-                printf("======================================================>>>>>>>>>>>>>>>>>\n");
+								//!! leak
+        				// zlist_purge(Hr);
+        				// zlist_destroy(&Hr);
+                printf("======================================================\n");
             }
-            //          zlist_destroy(&Htr);
+        		zlist_purge(Htr);
+            zlist_destroy(&Htr);
         }
     }
-    //  zlist_destroy(&r_tr_keys);
+
     printf("\tREAD_DISPERSE\n");
-    return;
 }
 */
-
 
 void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,const  char *phase,  void *worker) {
     char object_name[BUFSIZE];
@@ -417,7 +397,6 @@ void algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(zhash_t *frames,const  char *phas
     printf("\t\tsending\n");
 
     send_frames_at_server(frames, worker, SEND_FINAL, 6,  SENDER, OBJECT,  ALGORITHM, PHASE, OPNUM, TAG);
-
 }
 
 void algorithm_SODAW_WRITE_GET(zhash_t *frames,  void *worker) {
@@ -427,8 +406,6 @@ void algorithm_SODAW_WRITE_GET(zhash_t *frames,  void *worker) {
 void algorithm_SODAW_READ_GET(zhash_t *frames,  void *worker) {
     algorithm_SODAW_WRITE_GET_OR_READ_GET_TAG(frames, READ_GET,  worker) ;
 }
-
-
 
 void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
     char buf[BUFSIZE];
@@ -459,12 +436,12 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
     get_tag_frame(frames, &tag_r);
     tag_to_string(tag0, buf);
     tag_to_string(tag_r, tag_inc_str);
-    // printf("read value (%s,  %s,  %s,  %s)\n", h_str, buf, server_args->server_id, reader);
 
     if( zhash_lookup(metadata, h_str)!=NULL )  {
         zlist_t *Hr = metadata_with_reader(metadata, reader_opnum);
         metadata_remove_keys(metadata, Hr);
         zlist_purge(Hr);
+    		zlist_destroy(&Hr);
     } else {
         RegReader *r_tr_pair = RegReader_create(tag_r, _reader,  opnum);
 
@@ -489,11 +466,10 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
             if(item!=NULL) zframe_destroy(&item);
             zhash_delete(frames, TAG);
             zhash_insert((void *)frames, TAG, (void *)tag_loc_frame);
-
-            zframe_t *dup_payload_frame = zframe_dup(payload_frame);
-            zhash_insert((void *)frames, PAYLOAD, (void *)dup_payload_frame);
+            zhash_insert((void *)frames, PAYLOAD, (void *)payload_frame);
 
             printf("\t\tsending...\n");
+
             /*
                            send_frames_at_server(frames, worker, SEND_FINAL, 6,
                                    SENDER, OBJECT,  ALGORITHM, PHASE, TAG, PAYLOAD);
@@ -528,14 +504,13 @@ void algorithm_SODAW_READ_VALUE( zhash_t *frames, void *worker) {
                                types,  6, object_name, "SODAW", READ_DISPERSE,
                                tag_buf_str, h->serverid, h->readerid
                           );
+            metadata_disperse(object_name, algorithm_name,  h);
             */
-            //  metadata_disperse(object_name, algorithm_name,  h);
         }
     }
 }
 
-
-void  metadata_remove_keys(zhash_t *metadata, zlist_t *Hr) {
+void metadata_remove_keys(zhash_t *metadata, zlist_t *Hr) {
     char *key;
     MetaData *m;
 
@@ -548,10 +523,8 @@ void  metadata_remove_keys(zhash_t *metadata, zlist_t *Hr) {
     }
 }
 
-void  regreader_remove_key(zhash_t *regreaders, char *str_r_tr) {
+void regreader_remove_key(zhash_t *regreaders, char *str_r_tr) {
     RegReader *r = zhash_lookup(readerc, (const char *)str_r_tr);
-    free(r->reader_op);
-    free(r->reader_id);
     free(r);
     zhash_delete((void *)regreaders, (const char *)str_r_tr);
 }
@@ -563,16 +536,19 @@ zlist_t *metadata_with_reader(zhash_t *metadata, char *reader) {
 
     void *key;
     for(key= zlist_first(metadata_keys);  key!= NULL; key=zlist_next(metadata_keys) ) {
-
         MetaData *meta  = (MetaData *)zhash_lookup(metadata, (const char *)key);
         if(  strcmp(reader, meta->reader_opnum) == 0 ) {
             zlist_append((void *)relevant_keys, key);
         }
     }
 
+    zlist_purge(metadata_keys);
+    zlist_destroy(&metadata_keys);
+
     return relevant_keys;
 }
 
+//!! We need to handle the relevant keys
 zlist_t *metadata_with_tag_reader(zhash_t *metadata, Tag tag, char *reader) {
 
     char tag_str[BUFSIZE];
@@ -587,17 +563,16 @@ zlist_t *metadata_with_tag_reader(zhash_t *metadata, Tag tag, char *reader) {
         MetaData *meta  = (MetaData *)zhash_lookup(metadata, (const char *)key);
         assert(meta!=NULL);
         tag_to_string(meta->t_r, tag_str_meta);
-        if(  strcmp(reader, meta->reader_opnum) == 0 &&
-                strcmp(tag_str_meta, tag_str) == 0
-          ) {
+        if(strcmp(reader, meta->reader_opnum) == 0 &&
+           strcmp(tag_str_meta, tag_str) == 0) {
             zlist_append((void *)relevant_keys, key);
         }
     }
-    //zlist_destroy(&metadata_keys);
+    zlist_purge(metadata_keys);
+    zlist_destroy(&metadata_keys);
 
     return relevant_keys;
 }
-
 
 void create_metadata_sending_sockets() {
     int num_servers = count_num_servers(server_args->servers_str);
@@ -625,8 +600,6 @@ void create_metadata_sending_sockets() {
     server_args->sock_to_servers = sock_to_servers;
 }
 
-
-
 void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
     char phasebuf[BUFSIZE];
     char tag[BUFSIZE];
@@ -644,8 +617,6 @@ void algorithm_SODAW(zhash_t *frames, void *worker, void *_server_args) {
     if( has_object(hash_object_SODAW, object_name)==0) {
         create_object(hash_object_SODAW, object_name, "SODAW", server_args->init_data, status);
     }
-
-//    if( count++ > 10000 ) exit(EXIT_FAILURE);
 
     if( strcmp(phasebuf, WRITE_GET)==0)  {
         algorithm_SODAW_WRITE_GET(frames,  worker);
@@ -671,7 +642,6 @@ else if( strcmp(phasebuf, READ_DISPERSE)==0)  {
 
 //  The main thread simply starts several clients and a server, and then
 //  waits for the server to finish.
-
 #ifdef ASMAIN
 int main (void) {
     int i ;
