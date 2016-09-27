@@ -82,6 +82,8 @@ void SODAW_write_put_phase (char *obj_name,
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
     int per_server_payload_size =  encoded_info->num_blocks*encoded_info->encoded_symbol_size;
 
+
+/*
     if(N==3) {
         sprintf(tag_str, "%s-%x-%x-%x", tag_str,
                 simple_hash(encoded_info->encoded_data[0], per_server_payload_size),
@@ -89,6 +91,7 @@ void SODAW_write_put_phase (char *obj_name,
                 simple_hash(encoded_info->encoded_data[2], per_server_payload_size)
                );
     }
+*/
 
     send_multisend_servers (sock_to_servers, num_servers,
                             encoded_info->encoded_data, per_server_payload_size,
@@ -247,29 +250,6 @@ int main (void) {
     char *payload = (char *)malloc(100000000*sizeof(char));
     unsigned int size = 100000000*sizeof(char);
 
-    /*
-       char *servers[]= {
-                         "172.17.0.7", "172.17.0.5",
-                         "172.17.0.4", "172.17.0.6",
-                         "172.17.0.3"
-                       };
-
-    */
-
-    /*
-       char *servers[] = {
-    "172.17.0.22", "172.17.0.21",
-    "172.17.0.18", "172.17.0.17",
-    "172.17.0.20", "172.17.0.16",
-    "172.17.0.19", "172.17.0.15",
-    "172.17.0.14", "172.17.0.13",
-    "172.17.0.12", "172.17.0.11",
-    "172.17.0.10", "172.17.0.9",
-    "172.17.0.7", "172.17.0.8",
-    "172.17.0.6", "172.17.0.5",
-    "172.17.0.4", "172.17.0.3"
-                         };
-    */
 
     char *servers[]= {
         "172.17.0.2"
