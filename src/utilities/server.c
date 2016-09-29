@@ -298,6 +298,7 @@ void send_frames_at_server(zhash_t *frames, void *worker,  enum SEND_TYPE type, 
     for(i=0; i < n; i++ ) {
         key = va_arg(valist, char *);
         zframe_t *frame = (zframe_t *)zhash_lookup(frames, key);
+        assert(frame!=NULL); 
 
         assert(zframe_is(frame));
         zlist_append(names, key);
@@ -313,6 +314,7 @@ void send_frames_at_server(zhash_t *frames, void *worker,  enum SEND_TYPE type, 
 
     zlist_purge(names);
     zlist_destroy(&names);
+
 }
 #endif
 
