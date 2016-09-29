@@ -61,7 +61,10 @@ void SODAW_write_put_phase (char *obj_name,
     if(encode(encoded_info)==FALSE) {
         printf("Failed to encode data \n");
         exit(EXIT_FAILURE);
-    } else {
+    } 
+
+/*
+else {
         if(checking_decoding(encoded_info)==FALSE) {
             printf("Failed to decode encoded data \n");
             exit(EXIT_FAILURE);
@@ -69,6 +72,7 @@ void SODAW_write_put_phase (char *obj_name,
             printf("Successfully decoded encoded data \n");
         }
     }
+*/
 
     printf("waiting\n");
 //    destroy_encoded_data(encoded_data_info);

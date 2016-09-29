@@ -337,6 +337,7 @@ unsigned short decode(EncodeData  *encode_data) {
    }
    decoded_blocks.clear();
    
+   printf("done decoding with reed-solomon\n");
    return TRUE;
 }
 
