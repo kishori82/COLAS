@@ -12,23 +12,23 @@
 #include <base64.h>
 #include "client.h"
 
+typedef struct _RawData {
+   char *data;
+   int data_size;
+} RawData;
 
-//   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
-
-bool ABD_write(char *obj_name,
-               char *writer_id,
-               unsigned int op_num,
-               char *payload,
-               unsigned int size,
-               char *servers,
-               char *port
-              );
-char * ABD_read(char *obj_name,
-                char *writer_id,
-                unsigned int op_num,
-                //char *payload,
-                char *servers,
-                char *port
-               );
+// this is the write tag value phase of ABD
+Tag write_value_phase(
+    char *obj_name,
+    char *writer_id,
+    unsigned int op_num,
+    zsock_t *sock_to_servers,
+    char **servers,
+    unsigned int num_servers,
+    char *port,
+    char *payload,
+    int size,
+    Tag max_tag   // for read it is max and for write it is new
+);
 
 #endif
