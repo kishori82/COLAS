@@ -196,7 +196,9 @@ void SODAW_read_complete_phase (char *obj_name,
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG};
 
     tag_to_string(max_tag, tag_str);
-    send_multicast_servers(sock_to_servers, num_servers, types,  5, obj_name, SODAW, READ_COMPLETE, opnum, tag_str) ;
+    printf("\tREAD_COMPLETE (READER) 1 %s %d\n", tag_str, opnum);
+    send_multicast_servers(sock_to_servers, num_servers, types,  5, obj_name, SODAW, READ_COMPLETE, &opnum, tag_str) ;
+    printf("\tREAD_COMPLETE (READER) 2\n");
 }
 
 char *SODAW_read (char *obj_name,
@@ -245,6 +247,7 @@ char *SODAW_read (char *obj_name,
                               op_num, 
                               *read_tag);
 
+    printf("\tREAD_COMPLETE (READER)\n");
     free(read_tag);
 
     //!! Why was this turned off? Socket generates a memory leak
