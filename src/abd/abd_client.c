@@ -33,8 +33,6 @@ void  ABD_write_value_phase(
     tag_to_string(max_tag, tag_str);
 
 
-    zframe_t *tag_frame = zframe_new(tag_str, strlen(tag_str));
-
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG, PAYLOAD};
 
     send_multicast_servers(sock_to_servers, num_servers, types,  6, obj_name, ABD, WRITE_VALUE, &op_num, tag_str, abd_data->data) ;

@@ -50,6 +50,7 @@ Tag *ABD_get_max_tag_phase(
 
         if (items [0].revents & ZMQ_POLLIN) {
             zmsg_t *msg = zmsg_recv (sock_to_servers);
+
             zlist_t *names = zlist_new();
             zhash_t* frames = receive_message_frames_at_client(msg, names);
 
@@ -66,14 +67,22 @@ Tag *ABD_get_max_tag_phase(
                 string_to_tag(tag_str, tag);
                 zlist_append(tag_list, (void *)tag);
 
-                if(responses >= majority) break;
+                if(responses >= majority) {
+                   zlist_purge(names);
+                   zlist_destroy(&names);
+                   zmsg_destroy (&msg);
+                   destroy_frames(frames);
+                   break;
+
+                }
                 //if(responses >= num_servers) break;
             } else {
                 printf("\tOLD MESSAGES : %s  %d\n", phase, op_num);
             }
-
             zmsg_destroy (&msg);
             zlist_purge(names);
+            zlist_destroy(&names);
+            destroy_frames(frames);
         }
     }
     //comute the max tag now and return
