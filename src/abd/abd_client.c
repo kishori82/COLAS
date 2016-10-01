@@ -18,8 +18,8 @@ void  ABD_write_value_phase(
     unsigned int op_num,
     zsock_t *sock_to_servers,
     unsigned int num_servers,
-    Tag max_tag,   // for read it is max and for write it is new
-    RawData *abd_data
+    RawData *abd_data,
+    Tag max_tag   // for read it is max and for write it is new
 ) {
     // send out the messages to all servers
     char phase[100];
@@ -37,8 +37,7 @@ void  ABD_write_value_phase(
 
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG, PAYLOAD};
 
-    send_multicast_servers(sock_to_servers, num_servers, types,  6, obj_name, "ABD",\
-                           WRITE_VALUE, &op_num, tag_str, payload) ;
+    send_multicast_servers(sock_to_servers, num_servers, types,  6, obj_name, ABD, WRITE_VALUE, &op_num, tag_str, abd_data->data) ;
 
     unsigned int responses =0; 
 

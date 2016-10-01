@@ -4,9 +4,7 @@
 //  it easier to start and stop the example. Each task has its own
 //  context and conceptually acts as a separate process.
 
-#include "abd_client.h"
 #include "abd_writer.h"
-
 
 extern int s_interrupted;
 
@@ -14,9 +12,12 @@ extern int s_interrupted;
 #define DEBUG_MODE 1
 
 // this fethers the max tag
-Tag *get_max_tag_phase(char *obj_name, unsigned int op_num,
-                       zsock_t *sock_to_servers,  char **servers,
-                       unsigned int num_servers, char *port) {
+Tag *ABD_get_max_tag_phase(
+                       char *obj_name, 
+                       unsigned int op_num,
+                       zsock_t *sock_to_servers,
+                       unsigned int num_servers
+                      ) {
 
     // send out the messages to all servers
 
@@ -84,23 +85,6 @@ Tag *get_max_tag_phase(char *obj_name, unsigned int op_num,
 }
 
 
-// this is the write tag value phase of ABD
-/*
-Tag write_value_phase(
-    char *obj_name,
-    char *writer_id,
-    unsigned int op_num,
-    zsock_t *sock_to_servers,
-    char **servers,
-    unsigned int num_servers,
-    char *port,
-    char *payload,
-    int size,
-    Tag max_tag   // for read it is max and for write it is new
-) ;
-*/
-
-
 // ABD write
 bool ABD_write(
     char *obj_name,
@@ -111,8 +95,6 @@ bool ABD_write(
     ClientArgs *client_args
 ) {
     s_catch_signals();
-    int j;
-
     int num_servers = count_num_servers(client_args->servers_str);
 #ifndef DEBUG_MODE
     printf("\t\tObj name       : %s\n",obj_name);
@@ -145,9 +127,10 @@ bool ABD_write(
 
     Tag new_tag;
     new_tag.z = max_tag->z + 1;
-    strcpy(new_tag.id, client_args->clietn_id);
+    strcpy(new_tag.id, client_args->client_id);
     free(max_tag);
     printf("\tWRITE_VALUE (WRITER)\n");
+
     raw_data->data = payload;
     raw_data->data_size = payload_size;
 
@@ -159,7 +142,6 @@ bool ABD_write(
                       raw_data, 
                       new_tag
                     );
-
 
     return true;
 }

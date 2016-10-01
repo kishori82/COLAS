@@ -10,7 +10,6 @@ CFLAGS= -lm -L../ZMQ/zmqlibs -lzmq  -L../ZMQ/czmqlibs/lib -lczmq -Wimplicit-func
 UT_DEPS=$(UTILS)/algo_utils.h $(UTILS)/base64.h  $(UTILS)/client.h $(UTILS)/server.h
 UT_SRCS=$(UTILS)/algo_utils.c $(UTILS)/base64.c  $(UTILS)/client.c $(UTILS)/server.c
 
-
 UT_OBJS=$(UT_SRCS:%c=%o)
 
 all: libabd.so
@@ -31,7 +30,7 @@ static: abd_client.c abd_server.c
 	$(CC) -static -c  -o abd_server.o  abd_server.c  -DASLIBRARY #$(CFLAGS)
 	ar -cvq libabd.a  abd_server.o abd_client.o
 
-libabd.so: $(UT_OBJS) abd_client.o abd_server.o
+libabd.so: $(UT_OBJS) abd_client.o abd_server.o abd_reader.o abd_writer.o
 	$(CC) -shared -fPIC -o $@  $?  $(CFLAGS)
 
 clean:

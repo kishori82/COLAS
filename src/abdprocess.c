@@ -88,6 +88,14 @@ EncodeData *create_EncodeData(Parameters parameters) {
     return encoding_info;
 }
 
+
+
+RawData *create_RawData(Parameters parameters) {
+    RawData *raw_data  = (RawData *)malloc(sizeof(RawData));
+    return raw_data;
+}
+
+
 ClientArgs *create_ClientArgs(Parameters parameters) {
 
     char *servers_str = get_servers_str(parameters);
@@ -112,29 +120,28 @@ void reader_process(Parameters parameters) {
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
-    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
+
     for( opnum=2; opnum< 3000; opnum++) {
         usleep(parameters.wait*1000);
-        char *payload = get_random_data(filesize);
 
         printf("%s  %d  %s %s\n", parameters.server_id, opnum, client_args->servers_str, parameters.port);
-        char *payload_read = SODAW_read("atomic_object", opnum,  encoding_info, client_args);
 
-        /*
-                for(i=0; i < filesize; i++) {
-                  printf("%c",payload_read[i]);
-                }
-                printf("\n");
-        */
+        RawData *abd_data;
+        if(parameters.algorithm==abd) 
+          abd_data = ABD_read("atomic_object", opnum, client_args);
+        
 
+        if(parameters.algorithm==sodaw) {
+          char *payload_read = SODAW_read("atomic_object", opnum,  encoding_info, client_args);
+        }
 
+/*
         if( is_equal(payload, payload_read, filesize) ) {
             printf("INFO: The data sets %d are equal!!\n", opnum);
         } else {
             printf("ERROR: The data sets %d are NOT equal!!\n", opnum);
         }
-
-        free(payload);
+*/
     }
 }
 
@@ -142,15 +149,17 @@ void writer_process(Parameters parameters) {
     unsigned int opnum=0;
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
+    RawData *abd_data = create_RawData(parameters) ;
 
     for( opnum=0; opnum< 50000; opnum++) {
         unsigned int payload_size = (unsigned int) ( (parameters.filesize_kb + rand()%5)*1024);
         char *payload = get_random_data(payload_size);
-        if( parameters.algorithm==abd)
-            ABD_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);
 
-        if( parameters.algorithm==sodaw)
-            SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);
+        if(parameters.algorithm==abd)
+            ABD_write("atomic_object", opnum, payload, payload_size,  abd_data, client_args);
+
+        if(parameters.algorithm==sodaw)
+            SODAW_write("atomic_object", opnum, payload, payload_size, encoding_info, client_args);
 
         free(payload);
     }

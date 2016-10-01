@@ -13,21 +13,18 @@
 #include "client.h"
 
 typedef struct _RawData {
-   char *data;
+   void *data;
    int data_size;
+   Tag *tag;
 } RawData;
 
 // this is the write tag value phase of ABD
-Tag write_value_phase(
+void ABD_write_value_phase(
     char *obj_name,
-    char *writer_id,
     unsigned int op_num,
     zsock_t *sock_to_servers,
-    char **servers,
     unsigned int num_servers,
-    char *port,
-    char *payload,
-    int size,
+    RawData *raw_data,
     Tag max_tag   // for read it is max and for write it is new
 );
 

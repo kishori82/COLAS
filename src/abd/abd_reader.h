@@ -1,5 +1,5 @@
-#ifndef _ABD_CLIENT
-#define _ABD_CLIENT
+#ifndef _ABD_READER
+#define _ABD_READER
 
 #include <czmq.h>
 #include <stdio.h>
@@ -11,23 +11,12 @@
 #include <algo_utils.h>
 #include <base64.h>
 #include "client.h"
+#include "abd_client.h"
 
 
-//   write_value_phase(obj_name, writer_id,  op_num, sock_to_servers, servers, num_servers, port, payload, size, max_tag);
-/*
-char * ABD_read(char *obj_name,
-                char *writer_id,
+RawData * ABD_read(char *obj_name,
                 unsigned int op_num,
-                //char *payload,
-                char *servers,
-                char *port
-               );
-*/
-
-char * ABD_read(char *obj_name,
-                unsigned int op_num,
-                EncodeData *encoding_info,
-                ClientArgs *client_args,
+                ClientArgs *client_args
                );
 
 

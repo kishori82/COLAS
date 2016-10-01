@@ -21,8 +21,9 @@ void  ABD_get_max_tag_value_phase(
     unsigned int op_num,
     zsock_t *sock_to_servers,
     unsigned int num_servers,
-    Tag **max_tag,
-    char **max_value
+    RawData *max_tag_value
+//    Tag **max_tag,
+ //   char **max_value
 ) {
 
     // send out the messages to all servers
@@ -65,8 +66,6 @@ void  ABD_get_max_tag_value_phase(
             //value
             zframe_t *value_frame = (zframe_t *)zhash_lookup(frames, PAYLOAD);
             assert(value_frame !=NULL);
-            value = (char *)malloc(  (zframe_size(value_frame) + 1)*sizeof(char) );
-            _zframe_str(value_frame, value);
 
             get_string_frame(phase, frames, PHASE);
             round = get_int_frame(frames, OPNUM);
@@ -80,7 +79,9 @@ void  ABD_get_max_tag_value_phase(
                 string_to_tag(tag_str, tag);
                 zlist_append(tag_list, (void *)tag);
 
-                *max_value = value;
+                max_tag_value->data = (void *)value_frame;
+                max_tag_value->data_size = zframe_size(value_frame);
+
                 if(responses >= majority) break;
                 //if(responses >= num_servers) break;
             } else {
@@ -91,21 +92,19 @@ void  ABD_get_max_tag_value_phase(
         }
     }
     //comute the max tag now and return
-    max_tag = get_max_tag(tag_list);
+    max_tag_value->tag = get_max_tag(tag_list);
 
     free_items_in_list(tag_list);
     zlist_destroy(&tag_list);
 }
 
 
-char *ABD_read(
+RawData  *ABD_read(
     char *obj_name,
     unsigned int op_num ,
-    TagData *abd_data,
     ClientArgs *client_args
 ) {
     s_catch_signals();
-    int j;
 
     int num_servers = count_num_servers(client_args->servers_str);
     void *sock_to_servers= get_socket_servers(client_args);
@@ -123,29 +122,30 @@ char *ABD_read(
     printf("READ %d\n", op_num);
     printf("\tMAX_TAG_VALUE (READER)\n");
 
-    char *payload;
-    Tag *max_tag;
+    Tag max_tag;
+
+    RawData *max_tag_value = (RawData *)malloc(sizeof(RawData));
+
     ABD_get_max_tag_value_phase(obj_name,  
                             op_num, 
                             sock_to_servers,       
                             num_servers, 
-                            &max_tag, &payload
+                            &max_tag_value
                            );
 
     printf("\tWRITE_VALUE (READER)\n");
-    int size = strlen(payload);
-    ABD_write_value_phase(obj_name, 
+    ABD_write_value_phase(
+                      obj_name, 
                       op_num, 
                       sock_to_servers, 
                       num_servers, 
+                      max_tag_value,
                       max_tag
-                      payload, 
                     );
 
 
-   free(max_tag); 
 
-   return payload;
+   return max_tag_value;
 }
 
 
