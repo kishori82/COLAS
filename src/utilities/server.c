@@ -176,17 +176,18 @@ int create_object(zhash_t *object_hash, char *obj_name, char *algorithm,
     init_tag(&tag);
     tag_to_string(tag, tag_str);
 
-    if( strcmp(algorithm, "ABD")==0) {
-        zhash_t *hash_hash = zhash_new();
+    if( strcmp(algorithm, ABD)==0) {
+        zframe_t *payload_frame =
+            zframe_new((void *)server_args->init_data, server_args->init_data_size);
 
-        zhash_insert(hash_hash, tag_str, server_args->init_data);
+        store_payload(object_hash, obj_name, tag, payload_frame, yield) ;
+
 
         status->metadata_memory += (float) strlen(tag_str);
         status->data_memory += (float) server_args->init_data_size;
 
         printf("\tCreated \"%s\" (size %d) \n", obj_name, (int)status->data_memory);
         //add it to the main list
-        zhash_insert(object_hash, obj_name, (void *)hash_hash);
 
         return 1;
     }

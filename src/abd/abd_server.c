@@ -31,7 +31,6 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
     printf("\tWRITE_VALUE\n");
 
 
-    if( DEBUG_MODE ) printf("\t\t INSIDE WRITE VALUE\n");
     Tag tag;
     get_string_frame(tag_str, frames, TAG);
     string_to_tag(tag_str, &tag);
@@ -44,51 +43,49 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
 //    if( DEBUG_MODE )printf("\t\t WRITE TAG for COMP (%d, %s)  (%d, %s)\n", local_tag.z, local_tag.id, tag.z, tag.id);
 
     if( compare_tags(local_tag, tag)==-1 ) {
-        if( DEBUG_MODE )printf("\t\tBEHIND\n");
 
         zframe_t *payload_frame= (zframe_t *)zhash_lookup(frames, PAYLOAD);
-        int size = zframe_size(payload_frame);
-        void *frame_data = zframe_data(payload_frame);
-        char *data =  (char *)malloc(size + 1);
-        memcpy(data, frame_data, size);
-        data[size]='\0';
 
-        if( DEBUG_MODE)      printf("data %s\n", data);
+        if( 0 &&  DEBUG_MODE)  {
+           int size = zframe_size(payload_frame);
+           void *frame_data = zframe_data(payload_frame);
+           char *data =  (char *)malloc(size + 1);
+           memcpy(data, frame_data, size);
+           data[size]='\0';
+           printf("data %s\n", data);
+        }
+
         assert(hash_object_ABD!=NULL);
-        zhash_t *temp_hash_hash = zhash_lookup(hash_object_ABD, object_name);
 
+        zhash_t *temp_hash_hash = zhash_lookup(hash_object_ABD, object_name);
         assert(temp_hash_hash!=NULL);
-        if( DEBUG_MODE ) printf("\t\tIS NULL %p\n", temp_hash_hash);
 
         zlist_t *keys = zhash_keys (temp_hash_hash);
-        assert(keys!=NULL);
-
-        if( DEBUG_MODE ) printf("\t\t# KEYS  %d\n", (int)zlist_size(keys));
         assert(keys!=NULL);
 
         void *key = zlist_first(keys);
         assert(key!=NULL);
 
         void *item = zhash_lookup(temp_hash_hash,key);
+        assert(item!=NULL);
+        
         status->data_memory -= (float)strlen((char *)item);
         status->metadata_memory -=  (float)strlen( (char *)key);
+
         zhash_delete(temp_hash_hash, key);
-        free(item);
+
+        zframe_destroy(&item);
 
 
-        if( DEBUG_MODE ) printf("\t\t# KEYS AFTER DEL %d\n", (int)zhash_size(temp_hash_hash));
+        zframe_t *dup_payload_frame = zframe_dup(payload_frame);
+        zhash_insert(temp_hash_hash,tag_str, dup_payload_frame);
 
-        zhash_insert(temp_hash_hash,tag_str, data);
         status->metadata_memory +=  (float) strlen(tag_str);
-        status->data_memory += (float)  size;
-
-
-        if( DEBUG_MODE ) printf("\t\tINSERTING KEY %s data of size  %d\n", tag_str, size);
+        status->data_memory += (float)  zframe_size(payload_frame);
 
         zframe_t *ack_frame = zframe_new("SUCCESS",strlen("SUCCESS"));
         zhash_insert(frames, "acknowledge", ack_frame);
 
-        if( DEBUG_MODE ) printf("\t\tSENT SUCCESS\n");
     } else {
         zframe_t *ack_frame = zframe_new("SUCCESS",strlen("SUCCESS"));
         zhash_insert(frames, "acknowledge", ack_frame);

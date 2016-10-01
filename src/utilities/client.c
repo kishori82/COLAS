@@ -49,7 +49,6 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
 
     void **values = (void **)malloc(n*sizeof(void *));
 
-    printf("\t\tcreated frames sending .. 0\n");
     /*
         for(i=0; i < n; i++)  {
            values[i] = (void *)malloc(10*sizeof(void));
@@ -57,23 +56,19 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
     */
 
     zframe_t **frames = (zframe_t **)malloc(n*sizeof(zframe_t *));
-    printf("\t\tcreated frames sending .. 1\n");
     assert(values!=NULL);
     assert(frames!=NULL);
     for(i=0; i < n; i++ ) {
         if( strcmp(names[i], OPNUM)==0)   {
-            printf("\t\tcreated frames sending .. 2a %d %d\n", i, n);
             values[i] = (void *)va_arg(valist, unsigned  int *);
             frames[i]= zframe_new( (const void *)values[i], sizeof(unsigned int));
             //frames[i]= zframe_new((const void *)values[i], sizeof(*values[i]));
         } else {
-            printf("\t\tcreated frames sending .. 2b %d %d\n", i, n);
             values[i] = va_arg(valist, char *);
             frames[i]= zframe_new(values[i], strlen((char *)values[i]));
         }
     }
     va_end(valist);
-    printf("\t\tcreated frames sending .. 2\n");
 
     // it to all servers in a round robin fashion
     int rc;
