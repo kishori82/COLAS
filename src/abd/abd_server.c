@@ -73,11 +73,14 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
         status->metadata_memory -=  (float)strlen( (char *)key);
 
         zhash_delete(temp_hash_hash, key);
-
         zframe_destroy(&item);
+        
+        zlist_purge(keys);
+        zlist_destroy(&keys);
 
 
         zframe_t *dup_payload_frame = zframe_dup(payload_frame);
+
         zhash_insert(temp_hash_hash,tag_str, dup_payload_frame);
 
         status->metadata_memory +=  (float) strlen(tag_str);
@@ -85,6 +88,8 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
 
         zframe_t *ack_frame = zframe_new("SUCCESS",strlen("SUCCESS"));
         zhash_insert(frames, "acknowledge", ack_frame);
+
+
 
     } else {
         zframe_t *ack_frame = zframe_new("SUCCESS",strlen("SUCCESS"));
@@ -186,6 +191,7 @@ void algorithm_ABD(zhash_t *frames, void *worker, void *_server_args) {
     /* zframe_t *payloadf= zmsg_pop (msg);
             printf("%d\n",  (int)zframe_size(payloadf));
     */
+    if(  get_uint_frame(frames, OPNUM) > 40000) exit(0);
 
 }
 
