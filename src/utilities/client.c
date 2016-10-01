@@ -6,6 +6,7 @@
 
 #include "client.h"
 
+/*
 int
 special_zframe_send (zframe_t **self_p, void *dest, int flags) {
     assert (dest);
@@ -28,7 +29,7 @@ special_zframe_send (zframe_t **self_p, void *dest, int flags) {
                 return -2;
             }
         } else {
-            if (zmq_sendmsg (handle, zframe_data(&self), send_flags) >= 0)
+            if (zmq_sendmsg(handle, zframe_data(&self), send_flags) >= 0)
                 zframe_destroy (self_p);
             else
                 return -3;
@@ -36,12 +37,14 @@ special_zframe_send (zframe_t **self_p, void *dest, int flags) {
     }
     return 0;
 }
+*/
 
 #define DEBUG_MODE  1
 
 extern int s_interrupted;
 
 void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[],  int n, ...) {
+    RawData *rawdata;
     va_list valist;
     int i =0, j;
 
@@ -63,6 +66,11 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
             values[i] = (void *)va_arg(valist, unsigned  int *);
             frames[i]= zframe_new( (const void *)values[i], sizeof(unsigned int));
             //frames[i]= zframe_new((const void *)values[i], sizeof(*values[i]));
+        }
+        else if( strcmp(names[i], PAYLOAD)==0)   {
+            rawdata = va_arg(valist, RawData *);
+            values[i] = rawdata;
+            frames[i]= zframe_new(rawdata->data, rawdata->data_size);
         } else {
             values[i] = va_arg(valist, char *);
             frames[i]= zframe_new(values[i], strlen((char *)values[i]));
@@ -81,7 +89,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
                 if( strcmp(names[j], OPNUM)==0)
                     printf("\t\t\tFRAME%d :%s  %u\n",j, names[j], *((unsigned int *)values[j]) );
                 else if( strcmp(names[j], PAYLOAD)==0)
-                    printf("\t\t\tFRAME%d :%s  %lu\n", j, names[j],  strlen((char *)values[j]) );
+                    printf("\t\t\tFRAME%d :%s  %d\n", j, names[j],  ((RawData *)values[j])->data_size);
                 else
                     printf("\t\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
 
@@ -104,7 +112,7 @@ void send_multicast_servers(void *sock_to_servers, int num_servers, char *names[
             if( strcmp(names[j], OPNUM)==0) {
                 printf("\t\t\tFRAME%d :%s  %u\n", j, names[j],   *((unsigned int *)values[j]) );
             } else if( strcmp(names[j], PAYLOAD)==0) {
-                printf("\t\t\tFRAME%d :%s  %lu\n", j, names[j],  strlen((char *)values[j]) );
+                printf("\t\t\tFRAME%d :%s  %d\n", j, names[j],  ((RawData *)values[j])->data_size);
             } else {
                 printf("\t\t\tFRAME%d :%s  %s\n", j, names[j],   (char *)values[j]);
             }
@@ -271,7 +279,7 @@ zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names)  {
 
 void *get_socket_servers(ClientArgs *client_args) {
     int j;
-    static socket_create=0;
+    static int socket_create=0;
     static void *sock_to_servers =0;
 
     if( socket_create==1) return sock_to_servers;

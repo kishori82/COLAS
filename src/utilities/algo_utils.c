@@ -384,7 +384,7 @@ void clear_hash(zhash_t *hash) {
     zlist_t *keys = zhash_keys(hash);
     char *key;
     for( key = (char *)zlist_first(keys);  key != NULL; key = (char *)zlist_next(keys)) {
-        zframe_t *frame = (zframe_t *)zhash_lookup(hash, key);
+        //zframe_t *frame = (zframe_t *)zhash_lookup(hash, key);
         zhash_delete(hash, key);
     }
     //printf("\t\t\t%s : %d\n","frames", zhash_size(frames));

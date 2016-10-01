@@ -98,8 +98,6 @@ Tag *ABD_get_max_tag_phase(
 bool ABD_write(
     char *obj_name,
     unsigned int op_num ,
-    char *payload,
-    unsigned int payload_size,
     RawData *raw_data,
     ClientArgs *client_args
 ) {
@@ -139,9 +137,6 @@ bool ABD_write(
     strcpy(new_tag.id, client_args->client_id);
     free(max_tag);
     printf("\tWRITE_VALUE (WRITER)\n");
-
-    raw_data->data = payload;
-    raw_data->data_size = payload_size;
 
     ABD_write_value_phase(
                       obj_name, 

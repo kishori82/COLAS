@@ -63,6 +63,13 @@ typedef struct  _TAG {
     char id[100];
 }  Tag;
 
+typedef struct _RawData {
+   void *data;
+   int data_size;
+   Tag *tag;
+} RawData;
+
+
 typedef struct  _TAG_VALUE {
     Tag tag;
     void *data;

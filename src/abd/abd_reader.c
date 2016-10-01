@@ -22,15 +22,12 @@ void  ABD_get_max_tag_value_phase(
     zsock_t *sock_to_servers,
     unsigned int num_servers,
     RawData *max_tag_value
-//    Tag **max_tag,
- //   char **max_value
 ) {
 
     // send out the messages to all servers
 
     char phase[64];
     char tag_str[64];
-    char *value=NULL;
     unsigned int round;
 
     Tag *tag;
@@ -58,7 +55,7 @@ void  ABD_get_max_tag_value_phase(
         printf("\t\treceived data\n");
 
         if (items [0].revents & ZMQ_POLLIN) {
-            zmsg_t *msg = zmsg_recv (sock_to_servers);
+            zmsg_t *msg = zmsg_recv(sock_to_servers);
 
             zlist_t *names = zlist_new();
             zhash_t* frames = receive_message_frames_at_client(msg, names);
@@ -73,6 +70,7 @@ void  ABD_get_max_tag_value_phase(
 
 
             if(round==op_num && strcmp(phase, GET_TAG_VALUE)==0) {
+                if(DEBUG_MODE) print_out_hash_in_order(frames, names);
                 responses++;
                 // add tag to list
                 tag = (Tag *)malloc(sizeof(Tag));
@@ -82,7 +80,13 @@ void  ABD_get_max_tag_value_phase(
                 max_tag_value->data = (void *)value_frame;
                 max_tag_value->data_size = zframe_size(value_frame);
 
-                if(responses >= majority) break;
+                if(responses >= majority) { 
+                   zlist_purge(names);
+                   zlist_destroy(&names);
+                   zmsg_destroy (&msg);
+                   destroy_frames(frames);
+                   break;
+                }
                 //if(responses >= num_servers) break;
             } else {
                 printf("\tOLD MESSAGES : (%s, %d)\n", phase, op_num);
@@ -124,13 +128,13 @@ RawData  *ABD_read(
 
     Tag max_tag;
 
-    RawData *max_tag_value = (RawData *)malloc(sizeof(RawData));
+    RawData *max_tag_value = malloc(sizeof(RawData));
 
     ABD_get_max_tag_value_phase(obj_name,  
                             op_num, 
                             sock_to_servers,       
                             num_servers, 
-                            &max_tag_value
+                            max_tag_value
                            );
 
     printf("\tWRITE_VALUE (READER)\n");
@@ -142,7 +146,6 @@ RawData  *ABD_read(
                       max_tag_value,
                       max_tag
                     );
-
 
 
    return max_tag_value;

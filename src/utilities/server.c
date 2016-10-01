@@ -78,7 +78,7 @@ server_worker (void *_server_args, zctx_t *ctx) {
 
     zmq_pollitem_t items[] = { { worker, 0, ZMQ_POLLIN, 0}};
 
-    int count = 0;
+//    int count = 0;
     while (true) {
         printf("\twaiting for message\n");
         int rc = zmq_poll(items, 1, -1);
@@ -95,7 +95,6 @@ server_worker (void *_server_args, zctx_t *ctx) {
             status->network_data += (float)zmsg_content_size(msg) ;
             zlist_t *frames_list = zlist_new();
             zhash_t *frames = receive_message_frames_at_server(msg, frames_list);
-            zframe_t *s = (zframe_t *)zhash_lookup(frames, PAYLOAD);
 
             get_string_frame(algorithm_name, frames, ALGORITHM);
 

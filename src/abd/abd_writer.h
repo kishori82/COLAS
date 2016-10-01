@@ -18,8 +18,6 @@
 
 bool ABD_write(char *obj_name,
                unsigned int op_num,
-               char *payload,
-               unsigned int payload_size,
                RawData *raw_data,
                ClientArgs *client_args
               );

@@ -35,7 +35,7 @@ void  ABD_write_value_phase(
 
     char *types[] = {OBJECT, ALGORITHM, PHASE, OPNUM, TAG, PAYLOAD};
 
-    send_multicast_servers(sock_to_servers, num_servers, types,  6, obj_name, ABD, WRITE_VALUE, &op_num, tag_str, abd_data->data) ;
+    send_multicast_servers(sock_to_servers, num_servers, types,  6, obj_name, ABD, WRITE_VALUE, &op_num, tag_str, abd_data) ;
 
     unsigned int responses =0; 
 
@@ -64,6 +64,7 @@ void  ABD_write_value_phase(
 
             if(round==op_num && strcmp(phase, WRITE_VALUE)==0) {
                 responses++;
+                if(DEBUG_MODE) print_out_hash_in_order(frames, names);
                 if(responses >= majority) {
                     zmsg_destroy(&msg);
                     destroy_frames(frames);

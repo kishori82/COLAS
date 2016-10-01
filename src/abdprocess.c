@@ -116,19 +116,21 @@ void reader_process(Parameters parameters) {
     unsigned int opnum=2;
 
     write_initial_data(parameters);
-
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
 
-
-    for( opnum=2; opnum< 3000; opnum++) {
+    for( opnum=2; opnum< 450; opnum++) {
         usleep(parameters.wait*1000);
 
         printf("%s  %d  %s %s\n", parameters.server_id, opnum, client_args->servers_str, parameters.port);
 
         RawData *abd_data;
-        if(parameters.algorithm==abd) 
+        if(parameters.algorithm==abd)  {
           abd_data = ABD_read("atomic_object", opnum, client_args);
+          free(abd_data->data);
+          free(abd_data->tag);
+          free(abd_data);
+        }
         
 
         if(parameters.algorithm==sodaw) {
@@ -155,8 +157,11 @@ void writer_process(Parameters parameters) {
         unsigned int payload_size = (unsigned int) ( (parameters.filesize_kb + rand()%5)*1024);
         char *payload = get_random_data(payload_size);
 
-        if(parameters.algorithm==abd)
-            ABD_write("atomic_object", opnum, payload, payload_size,  abd_data, client_args);
+        if(parameters.algorithm==abd) {
+            abd_data->data = payload;
+            abd_data->data_size = payload_size;
+            ABD_write("atomic_object", opnum, abd_data, client_args);
+        }
 
         if(parameters.algorithm==sodaw)
             SODAW_write("atomic_object", opnum, payload, payload_size, encoding_info, client_args);
@@ -169,14 +174,22 @@ void write_initial_data(Parameters parameters) {
 
     unsigned int opnum=1;
     unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
+
     unsigned int payload_size=filesize;
     char *payload = get_random_data(filesize);
 
     EncodeData *encoding_info = create_EncodeData(parameters);
     ClientArgs *client_args = create_ClientArgs(parameters);
+    RawData *abd_data = create_RawData(parameters) ;
 
+    abd_data->data = payload;
+    abd_data->data_size = payload_size;
 
-    SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);
+    if(parameters.algorithm==abd)
+        ABD_write("atomic_object", opnum, abd_data, client_args);
+
+    if(parameters.algorithm==sodaw)
+        SODAW_write("atomic_object", opnum, payload, payload_size,  encoding_info, client_args);
 
     free(payload);
 }

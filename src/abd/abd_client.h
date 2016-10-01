@@ -12,12 +12,6 @@
 #include <base64.h>
 #include "client.h"
 
-typedef struct _RawData {
-   void *data;
-   int data_size;
-   Tag *tag;
-} RawData;
-
 // this is the write tag value phase of ABD
 void ABD_write_value_phase(
     char *obj_name,

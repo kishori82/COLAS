@@ -66,7 +66,7 @@ void algorithm_ABD_WRITE_VALUE( zhash_t *frames, void *worker) {
         void *key = zlist_first(keys);
         assert(key!=NULL);
 
-        void *item = zhash_lookup(temp_hash_hash,key);
+        zframe_t *item = zhash_lookup(temp_hash_hash,key);
         assert(item!=NULL);
         
         status->data_memory -= (float)strlen((char *)item);
