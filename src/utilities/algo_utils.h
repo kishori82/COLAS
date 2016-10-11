@@ -89,7 +89,7 @@ void s_catch_signals ();
 
 enum ProcessType { server=2, reader=0, writer=1  };
 
-enum Algorithm {abd=0, sodaw=1};
+enum Algorithm {abd=0, sodaw=1, soda=2};
 
 
 bool is_equal(char *payload1, char*payload2, unsigned int size);

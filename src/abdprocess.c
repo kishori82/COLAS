@@ -166,6 +166,10 @@ void writer_process(Parameters parameters) {
         if(parameters.algorithm==sodaw)
             SODAW_write("atomic_object", opnum, payload, payload_size, encoding_info, client_args);
 
+
+        if(parameters.algorithm==soda)
+            SODA_write("atomic_object", opnum, payload, payload_size, encoding_info, client_args);
+
         free(payload);
     }
 }

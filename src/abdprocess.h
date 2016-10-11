@@ -15,6 +15,8 @@
 #include "sodaw/sodaw_writer.h"
 #include "sodaw/sodaw_server.h"
 
+#include "soda/soda_reader.h"
+
 #include "abd/abd_client.h"
 #include "abd/abd_writer.h"
 #include "abd/abd_reader.h"
