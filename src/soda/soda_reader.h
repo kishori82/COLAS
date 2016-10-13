@@ -1,5 +1,5 @@
-#ifndef _SODAW_READER
-#define _SODAW_READER
+#ifndef _SODA_READER
+#define _SODA_READER
 
 #include "czmq.h"
 #include <stdio.h>

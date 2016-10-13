@@ -167,8 +167,9 @@ void writer_process(Parameters parameters) {
             SODAW_write("atomic_object", opnum, payload, payload_size, encoding_info, client_args);
 
 
-        if(parameters.algorithm==soda)
-            SODA_write("atomic_object", opnum, payload, payload_size, encoding_info, client_args);
+        if(parameters.algorithm==soda){
+          char *payload_read = SODA_read("atomic_object", opnum,  encoding_info, client_args);
+        }
 
         free(payload);
     }
@@ -328,6 +329,7 @@ Server_Args * get_server_args( Parameters parameters) {
     strcpy(server_args->server_id, parameters.server_id);
 
     strcpy(server_args->port, PORT);
+    strcpy(server_args->port1, PORT1);
 
     unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
 

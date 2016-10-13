@@ -17,6 +17,7 @@ typedef struct _client_Args {
     char client_id[BUFSIZE];
     char *servers_str;
     char port[10];
+    char port1[10];
 } ClientArgs;
 
 
@@ -26,6 +27,7 @@ void s_signal_handler(int signal_value);
 void s_catch_signals();
 
 void *get_socket_servers(ClientArgs *client_args) ;
+void *get_md_socket_dealer(ClientArgs *client_args) ;
 
 
 zhash_t *receive_message_frames_at_client(zmsg_t *msg, zlist_t *names) ;

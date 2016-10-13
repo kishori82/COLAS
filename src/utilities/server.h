@@ -33,6 +33,7 @@ typedef struct _Server_Args {
     char server_id[BUFSIZE];
     char *servers_str;
     char port[BUFSIZE];
+    char port1[BUFSIZE];
     void *sock_to_servers;
     int num_servers;
     int symbol_size;

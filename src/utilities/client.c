@@ -302,3 +302,32 @@ void *get_socket_servers(ClientArgs *client_args) {
 
     return sock_to_servers;
 }
+
+void *get_md_socket_dealer(ClientArgs *client_args) {
+    int j;
+    static int socket_create=0;
+    static void *sock_to_servers =0;
+
+    if( socket_create==1) return sock_to_servers;
+
+    int num_servers = count_num_servers(client_args->servers_str);
+    char **servers = create_server_names(client_args->servers_str);
+
+    socket_create=1;
+    zctx_t *ctx  = zctx_new();
+    sock_to_servers = zsocket_new(ctx, ZMQ_DEALER);
+    assert (sock_to_servers);
+    zsocket_set_identity(sock_to_servers,  client_args->client_id);
+
+    for(j=0; j < num_servers; j++) {
+        char *destination = create_destination(servers[j], client_args->port1);
+        int rc = zsocket_connect(sock_to_servers, (const char *)destination);
+        assert(rc==0);
+        free(destination);
+    }
+
+    return sock_to_servers;
+}
+
+
+

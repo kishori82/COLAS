@@ -55,6 +55,7 @@
 #define PAYLOADBUF_SIZE 3000
 #define SYMBOL_SIZE 1024
 #define PORT "8081"
+#define PORT1 "8082"
 
 int s_interrupted;
 
