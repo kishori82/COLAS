@@ -1,8 +1,8 @@
 ALL = abdprocess 
 CC=gcc -g  -DDEBUG
 
-CFLAGS= -Iutilities/ -Iabd/ -Icodes/ -Isodaw  -IZMQ/include
-LDFLAGS= -lm -LZMQ/zmqlibs  -LZMQ/czmqlibs  -lzmq -lczmq  -Labd/ -Lcodes/ -Lsodaw -lsodaw -Lsoda -lsoda  -lrlnc_rs -labd -Wimplicit-function-declaration -fPIC -Wall 
+CFLAGS= -Iutilities/ -Iabd/ -Icodes/ -Isodaw  -IZMQ/include 
+LDFLAGS= -lm -LZMQ/zmqlibs  -LZMQ/czmqlibs  -lzmq -lczmq  -Labd/ -Lcodes/ -Lsodaw -lsodaw  -lrlnc_rs -labd -Wimplicit-function-declaration -fPIC -Wall 
 
 
 all: $(ALL)
