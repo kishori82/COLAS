@@ -60,16 +60,22 @@ func writer_deamon() {
 					C.ABD_write(
 						C.CString(object_name),
 						C.CString(data.name),
-						(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
-						C.CString(servers_str), C.CString(data.port))
+						(C.uint)(data.write_counter),
+						rawdata,
+						(C.uint)(len(encoded)),
+						C.CString(servers_str),
+						C.CString(data.port))
 				}
 
 				if data.algorithm == "SODAW" {
 					C.SODAW_write(
 						C.CString(object_name),
 						C.CString(data.name),
-						(C.uint)(data.write_counter), rawdata, (C.uint)(len(encoded)),
-						C.CString(servers_str), C.CString(data.port))
+						(C.uint)(data.write_counter),
+						rawdata,
+						(C.uint)(len(encoded)),
+						C.CString(servers_str),
+						C.CString(data.port))
 				}
 
 				elapsed := time.Since(start)

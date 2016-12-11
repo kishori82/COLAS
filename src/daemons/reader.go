@@ -10,7 +10,7 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I../abd -I../sodaw -I../utilities
+#cgo CFLAGS: -I../abd -I../sodaw -I../utilities 
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw
 #include <abd_client.h>
 #include <sodaw_reader.h>
