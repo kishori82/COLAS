@@ -52,30 +52,34 @@ func writer_deamon() {
 				rawdata := C.CString(encoded)
 
 				//	defer C.free(unsafe.Pointer(&rawdata))
-				servers_str := create_server_string_to_C()
+				//servers_str := create_server_string_to_C()
 				defer C.free(unsafe.Pointer(&rawdata))
 				start := time.Now()
 				//log.Println(len( C.GoString(rawdata)), servers_str)
 				if data.algorithm == "ABD" {
-					C.ABD_write(
-						C.CString(object_name),
-						C.CString(data.name),
-						(C.uint)(data.write_counter),
-						rawdata,
-						(C.uint)(len(encoded)),
-						C.CString(servers_str),
-						C.CString(data.port))
+					/*
+						C.ABD_write(
+							C.CString(object_name),
+							C.CString(data.name),
+							(C.uint)(data.write_counter),
+							rawdata,
+							(C.uint)(len(encoded)),
+							C.CString(servers_str),
+							C.CString(data.port))
+					*/
 				}
 
 				if data.algorithm == "SODAW" {
-					C.SODAW_write(
-						C.CString(object_name),
-						C.CString(data.name),
-						(C.uint)(data.write_counter),
-						rawdata,
-						(C.uint)(len(encoded)),
-						C.CString(servers_str),
-						C.CString(data.port))
+					/*
+						C.SODAW_write(
+							C.CString(object_name),
+							C.CString(data.name),
+							(C.uint)(data.write_counter),
+							rawdata,
+							(C.uint)(len(encoded)),
+							C.CString(servers_str),
+							C.CString(data.port))
+					*/
 				}
 
 				elapsed := time.Since(start)

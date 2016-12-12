@@ -10,7 +10,7 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I../abd -I../sodaw -I../utilities 
+#cgo CFLAGS: -I../abd -I../sodaw -I../utilities
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw
 #include <abd_client.h>
 #include <sodaw_reader.h>
@@ -20,7 +20,7 @@ import "C"
 func reader_daemon() {
 	active_chan = make(chan bool, 2)
 
-	var object_name string = "atomic_object"
+//	var object_name string = "atomic_object"
 
 	for {
 		select {
@@ -39,7 +39,7 @@ func reader_daemon() {
 
 				time.Sleep(time.Duration(rand_wait))
 
-				servers_str := create_server_string_to_C()
+				//servers_str := create_server_string_to_C()
 
 				// call the ABD algorithm
 				var data_read string
@@ -47,13 +47,12 @@ func reader_daemon() {
 
 				start := time.Now()
 				if data.algorithm == "ABD" {
-
-					data_read_c = C.ABD_read(
-						C.CString(object_name),
-						C.CString(data.name),
-						(C.uint)(data.write_counter),
-						C.CString(servers_str),
-						C.CString(data.port))
+					data_read_c = nil /* C.ABD_read(
+					C.CString(object_name),
+					C.CString(data.name),
+					(C.uint)(data.write_counter),
+					C.CString(servers_str),
+					C.CString(data.port))*/
 
 					data_read = C.GoString(data_read_c)
 					//            C.free(unsafe.Pointer(&data_read_c))
@@ -61,12 +60,13 @@ func reader_daemon() {
 
 				// call the SODAW algorithm
 				if data.algorithm == "SODAW" {
-					data_read_c = C.SODAW_read(
-						C.CString(object_name),
-						C.CString(data.name),
-						(C.uint)(data.write_counter),
-						C.CString(servers_str),
-						C.CString(data.port))
+					data_read_c = nil /* C.SODAW_read(
+					C.CString(object_name),
+					C.CString(data.name),
+					(C.uint)(data.write_counter),
+					C.CString(servers_str),
+					C.CString(data.port))
+					*/
 
 					data_read = C.GoString(data_read_c)
 				}

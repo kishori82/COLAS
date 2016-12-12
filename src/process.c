@@ -1,9 +1,9 @@
-#include "abdprocess.h"
+#include "process.h"
 
 
 int main(int argc, char *argv[]) {
 
-    char usage[] = "Usage: abdprocessc --process-type [0 (R), 1 (W), 2 (S)]\n\t\t\t[--ip  xx.xx.xx.xx] [...] (servers)\n\t\t\t[--filesize  s] (default 1 KB)\n\t\t\t[--wait m] (default 100ms)\n\t\t\t[--algorithm ABD/SODAW(default)]\n\t\t\t[--code rlnc(default)/reed-solomon]\n\t\t\t--serverid name\n";
+    char usage[] = "Usage: processc --process-type [0 (R), 1 (W), 2 (S)]\n\t\t\t[--ip  xx.xx.xx.xx] [...] (servers)\n\t\t\t[--filesize  s] (default 1 KB)\n\t\t\t[--wait m] (default 100ms)\n\t\t\t[--algorithm ABD/SODAW(default)]\n\t\t\t[--code rlnc(default)/reed-solomon]\n\t\t\t--serverid name\n";
 
 
     Parameters parameters;
