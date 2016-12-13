@@ -105,6 +105,7 @@ func Writer_process(parameters *Parameters) {
 	//Initialize the parameters
 	InitializeParameters()
 
+  printParameters(parameters)
 	// Keep running the server for now
 	go HTTP_Server()
 

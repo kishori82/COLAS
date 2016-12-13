@@ -9,17 +9,22 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I../abd -I../sodaw -I../utilities
+#cgo CFLAGS: -I../abd -I../sodaw -I../utilities -I..
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw
 #include <abd_client.h>
 #include <sodaw_reader.h>
+#include <helpers.h>
 */
 import "C"
 
-func reader_daemon() {
+func reader_daemon(parameters *C.Parameters) {
 	active_chan = make(chan bool, 2)
 
+
+
 //	var object_name string = "atomic_object"
+
+//  var opnum int=0
 
 	for {
 		select {
@@ -27,6 +32,7 @@ func reader_daemon() {
 			data.active = active
 			ReinitializeParameters()
 			LogParameters()
+			//opnum = 0
 		case active := <-reset_chan:
 			data.active = active
 			data.write_counter = 0
@@ -98,5 +104,10 @@ func Reader_process(parameters *Parameters) {
 	log.Println("INFO\tStarting reader process\n")
 	log.Println("INFO\tTIME in Milliseconds\n")
 
-	reader_daemon()
+  var cparameters C.Parameters
+  copyGoParamToCParam(&cparameters, parameters) 
+
+	reader_daemon(&cparameters)
 }
+
+

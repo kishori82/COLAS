@@ -1,5 +1,29 @@
 package daemons
 
+/*
+#cgo CFLAGS: -I../abd -I../sodaw -I../utilities -I..
+#cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw
+#include <abd_client.h>
+#include <sodaw_reader.h>
+#include <helpers.h>
+
+char **get_memory_for_ipaddresses(int num_ips) {
+    char **ipaddresses =  (char **)malloc(num_ips *sizeof(char *));
+    int i;
+    for( i =0; i < num_ips; i++)  {
+        ipaddresses[i] = (char *)malloc(16*sizeof(char));
+    }
+    return ipaddresses;
+}
+
+
+char *get_begin_location(char **a, int i){
+    return a[i];
+}
+*/
+import "C"
+
+
 import (
 	"math"
 	"container/list"
@@ -20,7 +44,7 @@ const controller = 3
 type Parameters struct {
     Ipaddresses string
     Ip_list []string
-    num_servers uint
+    Num_servers uint
     Server_id string 
     port string 
     port1 string 
@@ -136,7 +160,7 @@ func ReinitializeParameters() {
 
 
 func SetDefaultParameters(parameters *Parameters) {
-    parameters.num_servers = 0
+    parameters.Num_servers = 0
     parameters.Ipaddresses = ""
     parameters.Algorithm = sodaw
     parameters.Coding_algorithm = full_vector
@@ -151,7 +175,7 @@ func SetDefaultParameters(parameters *Parameters) {
 
 func printParameters(parameters *Parameters) {
 
-    fmt.Printf("Parameters\n");
+    fmt.Printf("Parameters [GO]\n");
     fmt.Printf("\tName  \t\t\t\t: %s\n", parameters.Server_id);;
 
     switch parameters.Processtype  {
@@ -165,7 +189,7 @@ func printParameters(parameters *Parameters) {
           panic("Do not recognize the process type know what it is")
     }
 
-    fmt.Printf("\tnum servers\t\t\t: %d\n", parameters.num_servers)
+    fmt.Printf("\tnum servers\t\t\t: %d\n", parameters.Num_servers)
 
     for i:=0; i < len(parameters.Ip_list) ; i++  {
         fmt.Printf("\t\tserver %d\t\t: %s\n",i, parameters.Ip_list[i] )
@@ -192,4 +216,52 @@ func printParameters(parameters *Parameters) {
     fmt.Printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.Filesize_kb)
 }
 
+func copyGoParamToCParam(cparameters *C.Parameters, parameters *Parameters) {
+   cparameters.num_servers = C.uint(parameters.Num_servers)
+
+   fmt.Printf("lenth of ipaddress %d\n", len(parameters.Ip_list))
+
+   cparameters.ipaddresses = C.get_memory_for_ipaddresses( C.int(parameters.Num_servers))
+	 
+   for i :=0; i < int(parameters.Num_servers); i++  {
+        C.strcpy(C.get_begin_location(cparameters.ipaddresses, C.int(i) ),  C.CString(parameters.Ip_list[i]))
+    }
+
+    switch  parameters.Algorithm {
+		    case abd:
+             cparameters.algorithm = 0
+		    case sodaw:
+             cparameters.algorithm = 1
+				default:
+				    panic("Unknown choice for algorithm")
+		}
+
+    switch  parameters.Coding_algorithm {
+		    case full_vector:
+             cparameters.coding_algorithm = 0
+		    case reed_solomon:
+             cparameters.algorithm = 1
+				default:
+				    panic("Unknown choice for coding algorithm")
+		}
+
+
+    cparameters.wait = C.int(parameters.Wait)
+    cparameters.filesize_kb = C.float(parameters.Filesize_kb)
+
+    switch  parameters.Processtype {
+		    case 0:
+             cparameters.processtype = 0
+		    case 1:
+             cparameters.processtype = 1
+		    case 2:
+             cparameters.processtype = 2
+		    case 3:
+             cparameters.processtype = 3
+				default:
+				    panic("Unknown choice for process typ")
+		}
+    C.strcpy(&cparameters.port[0],  C.CString(parameters.port))
+    C.strcpy(&cparameters.port1[0],  C.CString(parameters.port1))
+}
 

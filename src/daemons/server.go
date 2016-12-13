@@ -95,15 +95,16 @@ func InitializeServerParameters(server_args *C.Server_Args, status *C.Server_Sta
 	server_args.K = C.uint(data.K)
 }
 
-func Server_process(init_file_size float64) {
+func Server_process(parameters *Parameters) {
 	fmt.Println("Starting server\n")
 	data.processType = 2
-	data.init_file_size = init_file_size
+	data.init_file_size = parameters.Filesize_kb
 
 	f := SetupLogging()
 	defer f.Close()
 	// Run the server for now
 	InitializeParameters()
+  printParameters(parameters)
 
 	go HTTP_Server()
 	server_daemon()

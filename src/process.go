@@ -12,8 +12,9 @@ import (
 )
 
 /*
-#cgo CFLAGS: -Iabd  -Isodaw  -Iutilities/C
+#cgo CFLAGS: -Iabd  -Isodaw  -Iutilities
 #cgo LDFLAGS: -Labd  -labd -Lsodaw -lsodaw -lzmq  -Lcodes -lreed -Wl,-rpath=codes
+#include "helpers.h"
 */
 import "C"
 
@@ -107,6 +108,7 @@ func main() {
 
 
   parameters.Ipaddresses=strings.Join(parameters.Ip_list, " ")
+  parameters.Num_servers = uint(len(parameters.Ip_list))
 
   s1 := rand.NewSource(time.Now().UnixNano())
   ran := rand.New(s1)
@@ -119,7 +121,7 @@ func main() {
 		daemons.Writer_process(&parameters)
 	} else if parameters.Processtype == 2 {
 	  parameters.Server_id = "server-" + strconv.Itoa(ran.Intn(10000000000))
-		daemons.Server_process(parameters.Filesize_kb)
+		daemons.Server_process(&parameters)
 	} else if parameters.Processtype == 3 {
 	  parameters.Server_id = "controller-" + strconv.Itoa(ran.Intn(10000000000))
 		daemons.Controller_process()
@@ -129,6 +131,3 @@ func main() {
 	daemons.PrintFooter()
 }
 
-func createParameters(x string) string {
-     return "hello"
-}

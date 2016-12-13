@@ -41,11 +41,11 @@ rebuildc: remove buildc
 	make -C abd clean
 	make -C sodaw clean
 
-buildc: 
+buildc: process.c utilities/helpers.c utilities/helpers.h 
 	make -C codes 
 	make -C abd 
 	make -C sodaw
-	$(CC) $(CFLAGS)  process.c  -o $(TARGET1)  $(LDFLAGS)
+	$(CC) $(CFLAGS) utilities/helpers.c  process.c  -o $(TARGET1)  $(LDFLAGS)
 
 
 rebuild: remove build
