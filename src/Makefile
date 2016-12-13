@@ -47,9 +47,9 @@ rebuildc:
 
 
 rebuild:
-	make -C codes clean
-	make -C abd clean
-	make -C sodaw clean
+	#make -C codes clean
+	#make -C abd clean
+	#make -C sodaw clean
 	rm -rf  $(TARGET)
 	make -C codes 
 	make -C abd 

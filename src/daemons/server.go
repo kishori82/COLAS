@@ -11,6 +11,13 @@ import (
 #cgo CFLAGS: -I../abd  -I../sodaw
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw -lzmq -lczmq
 #include <abd_server.h>
+#include <stdio.h>
+
+void strcopy(char *a, char *b) 
+ {
+
+
+ }
 */
 import "C"
 
@@ -76,9 +83,12 @@ func InitializeServerParameters(server_args *C.Server_Args, status *C.Server_Sta
 	status.time_point = 0
 
 	server_args.init_data = C.CString(encoded)
-	server_args.server_id = C.CString(data.name)
+
+	C.strcpy(&server_args.server_id[0], C.CString(data.name))
+
 	server_args.servers_str = C.CString(servers_str)
-	server_args.port = C.CString(data.port)
+
+	C.strcpy(&server_args.port[0], C.CString(data.port))
 	server_args.symbol_size = C.int(data.symbol_size)
 	server_args.coding_algorithm = C.uint(data.coding_algorithm)
 	server_args.N = C.uint(data.N)

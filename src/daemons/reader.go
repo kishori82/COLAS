@@ -1,7 +1,6 @@
 package daemons
 
 import (
-	"container/list"
 	"fmt"
 	"log"
 	//	"math/rand"
@@ -84,7 +83,7 @@ func reader_daemon() {
 	}
 }
 
-func Reader_process(ip_addrs *list.List) {
+func Reader_process(parameters *Parameters) {
 
 	// This should become part of the standard init function later when we refactor...
 	data.processType = 0
@@ -92,6 +91,7 @@ func Reader_process(ip_addrs *list.List) {
 	fmt.Println("INFO\tStarting reader\n")
 
 	InitializeParameters()
+  printParameters(parameters
 
 	go HTTP_Server()
 

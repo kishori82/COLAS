@@ -1,7 +1,6 @@
 package daemons
 
 import (
-	"container/list"
 	"encoding/base64"
 	//"fmt"
 	"log"
@@ -97,7 +96,7 @@ func writer_deamon() {
 	}
 }
 
-func Writer_process(ip_addrs *list.List) {
+func Writer_process(parameters *Parameters) {
 	// This should become part of the standard init function later when we refactor...
 	SetupLogging()
 	log.Println("INFO", data.name, "Starting")
