@@ -23,11 +23,10 @@ char *get_begin_location(char **a, int i){
 */
 import "C"
 
-
 import (
-	"math"
 	"container/list"
 	"fmt"
+	"math"
 )
 
 const PORT = "8081"
@@ -42,32 +41,29 @@ const server = 2
 const controller = 3
 
 type Parameters struct {
-    Ipaddresses string
-    Ip_list []string
-    Num_servers uint
-    Server_id string 
-    port string 
-    port1 string 
-    Algorithm string
-    Coding_algorithm string 
-    Wait uint64
-    Filesize_kb float64
-    Processtype uint64
-} 
-
-
+	Ipaddresses      string
+	Ip_list          []string
+	Num_servers      uint
+	Server_id        string
+	port             string
+	port1            string
+	Algorithm        string
+	Coding_algorithm string
+	Wait             uint64
+	Filesize_kb      float64
+	Processtype      uint64
+}
 
 type ClientArgs struct {
-    Algorithm string
-	  Ip_addrs  list.List
-	  Wait uint64
-	  Filesize float64 
+	Algorithm string
+	Ip_addrs  list.List
+	Wait      uint64
+	Filesize  float64
 }
 
 type EncodingInfo struct {
-    Code string
+	Code string
 }
-
 
 type Params struct {
 	processType    int8
@@ -156,112 +152,105 @@ func ReinitializeParameters() {
 	data.K = uint64(math.Ceil((float64(data.N) + 1) / 2.0))
 }
 
-
-
-
 func SetDefaultParameters(parameters *Parameters) {
-    parameters.Num_servers = 0
-    parameters.Ipaddresses = ""
-    parameters.Algorithm = sodaw
-    parameters.Coding_algorithm = full_vector
-    parameters.Wait = 100
-    parameters.Filesize_kb = 1.1
-    parameters.Processtype = 2
-    parameters.port = PORT
-    parameters.port1 = PORT1
+	parameters.Num_servers = 0
+	parameters.Ipaddresses = ""
+	parameters.Algorithm = sodaw
+	parameters.Coding_algorithm = full_vector
+	parameters.Wait = 100
+	parameters.Filesize_kb = 1.1
+	parameters.Processtype = 2
+	parameters.port = PORT
+	parameters.port1 = PORT1
 }
-
-
 
 func printParameters(parameters *Parameters) {
 
-    fmt.Printf("Parameters [GO]\n");
-    fmt.Printf("\tName  \t\t\t\t: %s\n", parameters.Server_id);;
+	fmt.Printf("Parameters [GO]\n")
+	fmt.Printf("\tName  \t\t\t\t: %s\n", parameters.Server_id)
 
-    switch parameters.Processtype  {
-       case reader:
-          fmt.Printf("\tprocesstype\t\t\t: %s\n", "reader")
-       case writer:
-           fmt.Printf("\tprocesstype\t\t\t: %s\n", "writer")
-       case server:
-           fmt.Printf("\tprocesstype\t\t\t: %s\n", "server")
-       default:
-          panic("Do not recognize the process type know what it is")
-    }
+	switch parameters.Processtype {
+	case reader:
+		fmt.Printf("\tprocesstype\t\t\t: %s\n", "reader")
+	case writer:
+		fmt.Printf("\tprocesstype\t\t\t: %s\n", "writer")
+	case server:
+		fmt.Printf("\tprocesstype\t\t\t: %s\n", "server")
+	default:
+		panic("Do not recognize the process type know what it is")
+	}
 
-    fmt.Printf("\tnum servers\t\t\t: %d\n", parameters.Num_servers)
+	fmt.Printf("\tnum servers\t\t\t: %d\n", parameters.Num_servers)
 
-    for i:=0; i < len(parameters.Ip_list) ; i++  {
-        fmt.Printf("\t\tserver %d\t\t: %s\n",i, parameters.Ip_list[i] )
-    }
+	for i := 0; i < len(parameters.Ip_list); i++ {
+		fmt.Printf("\t\tserver %d\t\t: %s\n", i, parameters.Ip_list[i])
+	}
 
-    switch parameters.Algorithm  {
-       case sodaw:
-          fmt.Printf("\talgorithm\t\t\t: %s\n", sodaw   )
-       case abd:
-           fmt.Printf("\talgorithm\t\t\t: %s\n", abd )
-       default:
-           panic("Cannot recognize algorithm")
-    }
+	switch parameters.Algorithm {
+	case sodaw:
+		fmt.Printf("\talgorithm\t\t\t: %s\n", sodaw)
+	case abd:
+		fmt.Printf("\talgorithm\t\t\t: %s\n", abd)
+	default:
+		panic("Cannot recognize algorithm")
+	}
 
-    switch parameters.Coding_algorithm  {
-       case full_vector:
-          fmt.Printf("\tcoding algorithm\t\t: %s\n", "RLNC" )
-       case reed_solomon:
-           fmt.Printf("\tcoding algorithm\t\t: %s\n", "REED-SOLOMON" )
-       default:
-           panic("Cannot recognize the coding algorithm")
-    }
-    fmt.Printf("\tinter op wait (ms)\t\t: %d\n", parameters.Wait)
-    fmt.Printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.Filesize_kb)
+	switch parameters.Coding_algorithm {
+	case full_vector:
+		fmt.Printf("\tcoding algorithm\t\t: %s\n", "RLNC")
+	case reed_solomon:
+		fmt.Printf("\tcoding algorithm\t\t: %s\n", "REED-SOLOMON")
+	default:
+		panic("Cannot recognize the coding algorithm")
+	}
+	fmt.Printf("\tinter op wait (ms)\t\t: %d\n", parameters.Wait)
+	fmt.Printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.Filesize_kb)
 }
 
 func copyGoParamToCParam(cparameters *C.Parameters, parameters *Parameters) {
-   cparameters.num_servers = C.uint(parameters.Num_servers)
+	C.strcpy(&cparameters.server_id[0], C.CString(parameters.Server_id))
 
-   fmt.Printf("lenth of ipaddress %d\n", len(parameters.Ip_list))
+	cparameters.num_servers = C.uint(parameters.Num_servers)
 
-   cparameters.ipaddresses = C.get_memory_for_ipaddresses( C.int(parameters.Num_servers))
-	 
-   for i :=0; i < int(parameters.Num_servers); i++  {
-        C.strcpy(C.get_begin_location(cparameters.ipaddresses, C.int(i) ),  C.CString(parameters.Ip_list[i]))
-    }
+	cparameters.ipaddresses = C.get_memory_for_ipaddresses(C.int(parameters.Num_servers))
 
-    switch  parameters.Algorithm {
-		    case abd:
-             cparameters.algorithm = 0
-		    case sodaw:
-             cparameters.algorithm = 1
-				default:
-				    panic("Unknown choice for algorithm")
-		}
+	for i := 0; i < int(parameters.Num_servers); i++ {
+		C.strcpy(C.get_begin_location(cparameters.ipaddresses, C.int(i)), C.CString(parameters.Ip_list[i]))
+	}
 
-    switch  parameters.Coding_algorithm {
-		    case full_vector:
-             cparameters.coding_algorithm = 0
-		    case reed_solomon:
-             cparameters.algorithm = 1
-				default:
-				    panic("Unknown choice for coding algorithm")
-		}
+	switch parameters.Algorithm {
+	case abd:
+		cparameters.algorithm = 0
+	case sodaw:
+		cparameters.algorithm = 1
+	default:
+		panic("Unknown choice for algorithm")
+	}
 
+	switch parameters.Coding_algorithm {
+	case full_vector:
+		cparameters.coding_algorithm = 0
+	case reed_solomon:
+		cparameters.coding_algorithm = 1
+	default:
+		panic("Unknown choice for coding algorithm")
+	}
 
-    cparameters.wait = C.int(parameters.Wait)
-    cparameters.filesize_kb = C.float(parameters.Filesize_kb)
+	cparameters.wait = C.int(parameters.Wait)
+	cparameters.filesize_kb = C.float(parameters.Filesize_kb)
 
-    switch  parameters.Processtype {
-		    case 0:
-             cparameters.processtype = 0
-		    case 1:
-             cparameters.processtype = 1
-		    case 2:
-             cparameters.processtype = 2
-		    case 3:
-             cparameters.processtype = 3
-				default:
-				    panic("Unknown choice for process typ")
-		}
-    C.strcpy(&cparameters.port[0],  C.CString(parameters.port))
-    C.strcpy(&cparameters.port1[0],  C.CString(parameters.port1))
+	switch parameters.Processtype {
+	case 0:
+		cparameters.processtype = 0
+	case 1:
+		cparameters.processtype = 1
+	case 2:
+		cparameters.processtype = 2
+	case 3:
+		cparameters.processtype = 3
+	default:
+		panic("Unknown choice for process typ")
+	}
+	C.strcpy(&cparameters.port[0], C.CString(parameters.port))
+	C.strcpy(&cparameters.port1[0], C.CString(parameters.port1))
 }
-

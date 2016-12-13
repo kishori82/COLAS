@@ -13,7 +13,7 @@ import (
 #include <abd_server.h>
 #include <stdio.h>
 
-void strcopy(char *a, char *b) 
+void strcopy(char *a, char *b)
  {
 
 
@@ -104,7 +104,7 @@ func Server_process(parameters *Parameters) {
 	defer f.Close()
 	// Run the server for now
 	InitializeParameters()
-  printParameters(parameters)
+	printParameters(parameters)
 
 	go HTTP_Server()
 	server_daemon()

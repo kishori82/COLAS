@@ -21,7 +21,6 @@ char *get_servers_str(Parameters parameters) {
 
 
 EncodeData *create_EncodeData(Parameters parameters) {
-
     unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
     EncodeData *encoding_info  = (EncodeData *)malloc(sizeof(EncodeData));
     encoding_info->N = parameters.num_servers;
@@ -92,7 +91,6 @@ RawData *create_RawData(Parameters parameters) {
     return raw_data;
 }
 
-
 ClientArgs *create_ClientArgs(Parameters parameters) {
 
     char *servers_str = get_servers_str(parameters);
@@ -107,7 +105,6 @@ ClientArgs *create_ClientArgs(Parameters parameters) {
 
     return client_args;
 }
-
 
 void setDefaults(Parameters *parameters) {
     parameters->num_servers = 0;

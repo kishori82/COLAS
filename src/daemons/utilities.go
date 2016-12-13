@@ -1,5 +1,114 @@
 package daemons
 
+/*
+#cgo CFLAGS: -I../abd -I../sodaw -I../utilities -I..
+#cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw -lm
+#include <abd_client.h>
+#include <sodaw_reader.h>
+#include <helpers.h>
+#include <math.h>
+
+#define SYMBOL_SIZE 1024
+
+EncodeData *create_EncodeData(Parameters parameters) {
+    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
+    EncodeData *encoding_info  = (EncodeData *)malloc(sizeof(EncodeData));
+    encoding_info->N = parameters.num_servers;
+    encoding_info->K= ceil((float)parameters.num_servers + 1)/2;
+    encoding_info->symbol_size = SYMBOL_SIZE;
+    encoding_info->raw_data_size = filesize;
+    encoding_info->num_blocks = ceil( (float)filesize/(encoding_info->K*SYMBOL_SIZE));
+    encoding_info->algorithm= parameters.coding_algorithm;
+    encoding_info->offset_index=0;
+
+    return encoding_info;
+}
+char *get_servers_str(Parameters parameters) {
+    int i;
+    char *q = (char *) malloc( 16*parameters.num_servers*sizeof(char));
+
+    char *p = q;
+    strncpy(p, parameters.ipaddresses[0], strlen(parameters.ipaddresses[0]));
+    p += strlen(parameters.ipaddresses[0]);
+    for(i=1; i < parameters.num_servers; i++) {
+        *p = ' ';
+        p++;
+        strncpy(p, parameters.ipaddresses[i], strlen(parameters.ipaddresses[i]));
+        p += strlen(parameters.ipaddresses[i]);
+    }
+    *p = '\0';
+    return q;
+}
+
+
+ClientArgs *create_ClientArgs(Parameters parameters) {
+
+    char *servers_str = get_servers_str(parameters);
+
+    ClientArgs *client_args  = (ClientArgs *)malloc(sizeof(ClientArgs));
+
+    strcpy(client_args->client_id, parameters.server_id);
+    strcpy(client_args->port, parameters.port);
+
+    client_args->servers_str = (char *)malloc( (strlen(servers_str) +1)*sizeof(char));
+    strcpy(client_args->servers_str, servers_str);
+
+    return client_args;
+}
+
+void printParameters(Parameters parameters) {
+    int i;
+
+    printf("Parameters [C]\n");
+    printf("\tName  \t\t\t\t: %s\n", parameters.server_id);;
+
+    switch(parameters.processtype) {
+    case reader:
+        printf("\tprocesstype\t\t\t: %s\n", "reader");
+        break;
+    case writer:
+        printf("\tprocesstype\t\t\t: %s\n", "writer");
+        break;
+    case server:
+        printf("\tprocesstype\t\t\t: %s\n", "server");
+        break;
+    default:
+        break;
+    }
+
+    printf("\tnum servers\t\t\t: %d\n", parameters.num_servers);
+    for(i=0; i < parameters.num_servers; i++) {
+        printf("\t\tserver %d\t\t: %s\n",i, parameters.ipaddresses[i] );
+    }
+
+    switch(parameters.algorithm) {
+    case sodaw:
+        printf("\talgorithm\t\t\t: %s\n", SODAW   );
+        break;
+    case abd:
+        printf("\talgorithm\t\t\t: %s\n", ABD );
+        break;
+    default:
+        break;
+    }
+
+    switch(parameters.coding_algorithm) {
+    case full_vector:
+        printf("\tcoding algorithm\t\t: %s\n", "RLNC"   );
+        break;
+    case reed_solomon:
+        printf("\tcoding algorithm\t\t: %s\n", "REED-SOLOMON" );
+        break;
+    default:
+        break;
+    }
+    printf("\tinter op wait (ms)\t\t: %d\n", parameters.wait);
+    printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.filesize_kb);
+}
+
+*/
+import "C"
+
 import (
 	"fmt"
 	"io/ioutil"
@@ -61,55 +170,3 @@ func CpuUsage() float64 {
 	//fmt.Printf("CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
 	return cpuUsage
 }
-
-
-/*
-ClientArgs *create_ClientArgs(Parameters parameters) {
-
-
-    char *servers_str = get_servers_str(parameters);
-
-    ClientArgs *client_args  = (ClientArgs *)malloc(sizeof(ClientArgs));
-
-    strcpy(client_args->client_id, parameters.server_id);
-    strcpy(client_args->port, parameters.port);
-
-    client_args->servers_str = (char *)malloc( (strlen(servers_str) +1)*sizeof(char));
-    strcpy(client_args->servers_str, servers_str);
-
-    return client_args;
-}
-
-EncodeData *create_EncodeData(Parameters parameters) {
-
-    unsigned int filesize = (unsigned int) (parameters.filesize_kb*1024);
-    EncodeData *encoding_info  = (EncodeData *)malloc(sizeof(EncodeData));
-    encoding_info->N = parameters.num_servers;
-    encoding_info->K= ceil((float)parameters.num_servers + 1)/2;
-    encoding_info->symbol_size = SYMBOL_SIZE;
-    encoding_info->raw_data_size = filesize;
-    encoding_info->num_blocks = ceil( (float)filesize/(encoding_info->K*SYMBOL_SIZE));
-    encoding_info->algorithm= parameters.coding_algorithm;
-    encoding_info->offset_index=0;
-
-    return encoding_info;
-}
-
-RawData *create_RawData(Parameters parameters) {
-    RawData *raw_data  = (RawData *)malloc(sizeof(RawData));
-    return raw_data;
-}
-
-char * get_random_data(unsigned int size) {
-    srand(23);
-    int i;
-    char *data = (char *)malloc( (size+1)*sizeof(char));
-
-    for( i = 0 ; i < size ; i++ ) {
-        data[i] = 65 + rand()%25;
-        //data[i] = 65 + i%25;
-    }
-    data[i]='\0';
-    return data;
-}
-*/

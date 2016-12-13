@@ -2,7 +2,7 @@ package daemons
 
 import (
 	"encoding/base64"
-	//"fmt"
+	"fmt"
 	"log"
 	//	"math/rand"
 	"time"
@@ -10,16 +10,30 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I../abd  -I../sodaw -I../utilities/C
+#cgo CFLAGS: -I../abd  -I../sodaw -I../utilities
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw  -lzmq -lczmq
 #include <abd_client.h>
 #include <sodaw_writer.h>
+#include <helpers.h>
+#include <client.h>
+
+#include <sodaw_reader.h>
+#include <abd_reader.h>
 */
 import "C"
 
-func writer_deamon() {
+func writer_daemon(cparameters *C.Parameters, parameters *Parameters) {
 	active_chan = make(chan bool, 2)
 
+
+	var client_args *C.ClientArgs
+	client_args = C.create_ClientArgs(*cparameters)
+	_= client_args
+	var encoding_info *C.EncodeData
+	encoding_info = C.create_EncodeData(*cparameters)
+	_ = encoding_info
+
+	var opnum int = 0
 	var object_name string = "atomic_object"
 
 	for {
@@ -33,9 +47,12 @@ func writer_deamon() {
 			data.write_counter = 0
 		default:
 			if data.active == true && len(data.servers) > 0 {
-
-				rand_wait := rand_wait_time()*int64(time.Millisecond) + int64(time.Millisecond)
+        opnum++
+				//rand_wait := rand_wait_time()*int64(time.Millisecond) + int64(time.Millisecond)
+				rand_wait := int64(parameters.Wait)*int64(time.Millisecond)
 				time.Sleep(time.Duration(rand_wait))
+
+				fmt.Printf("%s  %d %d %s %s\n", parameters.Server_id, opnum, rand_wait, C.GoString(client_args.servers_str), parameters.port)
 
 				//rand_data_file_size := int64(1024 * rand.ExpFloat64() / data.file_size)
 				rand_data_file_size := int64(1024 * data.file_size)
@@ -105,9 +122,24 @@ func Writer_process(parameters *Parameters) {
 	//Initialize the parameters
 	InitializeParameters()
 
-  printParameters(parameters)
+	printParameters(parameters)
 	// Keep running the server for now
 	go HTTP_Server()
 
-	writer_deamon()
+	log.Println("INFO\tStarting writer process\n")
+	log.Println("INFO\tTIME in Milliseconds\n")
+
+	var cparameters C.Parameters
+  copyGoParamToCParam(&cparameters, parameters)
+	if parameters.Num_servers > 0 {
+		data.active = true
+		for i := 0; i < int(parameters.Num_servers); i++ {
+			data.servers[parameters.Ip_list[i]] = true
+		}
+
+	}
+
+	C.printParameters(cparameters)
+   
+	writer_daemon(&cparameters, parameters)
 }

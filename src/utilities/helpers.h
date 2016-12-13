@@ -37,12 +37,11 @@ char **get_memory_for_ipaddresses(int num_ips) {
 }
 */
 
-
 EncodeData *create_EncodeData(Parameters parameters) ;
 
 RawData *create_RawData(Parameters parameters) ;
 
-ClientArgs *create_ClientArgs(Parameters parameters) ;
+//ClientArgs *create_ClientArgs(Parameters parameters) ;
 
 void setDefaults(Parameters *parameters);
 
@@ -59,5 +58,7 @@ bool is_equal(char *payload1, char*payload2, unsigned int size) ;
 void destroy_server_args(Server_Args *server_args) ;
 
 void printParameters(Parameters parameters) ;
+
+ClientArgs *create_ClientArgs(Parameters parameters) ;
 
 #endif
