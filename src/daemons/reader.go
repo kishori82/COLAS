@@ -91,7 +91,7 @@ func Reader_process(parameters *Parameters) {
 	fmt.Println("INFO\tStarting reader\n")
 
 	InitializeParameters()
-  printParameters(parameters
+  printParameters(parameters)
 
 	go HTTP_Server()
 

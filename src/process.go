@@ -5,6 +5,8 @@ import (
 	"strings"
 	"fmt"
 	"math"
+	"math/rand"
+	"time"
 	"os"
 	"strconv"
 )
@@ -104,15 +106,22 @@ func main() {
 	}
 
 
-  parameters.ipaddresses=strings.Join(parameters.Ip_list, " ")
+  parameters.Ipaddresses=strings.Join(parameters.Ip_list, " ")
+
+  s1 := rand.NewSource(time.Now().UnixNano())
+  ran := rand.New(s1)
 
 	if parameters.Processtype == 0 {
+	  parameters.Server_id = "reader-" + strconv.Itoa(ran.Intn(10000000000))
 		daemons.Reader_process(&parameters)
 	} else if parameters.Processtype == 1 {
+	  parameters.Server_id = "writer-" + strconv.Itoa(ran.Intn(10000000000))
 		daemons.Writer_process(&parameters)
 	} else if parameters.Processtype == 2 {
+	  parameters.Server_id = "server-" + strconv.Itoa(ran.Intn(10000000000))
 		daemons.Server_process(parameters.Filesize_kb)
 	} else if parameters.Processtype == 3 {
+	  parameters.Server_id = "controller-" + strconv.Itoa(ran.Intn(10000000000))
 		daemons.Controller_process()
 	} else {
 		fmt.Println("unknown type\n")

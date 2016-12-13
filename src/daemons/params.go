@@ -3,6 +3,7 @@ package daemons
 import (
 	"math"
 	"container/list"
+	"fmt"
 )
 
 const PORT = "8081"
@@ -11,12 +12,16 @@ const sodaw = "SODAW"
 const abd = "ABD"
 const full_vector = "full_vector"
 const reed_solomon = "reed_solomon"
+const reader = 0
+const writer = 1
+const server = 2
+const controller = 3
 
 type Parameters struct {
     Ipaddresses string
     Ip_list []string
     num_servers uint
-    server_id string 
+    Server_id string 
     port string 
     port1 string 
     Algorithm string
@@ -144,54 +149,47 @@ func SetDefaultParameters(parameters *Parameters) {
 
 
 
-func printParameters(parameters Parameters) {
-    var i  int 
+func printParameters(parameters *Parameters) {
 
     fmt.Printf("Parameters\n");
-    fmt.Printf("\tName  \t\t\t\t: %s\n", parameters.server_id);;
+    fmt.Printf("\tName  \t\t\t\t: %s\n", parameters.Server_id);;
 
-    switch(parameters.processtype) {
-    case reader:
-        fmt.Printf("\tprocesstype\t\t\t: %s\n", "reader");
-        break;
-    case writer:
-        fmt.Printf("\tprocesstype\t\t\t: %s\n", "writer");
-        break;
-    case server:
-        fmt.Printf("\tprocesstype\t\t\t: %s\n", "server");
-        break;
-    default:
-        break;
+    switch parameters.Processtype  {
+       case reader:
+          fmt.Printf("\tprocesstype\t\t\t: %s\n", "reader")
+       case writer:
+           fmt.Printf("\tprocesstype\t\t\t: %s\n", "writer")
+       case server:
+           fmt.Printf("\tprocesstype\t\t\t: %s\n", "server")
+       default:
+          panic("Do not recognize the process type know what it is")
     }
 
-    fmt.Printf("\tnum servers\t\t\t: %d\n", parameters.num_servers);
-    for(i=0; i < parameters.num_servers; i++) {
-        fmt.Printf("\t\tserver %d\t\t: %s\n",i, parameters.ipaddresses[i] );
+    fmt.Printf("\tnum servers\t\t\t: %d\n", parameters.num_servers)
+
+    for i:=0; i < len(parameters.Ip_list) ; i++  {
+        fmt.Printf("\t\tserver %d\t\t: %s\n",i, parameters.Ip_list[i] )
     }
 
-    switch(parameters.algorithm) {
-    case sodaw:
-        fmt.Printf("\talgorithm\t\t\t: %s\n", SODAW   );
-        break;
-    case abd:
-        fmt.Printf("\talgorithm\t\t\t: %s\n", ABD );
-        break;
-    default:
-        break;
+    switch parameters.Algorithm  {
+       case sodaw:
+          fmt.Printf("\talgorithm\t\t\t: %s\n", sodaw   )
+       case abd:
+           fmt.Printf("\talgorithm\t\t\t: %s\n", abd )
+       default:
+           panic("Cannot recognize algorithm")
     }
 
-    switch(parameters.coding_algorithm) {
-    case full_vector:
-        fmt.Printf("\tcoding algorithm\t\t: %s\n", "RLNC"   );
-        break;
-    case reed_solomon:
-        fmt.Printf("\tcoding algorithm\t\t: %s\n", "REED-SOLOMON" );
-        break;
-    default:
-        break;
+    switch parameters.Coding_algorithm  {
+       case full_vector:
+          fmt.Printf("\tcoding algorithm\t\t: %s\n", "RLNC" )
+       case reed_solomon:
+           fmt.Printf("\tcoding algorithm\t\t: %s\n", "REED-SOLOMON" )
+       default:
+           panic("Cannot recognize the coding algorithm")
     }
-    fmt.Printf("\tinter op wait (ms)\t\t: %d\n", parameters.wait);
-    fmt.Printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.filesize_kb);
+    fmt.Printf("\tinter op wait (ms)\t\t: %d\n", parameters.Wait)
+    fmt.Printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.Filesize_kb)
 }
 
 

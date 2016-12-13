@@ -8,6 +8,7 @@ LDFLAGS= -lm -LZMQ/zmqlibs  -LZMQ/czmqlibs  -lzmq -lczmq  -Labd/ -Lcodes/ -Lsoda
 all: $(ALL)
 
 TARGET= process
+TARGET1= processc
 
 SRCS = daemons/params.go daemons/logger.go daemons/controllerRoutes.go daemons/getParamRoutes.go  daemons/setParamRoutes.go daemons/httpServer.go daemons/routes.go daemons/controller.go daemons/utils.go daemons/writer.go daemons/reader.go daemons/server.go daemons/utilities.go
 
@@ -34,27 +35,34 @@ CODES:
 	make -C codes clean
 	make -C codes
 
-rebuildc:
+
+rebuildc: remove buildc
 	make -C codes clean
 	make -C abd clean
 	make -C sodaw clean
-	rm -rf  processc
+
+buildc: 
 	make -C codes 
 	make -C abd 
 	make -C sodaw
-	$(CC) $(CFLAGS)  process.c  -o processc  $(LDFLAGS)
+	$(CC) $(CFLAGS)  process.c  -o $(TARGET1)  $(LDFLAGS)
 
 
+rebuild: remove build
 
-rebuild:
-	#make -C codes clean
-	#make -C abd clean
-	#make -C sodaw clean
+.PHONY:remove
+remove:
+	make -C codes clean
+	make -C abd clean
+	make -C sodaw clean
+	rm -rf  $(TARGET1)
 	rm -rf  $(TARGET)
+
+build:
 	make -C codes 
 	make -C abd 
 	make -C sodaw
 	go build -x -o $(TARGET) process.go
 
 clean:
-	rm -rf logs $(TARGET) processc
+	rm -rf logs $(TARGET) $(TARGET1)
