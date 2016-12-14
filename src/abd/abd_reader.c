@@ -147,7 +147,6 @@ RawData  *ABD_read(
                       max_tag
                     );
 
-
    return max_tag_value;
 }
 

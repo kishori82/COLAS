@@ -106,6 +106,24 @@ void printParameters(Parameters parameters) {
     printf("\tfile size (KB)\t\t\t: %.2f\n", parameters.filesize_kb);
 }
 
+char * get_random_data(unsigned int size) {
+    srand(23);
+    int i;
+    char *data = (char *)malloc( (size+1)*sizeof(char));
+
+    for( i = 0 ; i < size ; i++ ) {
+        data[i] = 65 + rand()%25;
+        //data[i] = 65 + i%25;
+    }
+    data[i]='\0';
+    return data;
+}
+
+RawData *create_RawData(Parameters parameters) {
+    RawData *raw_data  = (RawData *)malloc(sizeof(RawData));
+    return raw_data;
+}
+
 */
 import "C"
 

@@ -106,8 +106,9 @@ void writer_process(Parameters parameters) {
             ABD_write("atomic_object", opnum, abd_data, client_args);
         }
 
-        if(parameters.algorithm==sodaw)
+        if(parameters.algorithm==sodaw) {
             SODAW_write("atomic_object", opnum, payload, payload_size, encoding_info, client_args);
+        }
 
 
 /*
