@@ -11,7 +11,6 @@
 
 #include <algo_utils.h>
 #include "sodaw_client.h"
-#include "client.h"
 #include "sodaw_reader.h"
 #include <base64.h>
 #include <rlnc_rs.h>

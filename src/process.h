@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "utilities/algo_utils.h"
-#include "utilities/client.h"
+#include "baseprocess/client.h"
 #include "codes/rlnc_rs.h"
 
 #include "sodaw/sodaw_client.h"
@@ -17,7 +17,7 @@
 
 #include "soda/soda_reader.h"
 
-#include "utilities/server.h"
+#include "baseprocess/server.h"
 #include "abd/abd_client.h"
 #include "abd/abd_writer.h"
 #include "abd/abd_reader.h"

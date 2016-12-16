@@ -6,9 +6,9 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "server.h"
+#include "../baseprocess/server.h"
 #include "algo_utils.h"
-#include "client.h"
+#include "../baseprocess/client.h"
 #include "../codes/rlnc_rs.h"
 
 

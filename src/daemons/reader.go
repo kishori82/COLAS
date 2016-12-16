@@ -9,7 +9,7 @@ import (
 )
 
 /*
-#cgo CFLAGS: -I../abd -I../sodaw -I../utilities
+#cgo CFLAGS: -I../abd -I../sodaw -I../utilities -I../baseprocess
 #cgo LDFLAGS: -L../abd  -labd  -L../sodaw -lsodaw
 #include <abd_client.h>
 #include <client.h>

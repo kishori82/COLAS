@@ -65,4 +65,4 @@ build:
 	go build -x -o $(TARGET) process.go
 
 clean:
-	rm -rf logs $(TARGET) $(TARGET1)
+	rm -rf logs $(TARGET) $(TARGET1) */*.o

@@ -1,6 +1,6 @@
 #ifndef _ABD_SERVER
 #define _ABD_SERVER
-#include "server.h"
+#include "../baseprocess/server.h"
 #include <czmq.h>
 #include <zmq.h>
 #include <stdio.h>

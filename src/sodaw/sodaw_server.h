@@ -1,7 +1,7 @@
 #ifndef _SODAW_SERVER
 #define _SODAW_SERVER
 
-#include "server.h"
+#include "../baseprocess/server.h"
 #include <algo_utils.h>
 
 typedef struct _R_C {

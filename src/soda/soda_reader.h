@@ -11,7 +11,7 @@
 
 #include <algo_utils.h>
 #include <base64.h>
-#include "client.h"
+#include "../baseprocess/client.h"
 #include "../codes/rlnc_rs.h"
 
 char *SODA_read(char *obj_name, unsigned int op_num, EncodeData *encoding_info, ClientArgs *client_args);
