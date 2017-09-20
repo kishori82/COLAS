@@ -1,7 +1,5 @@
-# COLAS
-
+## COLAS
 This is the source repository for the algorithm source code of the COLAS project. This code base is used for implementing atomicity algorithms developed in the following papers. The tool is desgined to be deployed as a docker container, whihc can be deployed on AWS, OpenStack Cloud and a single stand-along machine. The code is written in C/C++ and GO.
-
 
 References:
 
